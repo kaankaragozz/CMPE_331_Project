@@ -24,9 +24,6 @@ export default function Navbar() {
             placeholder="Search flights, crew, passengers..."
             className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900/80 focus:bg-white"
           />
-          <span className="absolute inset-y-0 right-2 flex items-center text-slate-400 text-xs">
-            ⌘K
-          </span>
         </div>
       </div>
 
