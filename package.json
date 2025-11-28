@@ -2,9 +2,9 @@
   "name": "cmpe331_webapp_proje",
   "version": "1.0.0",
   "description": "��#\u0000 \u0000C\u0000M\u0000P\u0000E\u0000_\u00003\u00003\u00001\u0000_\u0000P\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000\r\u0000 \u0000",
-  "main": "index.js",
+  "main": "backend/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon backend/server.js"
   },
   "repository": {
     "type": "git",
@@ -12,9 +12,22 @@
   },
   "keywords": [],
   "author": "",
+  "type": "module",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kaankaragozz/CMPE_331_Project/issues"
   },
-  "homepage": "https://github.com/kaankaragozz/CMPE_331_Project#readme"
+  "homepage": "https://github.com/kaankaragozz/CMPE_331_Project#readme",
+  "dependencies": {
+    "@arcjet/node": "^1.0.0-beta.15",
+    "@neondatabase/serverless": "^1.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
 }
