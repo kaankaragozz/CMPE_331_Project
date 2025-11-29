@@ -8,8 +8,16 @@ import SeatAssignmentPage from "./pages/Passengers/SeatAssignmentPage.jsx";
 import PlaneSeatMapPage from "./pages/Roster/PlaneSeatMapPage.jsx";
 import RosterTabularPage from "./pages/Roster/RosterTabularPage.jsx";
 import UserProfilePage from "./pages/User/UserProfilePage.jsx";
+import LoginPage from "./pages/Auth/LoginPage.jsx";
 
 export default function App() {
+  // KEEP IT TRUE UNTIL REPLACING IT WITH REAL AUTH
+  const isAuthenticated = true; // later: replace with real auth
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
   return (
     <AppLayout>
       <Routes>
