@@ -2,15 +2,14 @@
 import { Routes, Route } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout.jsx";
 import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
-import FlightSearchPage from "./pages/Flights/FlightSearchPage.jsx";
+import FlightSelectionPage from "./pages/Flights/FlightSelectionPage.jsx";
 
 export default function App() {
   return (
     <AppLayout>
       <Routes>
         <Route path="/" element={<DashboardPage />} />
-        <Route path="/flights" element={<FlightSearchPage />} />
-        {/* other routes... */}
+        <Route path="/flights" element={<FlightSelectionPage />} />
       </Routes>
     </AppLayout>
   );
