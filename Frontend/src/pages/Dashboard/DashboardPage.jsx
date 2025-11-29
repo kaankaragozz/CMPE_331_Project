@@ -115,11 +115,10 @@ export default function DashboardPage() {
                   <td className="py-2 text-slate-600">{f.aircraft}</td>
                   <td className="py-2 text-right">
                     <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${
-                        f.status === "Roster ready"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                          : "bg-amber-50 text-amber-700 border border-amber-100"
-                      }`}
+                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${f.status === "Roster ready"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                        : "bg-amber-50 text-amber-700 border border-amber-100"
+                        }`}
                     >
                       {f.status}
                     </span>

@@ -117,11 +117,10 @@ export default function FlightCrewAssignmentPage() {
               {flightCrew.map((crew) => (
                 <div
                   key={crew.id}
-                  className={`flex items-center justify-between rounded-lg border px-4 py-3 bg-white ${
-                    crew.assigned
-                      ? "border-blue-400 shadow-sm"
-                      : "border-slate-200"
-                  }`}
+                  className={`flex items-center justify-between rounded-lg border px-4 py-3 bg-white ${crew.assigned
+                    ? "border-blue-400 shadow-sm"
+                    : "border-slate-200"
+                    }`}
                 >
                   <div className="space-y-0.5 text-sm">
                     <p className="font-semibold text-slate-900">
@@ -134,11 +133,10 @@ export default function FlightCrewAssignmentPage() {
                   <button
                     type="button"
                     onClick={() => toggleFlightCrew(crew.id)}
-                    className={`rounded-md px-4 py-2 text-sm font-medium text-white ${
-                      crew.assigned
-                        ? "bg-slate-500 hover:bg-slate-600"
-                        : "bg-blue-500 hover:bg-blue-600"
-                    }`}
+                    className={`rounded-md px-4 py-2 text-sm font-medium text-white ${crew.assigned
+                      ? "bg-slate-500 hover:bg-slate-600"
+                      : "bg-blue-500 hover:bg-blue-600"
+                      }`}
                   >
                     {crew.assigned ? "Unassign" : "Assign"}
                   </button>
@@ -156,11 +154,10 @@ export default function FlightCrewAssignmentPage() {
               {cabinCrew.map((crew) => (
                 <div
                   key={crew.id}
-                  className={`flex items-center justify-between rounded-lg border px-4 py-3 bg-white ${
-                    crew.assigned
-                      ? "border-blue-400 shadow-sm"
-                      : "border-slate-200"
-                  }`}
+                  className={`flex items-center justify-between rounded-lg border px-4 py-3 bg-white ${crew.assigned
+                    ? "border-blue-400 shadow-sm"
+                    : "border-slate-200"
+                    }`}
                 >
                   <div className="space-y-0.5 text-sm">
                     <p className="font-semibold text-slate-900">
@@ -173,11 +170,10 @@ export default function FlightCrewAssignmentPage() {
                   <button
                     type="button"
                     onClick={() => toggleCabinCrew(crew.id)}
-                    className={`rounded-md px-4 py-2 text-sm font-medium text-white ${
-                      crew.assigned
-                        ? "bg-slate-500 hover:bg-slate-600"
-                        : "bg-blue-500 hover:bg-blue-600"
-                    }`}
+                    className={`rounded-md px-4 py-2 text-sm font-medium text-white ${crew.assigned
+                      ? "bg-slate-500 hover:bg-slate-600"
+                      : "bg-blue-500 hover:bg-blue-600"
+                      }`}
                   >
                     {crew.assigned ? "Unassign" : "Assign"}
                   </button>
