@@ -5,17 +5,13 @@ import morgan from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import { sql } from "./config/db.js";
-//Route Import
-import denemeRoutes from './routes/denemeRoutes.js';
-
-
-
+import { initDB } from './db/initDB.js';
+import flightinfoRoutes from './routes/flightinfoRoutes.js';
 
 dotenv.config(); //To use .env file 
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 //Middleware 
 app.use(express.json()); //Parse incoming JSON requests and puts the parsed data in req.body 
@@ -23,31 +19,28 @@ app.use(cors()); //Enable CORS (Cross-Origin Resource Sharing) for handling requ
 app.use(helmet()); //Middleware for security that helps you protect your app by setting various HTTP headers 
 app.use(morgan('dev')); //HTTP request logger middleware for node.js 
 
-
 //Route call 
-app.use("/api/deneme", denemeRoutes);
+app.use("/api/flight", flightinfoRoutes);
 
-//Initialize Database 
-async function initDB() {
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS deneme (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `;
-    console.log("Database initialized successfully");
-  }
-  catch (error) {
-    console.log("Error initializing database", error);
-  }
-}
-
-//Listen to Backend Server 
-initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log("Server is running on port: " + PORT);
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'Flight API is running',
+    timestamp: new Date().toISOString()
   });
-})
+});
+
+//Initialize Database and Start Server
+initDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log("✅ Server is running on port: " + PORT);
+      console.log("✅ Flight API endpoints available at: http://localhost:" + PORT + "/api/flight");
+    });
+  })
+  .catch((error) => {
+    console.error("❌ Failed to initialize database:", error);
+    process.exit(1);
+  });
+
