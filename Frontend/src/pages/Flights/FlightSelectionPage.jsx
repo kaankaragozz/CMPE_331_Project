@@ -1,10 +1,45 @@
-import { useState, useMemo, useEffect } from "react";
-import { getAllFlights } from "../../services/apiService.js";
+import { useState, useMemo } from "react";
+
+const DUMMY_FLIGHTS = [
+  {
+    id: "AA1234",
+    dateTime: "2024-07-20 10:00 AM",
+    route: "JFK - LAX",
+    planeType: "Boeing 737",
+    vehicleType: "Boeing 737",
+    origin: "JFK",
+    destination: "LAX",
+  },
+  {
+    id: "UA5678",
+    dateTime: "2024-07-20 02:30 PM",
+    route: "ORD - SFO",
+    planeType: "Airbus A320",
+    vehicleType: "Airbus A320",
+    origin: "ORD",
+    destination: "SFO",
+  },
+  {
+    id: "DL9012",
+    dateTime: "2024-07-21 08:00 AM",
+    route: "ATL - MIA",
+    planeType: "Boeing 787",
+    vehicleType: "Boeing 787",
+    origin: "ATL",
+    destination: "MIA",
+  },
+  {
+    id: "SW3456",
+    dateTime: "2024-07-21 11:45 AM",
+    route: "DEN - PHX",
+    planeType: "Boeing 737",
+    vehicleType: "Boeing 737",
+    origin: "DEN",
+    destination: "PHX",
+  },
+];
 
 export default function FlightSelectionPage() {
-  const [flights, setFlights] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     flightNumber: "",
     origin: "",
@@ -13,52 +48,12 @@ export default function FlightSelectionPage() {
     vehicleType: "",
   });
 
-  // Fetch flights from backend on component mount
-  useEffect(() => {
-    const fetchFlights = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getAllFlights();
-        // Transform backend data to match frontend format
-        const transformedFlights = data.map(flight => ({
-          id: flight.flight_number,
-          dateTime: new Date(flight.flight_date).toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          route: `${flight.source.airport_code} - ${flight.destination.airport_code}`,
-          planeType: flight.vehicle_type.type_name,
-          vehicleType: flight.vehicle_type.type_name,
-          origin: flight.source.airport_code,
-          destination: flight.destination.airport_code,
-          flight_number: flight.flight_number,
-          duration: flight.duration_minutes,
-          distance: flight.distance_km,
-        }));
-        setFlights(transformedFlights);
-      } catch (err) {
-        console.error('Failed to fetch flights:', err);
-        setError('Failed to load flights. Using demo data.');
-        // Fallback to dummy data if API fails
-        setFlights(DUMMY_FLIGHTS);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFlights();
-  }, []);
-
   const handleChange = (field) => (e) => {
     setFilters((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const filteredFlights = useMemo(() => {
-    return flights.filter((f) => {
+    return DUMMY_FLIGHTS.filter((f) => {
       const fn = filters.flightNumber.trim().toLowerCase();
       const origin = filters.origin.trim().toLowerCase();
       const dest = filters.destination.trim().toLowerCase();
@@ -72,51 +67,12 @@ export default function FlightSelectionPage() {
       // date filter is skipped here; you can implement when you have real dates
       return true;
     });
-  }, [flights, filters]);
+  }, [filters]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Right now filtering happens live
+    // Right now filtering happens live; you could trigger API call here later.
   };
-
-  const DUMMY_FLIGHTS = [
-    {
-      id: "AA1234",
-      dateTime: "2024-07-20 10:00 AM",
-      route: "JFK - LAX",
-      planeType: "Boeing 737",
-      vehicleType: "Boeing 737",
-      origin: "JFK",
-      destination: "LAX",
-    },
-    {
-      id: "UA5678",
-      dateTime: "2024-07-20 02:30 PM",
-      route: "ORD - SFO",
-      planeType: "Airbus A320",
-      vehicleType: "Airbus A320",
-      origin: "ORD",
-      destination: "SFO",
-    },
-    {
-      id: "DL9012",
-      dateTime: "2024-07-21 08:00 AM",
-      route: "ATL - MIA",
-      planeType: "Boeing 787",
-      vehicleType: "Boeing 787",
-      origin: "ATL",
-      destination: "MIA",
-    },
-    {
-      id: "SW3456",
-      dateTime: "2024-07-21 11:45 AM",
-      route: "DEN - PHX",
-      planeType: "Boeing 737",
-      vehicleType: "Boeing 737",
-      origin: "DEN",
-      destination: "PHX",
-    },
-  ];
 
   return (
     <div className="space-y-6">
@@ -124,20 +80,6 @@ export default function FlightSelectionPage() {
       <h2 className="text-2xl font-semibold text-slate-900">
         Flight Selection Page
       </h2>
-
-      {/* Error message */}
-      {error && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800">
-          {error}
-        </div>
-      )}
-
-      {/* Loading indicator */}
-      {loading && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
-          Loading flights from API...
-        </div>
-      )}
 
       {/* Search + filters */}
       <form
@@ -224,7 +166,7 @@ export default function FlightSelectionPage() {
       {/* Available flights */}
       <section className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4">
         <h3 className="text-base font-semibold text-slate-900">
-          Available Flights ({filteredFlights.length})
+          Available Flights
         </h3>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -291,7 +233,7 @@ export default function FlightSelectionPage() {
             </div>
           ))}
 
-          {!loading && filteredFlights.length === 0 && (
+          {filteredFlights.length === 0 && (
             <p className="text-sm text-slate-500 col-span-full">
               No flights match the selected filters.
             </p>
