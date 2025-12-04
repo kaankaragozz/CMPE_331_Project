@@ -20,6 +20,10 @@ export const getAllCabinCrew = async (req, res) => {
       ORDER BY cc.created_at DESC
     `;
 
+    if (allCabinCrew.length === 0) {
+      return res.status(404).json({ success: false, message: "No cabin crew found" });
+    }
+
     console.log("Fetched all cabin crew:", allCabinCrew);
     res.status(200).json({ success: true, data: allCabinCrew });
   } catch (error) {
@@ -47,10 +51,11 @@ export const getCabinCrew = async (req, res) => {
       WHERE cc.id = ${id}
       GROUP BY cc.id, at.type_name
     `;
-    console.log("Fetched cabin crew:", cabinCrew);
+
     if (cabinCrew.length === 0) {
       return res.status(404).json({ success: false, message: "Cabin crew not found" });
     }
+
     res.status(200).json({ success: true, data: cabinCrew[0] });
   } catch (error) {
     console.log("Error in getCabinCrew:", error);
@@ -59,13 +64,34 @@ export const getCabinCrew = async (req, res) => {
 };
 
 export const createCabinCrew = async (req, res) => {
-  const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id } = req.body;
+  const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id, vehicle_restrictions, recipes } = req.body;
   try {
     const newCabinCrew = await sql`
       INSERT INTO cabin_crew (first_name, last_name, age, gender, nationality, known_languages, attendant_type_id)
       VALUES (${first_name}, ${last_name}, ${age}, ${gender}, ${nationality}, ${known_languages}, ${attendant_type_id})
       RETURNING *
     `;
+
+    const createdId = newCabinCrew[0].id;
+
+    // Insert vehicle restrictions
+    for (let v of vehicle_restrictions) {
+      await sql`
+        INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
+        VALUES (${createdId}, ${v})
+      `;
+    }
+
+    // Insert dish recipes if the attendant is a chef
+    if (attendant_type_id === 3) { // Assuming 3 is the ID for chefs
+      for (let recipe of recipes) {
+        await sql`
+          INSERT INTO dish_recipes (chef_id, recipe_name, description)
+          VALUES (${createdId}, ${recipe.recipe_name}, ${recipe.description})
+        `;
+      }
+    }
+
     console.log("Created new cabin crew:", newCabinCrew);
     res.status(201).json({ success: true, data: newCabinCrew[0] });
   } catch (error) {
@@ -76,7 +102,7 @@ export const createCabinCrew = async (req, res) => {
 
 export const updateCabinCrew = async (req, res) => {
   const { id } = req.params;
-  const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id } = req.body;
+  const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id, vehicle_restrictions, recipes } = req.body;
   try {
     const updatedCabinCrew = await sql`
       UPDATE cabin_crew
@@ -85,6 +111,37 @@ export const updateCabinCrew = async (req, res) => {
       WHERE id = ${id}
       RETURNING *
     `;
+
+    // Delete existing vehicle restrictions
+    await sql`
+      DELETE FROM cabin_crew_vehicle_restrictions
+      WHERE cabin_crew_id = ${id}
+    `;
+
+    // Insert updated vehicle restrictions
+    for (let v of vehicle_restrictions) {
+      await sql`
+        INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
+        VALUES (${id}, ${v})
+      `;
+    }
+
+    // Delete existing dish recipes if the attendant is a chef
+    if (attendant_type_id === 3) {
+      await sql`
+        DELETE FROM dish_recipes
+        WHERE chef_id = ${id}
+      `;
+
+      // Insert updated dish recipes
+      for (let recipe of recipes) {
+        await sql`
+          INSERT INTO dish_recipes (chef_id, recipe_name, description)
+          VALUES (${id}, ${recipe.recipe_name}, ${recipe.description})
+        `;
+      }
+    }
+
     console.log("Updated cabin crew:", updatedCabinCrew);
     res.status(200).json({ success: true, data: updatedCabinCrew[0] });
   } catch (error) {
