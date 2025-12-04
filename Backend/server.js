@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 
 import { initDB } from './db/initDB.js';
 import flightinfoRoutes from './routes/flightinfoRoutes.js';
+import passengerRoutes from './routes/passengerRoutes.js';
 
 dotenv.config(); //To use .env file 
 
@@ -21,12 +22,13 @@ app.use(morgan('dev')); //HTTP request logger middleware for node.js
 
 //Route call 
 app.use("/api/flight", flightinfoRoutes);
+app.use("/api/passengers", passengerRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     success: true, 
-    message: 'Flight API is running',
+    message: 'Flight & Passenger API is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -37,10 +39,10 @@ initDB()
     app.listen(PORT, () => {
       console.log("✅ Server is running on port: " + PORT);
       console.log("✅ Flight API endpoints available at: http://localhost:" + PORT + "/api/flight");
+      console.log("✅ Passenger API endpoints available at: http://localhost:" + PORT + "/api/passengers");
     });
   })
   .catch((error) => {
     console.error("❌ Failed to initialize database:", error);
     process.exit(1);
   });
-
