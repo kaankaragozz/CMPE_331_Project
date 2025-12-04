@@ -1,15 +1,15 @@
 //Library Imports
+import dotenv from 'dotenv';
+dotenv.config(); //To use .env file - MUST be before other imports that use env variables
+
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
 import { initDB } from './db/initDB.js';
 import flightinfoRoutes from './routes/flightinfoRoutes.js';
 import cabinCrewRoutes from './routes/cabinCrewRoutes.js';
-
-dotenv.config(); //To use .env file 
 
 const app = express();
 const PORT = process.env.PORT || 3000;

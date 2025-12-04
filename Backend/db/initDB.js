@@ -1,10 +1,22 @@
-import { sql } from '../config/db.js';
+import pg from 'pg';
 
-// Initialize database schema
+const pool = new pg.Pool({
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  port: process.env.PGPORT || 5432,
+  ssl: { rejectUnauthorized: false }, // NeonDB için SSL gerekli
+});
+
 export async function initDB() {
   try {
+    console.log('🔍 Veritabanı bağlantısı test ediliyor...');
+    const client = await pool.connect();
+    console.log('✅ Veritabanına başarıyla bağlanıldı!');
+
     // Create vehicle_types table
-    await sql`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS vehicle_types (
         id SERIAL PRIMARY KEY,
         type_name VARCHAR(100) NOT NULL UNIQUE,
@@ -15,10 +27,10 @@ export async function initDB() {
         menu_description TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create airports table
-    await sql`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS airports (
         id SERIAL PRIMARY KEY,
         code VARCHAR(3) NOT NULL UNIQUE,
@@ -27,10 +39,10 @@ export async function initDB() {
         country VARCHAR(100) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create flights table
-    await sql`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS flights (
         id SERIAL PRIMARY KEY,
         flight_number VARCHAR(6) NOT NULL UNIQUE,
@@ -47,30 +59,30 @@ export async function initDB() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create index on flight_number for faster lookups
-    await sql`
+    await client.query(`
       CREATE INDEX IF NOT EXISTS idx_flights_flight_number ON flights(flight_number)
-    `;
+    `);
 
     // Create index on flight_date for date-based queries
-    await sql`
+    await client.query(`
       CREATE INDEX IF NOT EXISTS idx_flights_flight_date ON flights(flight_date)
-    `;
+    `);
 
     // Create attendant_types table
-    await sql`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS attendant_types (
         id SERIAL PRIMARY KEY,
         type_name VARCHAR(50) NOT NULL UNIQUE,
         min_count INTEGER NOT NULL,
         max_count INTEGER NOT NULL
       )
-    `;
+    `);
 
     // Create cabin_crew table
-    await sql`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS cabin_crew (
         id SERIAL PRIMARY KEY,
         first_name VARCHAR(100) NOT NULL,
@@ -82,10 +94,10 @@ export async function initDB() {
         attendant_type_id INTEGER NOT NULL REFERENCES attendant_types(id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create dish_recipes table
-    await sql`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS dish_recipes (
         id SERIAL PRIMARY KEY,
         chef_id INTEGER NOT NULL REFERENCES cabin_crew(id),
@@ -93,18 +105,19 @@ export async function initDB() {
         description TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
     // Create cabin_crew_vehicle_restrictions table
-    await sql`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS cabin_crew_vehicle_restrictions (
         id SERIAL PRIMARY KEY,
         cabin_crew_id INTEGER NOT NULL REFERENCES cabin_crew(id),
         vehicle_type_id INTEGER NOT NULL REFERENCES vehicle_types(id),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
-    `;
+    `);
 
+    client.release();
     console.log("✅ Database tables initialized successfully");
     return true;
   } catch (error) {
@@ -112,4 +125,6 @@ export async function initDB() {
     throw error;
   }
 }
+
+export { pool };
 
