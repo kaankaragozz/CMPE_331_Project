@@ -1,14 +1,15 @@
 //Library Imports
+import dotenv from 'dotenv';
+dotenv.config(); //To use .env file - MUST be before other imports that use env variables
+
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
 import { initDB } from './db/initDB.js';
 import flightinfoRoutes from './routes/flightinfoRoutes.js';
-
-dotenv.config(); //To use .env file 
+import cabinCrewRoutes from './routes/cabinCrewRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.use(morgan('dev')); //HTTP request logger middleware for node.js
 
 //Route call 
 app.use("/api/flight", flightinfoRoutes);
+app.use("/api/cabin-crew", cabinCrewRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
