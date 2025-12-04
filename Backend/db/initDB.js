@@ -59,6 +59,52 @@ export async function initDB() {
       CREATE INDEX IF NOT EXISTS idx_flights_flight_date ON flights(flight_date)
     `;
 
+    // Create attendant_types table
+    await sql`
+      CREATE TABLE IF NOT EXISTS attendant_types (
+        id SERIAL PRIMARY KEY,
+        type_name VARCHAR(50) NOT NULL UNIQUE,
+        min_count INTEGER NOT NULL,
+        max_count INTEGER NOT NULL
+      )
+    `;
+
+    // Create cabin_crew table
+    await sql`
+      CREATE TABLE IF NOT EXISTS cabin_crew (
+        id SERIAL PRIMARY KEY,
+        first_name VARCHAR(100) NOT NULL,
+        last_name VARCHAR(100) NOT NULL,
+        age INTEGER NOT NULL,
+        gender VARCHAR(10) NOT NULL,
+        nationality VARCHAR(100) NOT NULL,
+        known_languages TEXT[] NOT NULL,
+        attendant_type_id INTEGER NOT NULL REFERENCES attendant_types(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create dish_recipes table
+    await sql`
+      CREATE TABLE IF NOT EXISTS dish_recipes (
+        id SERIAL PRIMARY KEY,
+        chef_id INTEGER NOT NULL REFERENCES cabin_crew(id),
+        recipe_name VARCHAR(255) NOT NULL,
+        description TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
+    // Create cabin_crew_vehicle_restrictions table
+    await sql`
+      CREATE TABLE IF NOT EXISTS cabin_crew_vehicle_restrictions (
+        id SERIAL PRIMARY KEY,
+        cabin_crew_id INTEGER NOT NULL REFERENCES cabin_crew(id),
+        vehicle_type_id INTEGER NOT NULL REFERENCES vehicle_types(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
     console.log("✅ Database tables initialized successfully");
     return true;
   } catch (error) {

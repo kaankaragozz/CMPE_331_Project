@@ -1,0 +1,96 @@
+import { sql } from "../config/db.js";
+
+//CRUD Operations for "cabin_crew" table
+export const getAllCabinCrew = async (req, res) => {
+  try {
+    const allCabinCrew = await sql`
+      SELECT cc.id, cc.first_name, cc.last_name, cc.age, cc.gender, cc.nationality, cc.known_languages, 
+             at.type_name AS attendant_type, 
+             ARRAY_AGG(vt.type_name) AS vehicle_restrictions
+      FROM cabin_crew cc
+      JOIN attendant_types at ON cc.attendant_type_id = at.id
+      LEFT JOIN cabin_crew_vehicle_restrictions cvr ON cc.id = cvr.cabin_crew_id
+      LEFT JOIN vehicle_types vt ON cvr.vehicle_type_id = vt.id
+      GROUP BY cc.id, at.type_name
+      ORDER BY cc.created_at DESC
+    `;
+
+    console.log("Fetched all cabin crew:", allCabinCrew);
+    res.status(200).json({ success: true, data: allCabinCrew });
+  } catch (error) {
+    console.log("Error in getAllCabinCrew:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const getCabinCrew = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const cabinCrew = await sql`
+      SELECT cc.id, cc.first_name, cc.last_name, cc.age, cc.gender, cc.nationality, cc.known_languages, 
+             at.type_name AS attendant_type, 
+             ARRAY_AGG(vt.type_name) AS vehicle_restrictions
+      FROM cabin_crew cc
+      JOIN attendant_types at ON cc.attendant_type_id = at.id
+      LEFT JOIN cabin_crew_vehicle_restrictions cvr ON cc.id = cvr.cabin_crew_id
+      LEFT JOIN vehicle_types vt ON cvr.vehicle_type_id = vt.id
+      WHERE cc.id = ${id}
+      GROUP BY cc.id, at.type_name
+    `;
+    console.log("Fetched cabin crew:", cabinCrew);
+    res.status(200).json({ success: true, data: cabinCrew[0] });
+  } catch (error) {
+    console.log("Error in getCabinCrew:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const createCabinCrew = async (req, res) => {
+  const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id } = req.body;
+  try {
+    const newCabinCrew = await sql`
+      INSERT INTO cabin_crew (first_name, last_name, age, gender, nationality, known_languages, attendant_type_id)
+      VALUES (${first_name}, ${last_name}, ${age}, ${gender}, ${nationality}, ${known_languages}, ${attendant_type_id})
+      RETURNING *
+    `;
+    console.log("Created new cabin crew:", newCabinCrew);
+    res.status(201).json({ success: true, data: newCabinCrew[0] });
+  } catch (error) {
+    console.log("Error in createCabinCrew:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const updateCabinCrew = async (req, res) => {
+  const { id } = req.params;
+  const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id } = req.body;
+  try {
+    const updatedCabinCrew = await sql`
+      UPDATE cabin_crew
+      SET first_name = ${first_name}, last_name = ${last_name}, age = ${age}, gender = ${gender}, 
+          nationality = ${nationality}, known_languages = ${known_languages}, attendant_type_id = ${attendant_type_id}
+      WHERE id = ${id}
+      RETURNING *
+    `;
+    console.log("Updated cabin crew:", updatedCabinCrew);
+    res.status(200).json({ success: true, data: updatedCabinCrew[0] });
+  } catch (error) {
+    console.log("Error in updateCabinCrew:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+export const deleteCabinCrew = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await sql`
+      DELETE FROM cabin_crew
+      WHERE id = ${id}
+    `;
+    console.log("Deleted cabin crew with ID:", id);
+    res.status(200).json({ success: true, message: "Cabin crew deleted successfully" });
+  } catch (error) {
+    console.log("Error in deleteCabinCrew:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
