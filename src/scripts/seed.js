@@ -1,5 +1,4 @@
-const sequelize = require('../config/database');
-const Pilot = require('../models/Pilot');
+const { sequelize, Pilot, Language } = require('../models');
 
 const seedDatabase = async () => {
   try {
@@ -11,8 +10,25 @@ const seedDatabase = async () => {
     await sequelize.sync({ force: true });
     console.log('Models synced successfully.');
 
+    console.log('Seeding languages...');
+
+    const languageData = [
+      { name: 'English', iso_code: 'EN' },
+      { name: 'Spanish', iso_code: 'ES' },
+      { name: 'Turkish', iso_code: 'TR' },
+      { name: 'German', iso_code: 'DE' },
+      { name: 'French', iso_code: 'FR' }
+    ];
+
+    const createdLanguages = await Language.bulkCreate(languageData, { returning: true });
+
+    const languageByName = createdLanguages.reduce((acc, lang) => {
+      acc[lang.name] = lang;
+      return acc;
+    }, {});
+
     console.log('Seeding pilots...');
-    
+
     const pilots = [
       // Senior Pilots (3)
       {
@@ -109,8 +125,32 @@ const seedDatabase = async () => {
       }
     ];
 
-    await Pilot.bulkCreate(pilots);
-    console.log(`Successfully created ${pilots.length} pilots.`);
+    const createdPilots = await Pilot.bulkCreate(pilots, { returning: true });
+    console.log(`Successfully created ${createdPilots.length} pilots.`);
+
+    console.log('Associating pilots with languages...');
+
+    // Helper functions for random language assignment
+    const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const shuffled = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+    const getRandomLanguagesForSeniority = (seniorityLevel) => {
+      let count;
+      if (seniorityLevel === 'Senior') {
+        count = randomInt(2, 3); // Seniors speak 2-3 languages
+      } else if (seniorityLevel === 'Junior') {
+        count = randomInt(1, 3); // Juniors speak 1-3 languages
+      } else {
+        count = 1; // Trainees speak exactly 1 language
+      }
+      return shuffled(createdLanguages).slice(0, count);
+    };
+
+    // Assign languages to each pilot based on seniority level
+    for (const pilot of createdPilots) {
+      const langsForPilot = getRandomLanguagesForSeniority(pilot.seniority_level);
+      await pilot.addLanguages(langsForPilot);
+    }
     
     console.log('Database Seeded Successfully');
     
