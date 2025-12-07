@@ -1,34 +1,12 @@
-const { sequelize, Pilot, Language } = require('../models');
+const { Pilot, Language } = require('../models');
 
-const seedDatabase = async () => {
+const seedPilots = async (languageByName) => {
   try {
-    console.log('Connecting to database...');
-    await sequelize.authenticate();
-    console.log('Database connection established.');
-
-    console.log('Syncing models (force: true)...');
-    await sequelize.sync({ force: true });
-    console.log('Models synced successfully.');
-
-    console.log('Seeding languages...');
-
-    const languageData = [
-      { name: 'English', iso_code: 'EN' },
-      { name: 'Spanish', iso_code: 'ES' },
-      { name: 'Turkish', iso_code: 'TR' },
-      { name: 'German', iso_code: 'DE' },
-      { name: 'French', iso_code: 'FR' }
-    ];
-
-    const createdLanguages = await Language.bulkCreate(languageData, { returning: true });
-
-    const languageByName = createdLanguages.reduce((acc, lang) => {
-      acc[lang.name] = lang;
-      return acc;
-    }, {});
+    console.log('Clearing pilots table...');
+    await Pilot.destroy({ where: {}, truncate: true, cascade: true });
+    console.log('Pilots table cleared.');
 
     console.log('Seeding pilots...');
-
     const pilots = [
       // Senior Pilots (3)
       {
@@ -135,6 +113,7 @@ const seedDatabase = async () => {
     const shuffled = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
     const getRandomLanguagesForSeniority = (seniorityLevel) => {
+      const allLanguages = Object.values(languageByName);
       let count;
       if (seniorityLevel === 'Senior') {
         count = randomInt(2, 3); // Seniors speak 2-3 languages
@@ -143,7 +122,7 @@ const seedDatabase = async () => {
       } else {
         count = 1; // Trainees speak exactly 1 language
       }
-      return shuffled(createdLanguages).slice(0, count);
+      return shuffled(allLanguages).slice(0, count);
     };
 
     // Assign languages to each pilot based on seniority level
@@ -151,20 +130,12 @@ const seedDatabase = async () => {
       const langsForPilot = getRandomLanguagesForSeniority(pilot.seniority_level);
       await pilot.addLanguages(langsForPilot);
     }
-    
-    console.log('Database Seeded Successfully');
-    
-    await sequelize.close();
-    process.exit(0);
+
+    console.log('Pilots seeded successfully with language associations.');
   } catch (error) {
-    console.error('Error seeding database:', error);
-    await sequelize.close();
-    process.exit(1);
+    console.error('Error seeding pilots:', error);
+    throw error;
   }
 };
 
-seedDatabase();
-
-
-
-
+module.exports = seedPilots;

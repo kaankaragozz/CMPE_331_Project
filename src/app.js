@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const pilotRoutes = require('./routes/pilotRoutes');
+const initDB = require('./db/init');
 
 const app = express();
 
@@ -47,9 +48,20 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Pilot Information API server is running on port ${PORT}`);
-});
+// Initialize database and start server
+const startServer = async () => {
+  try {
+    await initDB();
+    app.listen(PORT, () => {
+      console.log(`Pilot Information API server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app;
 

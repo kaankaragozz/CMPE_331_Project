@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "seed": "node src/scripts/seed.js"
+    "seed": "node src/seeds/index.js"
   },
   "keywords": ["pilot", "api", "express", "sequelize"],
   "author": "",
