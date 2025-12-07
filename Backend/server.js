@@ -5,11 +5,10 @@ import morgan from 'morgan';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import { sql } from "./config/db.js";
 //Route Import
 import denemeRoutes from './routes/denemeRoutes.js';
 
-
+import { initDB } from "./db/initDB.js"
 
 
 dotenv.config(); //To use .env file 
@@ -26,24 +25,6 @@ app.use(morgan('dev')); //HTTP request logger middleware for node.js
 
 //Route call 
 app.use("/api/deneme", denemeRoutes);
-
-//Initialize Database 
-async function initDB() {
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS deneme (
-        id SERIAL PRIMARY KEY,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `;
-    console.log("Database initialized successfully");
-  }
-  catch (error) {
-    console.log("Error initializing database", error);
-  }
-}
 
 //Listen to Backend Server 
 initDB().then(() => {
