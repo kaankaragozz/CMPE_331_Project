@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 
 import { initDB } from './db/initDB.js';
 import flightinfoRoutes from './routes/flightinfoRoutes.js';
+import airportRoutes from './routes/airportRoutes.js';
+import vehicleTypeRoutes from './routes/vehicleTypeRoutes.js';
 
 dotenv.config(); //To use .env file 
 
@@ -21,6 +23,8 @@ app.use(morgan('dev')); //HTTP request logger middleware for node.js
 
 //Route call 
 app.use("/api/flight", flightinfoRoutes);
+app.use("/api/airport", airportRoutes);
+app.use("/api/vehicle-type", vehicleTypeRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
