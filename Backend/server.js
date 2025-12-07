@@ -9,6 +9,7 @@ import { initDB } from './db/initDB.js';
 import flightinfoRoutes from './routes/flightinfoRoutes.js';
 import airportRoutes from './routes/airportRoutes.js';
 import vehicleTypeRoutes from './routes/vehicleTypeRoutes.js';
+import denemeRoutes from './routes/denemeRoutes.js';
 
 dotenv.config(); //To use .env file 
 
@@ -22,9 +23,10 @@ app.use(helmet()); //Middleware for security that helps you protect your app by 
 app.use(morgan('dev')); //HTTP request logger middleware for node.js 
 
 //Route call 
-app.use("/api/flight", flightinfoRoutes);
-app.use("/api/airport", airportRoutes);
-app.use("/api/vehicle-type", vehicleTypeRoutes);
+app.use('/api/flight', flightinfoRoutes);
+app.use('/api/airport', airportRoutes);
+app.use('/api/vehicle-type', vehicleTypeRoutes);
+app.use('/api/deneme', denemeRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -47,4 +49,26 @@ initDB()
     console.error("❌ Failed to initialize database:", error);
     process.exit(1);
   });
+
+// Graceful shutdown and global error handlers
+function handleShutdown(signal) {
+  console.log(`\nReceived ${signal} - shutting down gracefully...`);
+  process.exit(0);
+}
+
+process.on('SIGINT', () => handleShutdown('SIGINT'));
+process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason);
+  process.exit(1);
+});
+
+// Export app for testing
+export default app;
 
