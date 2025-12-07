@@ -11,7 +11,7 @@ import { initDB_attendant_types } from "./initDB_attendant_types.js";
 
 //Tunahan: Pilot
 import { initDB_pilots } from "./initDB_pilots.js";
-//import { initDB_pilots_languages } from "./initDB_pilots_languages.js";
+import { initDB_pilots_languages } from "./initDB_pilots_languages.js";
 
 //Arif: Passenger
 
@@ -33,9 +33,12 @@ export async function initDB() {
 
     //Tunahan:Pilot
     await initDB_pilots();
-    //await  initDB_pilots_languages();
+    await initDB_pilots_languages();
 
     //Arif:Passenger
+    await initDB_passengers();
+    await initDB_flight_passengers_assignments();
+
 
     console.log("DataBase initialized successfully")
   } catch (error) {
