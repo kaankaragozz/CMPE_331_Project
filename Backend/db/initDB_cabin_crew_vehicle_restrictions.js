@@ -1,0 +1,18 @@
+import { sql } from "../config/db.js";
+
+export async function initDB_cabin_crew_vehicle_restrictions() {
+  try {
+    // Create cabin_crew_vehicle_restrictions table
+    await sql`
+      CREATE TABLE IF NOT EXISTS cabin_crew_vehicle_restrictions (
+        id SERIAL PRIMARY KEY,
+        cabin_crew_id INTEGER NOT NULL REFERENCES cabin_crew(id),
+        vehicle_type_id INTEGER NOT NULL REFERENCES vehicle_types(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    console.log("✅ DataBase cabin_crew_vehicle_restrictions initialized successfully");
+  } catch (error) {
+    console.log("❌ Error initDB_cabin_crew_vehicle_restrictions", error);
+  }
+}

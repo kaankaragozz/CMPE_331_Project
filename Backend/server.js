@@ -15,7 +15,7 @@ import airportsRoutes from "./routes/airportsRoutes.js";
 //Yusuf:CabinCrew
 import cabin_crewRoutes from "./routes/cabin_crewRoutes.js";
 import attendant_typesRoutes from "./routes/attendant_typesRoutes.js";
-import dish_recipeRoutes from "./routes/dish_recipesRoutes.js";
+import dish_recipesRoutes from "./routes/dish_recipesRoutes.js";
 import cabin_crew_vehicle_restrictionsRoutes from "./routes/cabin_crew_vehicle_restrictionsRoutes.js";
 
 //Tunahan:Pilot
@@ -52,7 +52,7 @@ app.use("/api/airports", airportsRoutes);
 //Yusuf:CabinCrew
 app.use("/api/cabin_crew", cabin_crewRoutes);
 app.use("/api/attendant_types", attendant_typesRoutes);
-app.use("/api/dish_recipe", dish_recipeRoutes);
+app.use("/api/dish_recipes", dish_recipesRoutes);
 app.use("/api/cabin_crew_vehicle_restrictions", cabin_crew_vehicle_restrictionsRoutes);
 
 //Tunahan:Pilot
