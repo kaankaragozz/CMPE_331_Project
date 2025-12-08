@@ -11,25 +11,24 @@ try {
   execSync("node seeds/Flight/vehicle_types.js", { stdio: "inherit" });
   execSync("node seeds/Flight/flights.js", { stdio: "inherit" });
 
-  /*
-
   //Yusuf:CabinCrew
-  execSync("node seeds/attendant_types.js", { stdio: "inherit" });
-  execSync("node seeds/cabin_crew_vehicle_restrictions.js", { stdio: "inherit" });
-  execSync("node seeds/dish_recipes.js", { stdio: "inherit" });
-  execSync("node seeds/cabin_crew.js", { stdio: "inherit" });
+  execSync("node seeds/CabinCrew/attendant_types.js", { stdio: "inherit" });
+  execSync("node seeds/CabinCrew/cabin_crew.js", { stdio: "inherit" });
+  execSync("node seeds/CabinCrew/dish_recipes.js", { stdio: "inherit" });
+  execSync("node seeds/CabinCrew/cabin_crew_vehicle_restrictions.js", { stdio: "inherit" });
 
+  /*
   //Tunahan:Pilot
-  execSync("node seeds/pilots.js", { stdio: "inherit" });
-  execSync("node seeds/pilots_languages.js", { stdio: "inherit" });
+  execSync("node seeds/Pilot/pilots.js", { stdio: "inherit" });
+  execSync("node seeds/Pilot/pilots_languages.js", { stdio: "inherit" });
 
   //Arif:Passenger
-  execSync("node seeds/passengers.js", { stdio: "inherit" });
-  execSync("node seeds/flight_passengers_assignments.js", { stdio: "inherit" });
-  execSync("node seeds/seat_type.js", { stdio: "inherit" });
-  execSync("node seeds/affiliated_seating.js", { stdio: "inherit" });
-  execSync("node seeds/infant_parent_relationship.js", { stdio: "inherit" });
- */
+  execSync("node seeds/Passenger/passengers.js", { stdio: "inherit" });
+  execSync("node seeds/Passenger/flight_passengers_assignments.js", { stdio: "inherit" });
+  execSync("node seeds/Passenger/seat_type.js", { stdio: "inherit" });
+  execSync("node seeds/Passenger/affiliated_seating.js", { stdio: "inherit" });
+  execSync("node seeds/Passenger/infant_parent_relationship.js", { stdio: "inherit" });
+  */
 
 
 
