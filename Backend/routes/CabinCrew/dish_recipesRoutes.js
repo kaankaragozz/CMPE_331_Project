@@ -1,12 +1,18 @@
-import express from 'express';
-import { } from '../../controllers/dish_recipesController.js';
+﻿import express from 'express';
+import {
+  getAllDishRecipes,
+  getDishRecipe,
+  createDishRecipe,
+  updateDishRecipe,
+  deleteDishRecipe
+} from '../../controllers/CabinCrew/dish_recipesController.js';
 
 const router = express.Router();
 
-router.get('/',);
-router.get('/:id',);
-router.post('/',);
-router.put('/:id',);
-router.delete('/:id',);
+router.get('/', getAllDishRecipes);
+router.get('/:id', getDishRecipe);
+router.post('/', createDishRecipe);
+router.put('/:id', updateDishRecipe);
+router.delete('/:id', deleteDishRecipe);
 
 export default router;

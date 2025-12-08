@@ -1,12 +1,18 @@
-import express from 'express';
-import { } from '../../controllers/CabinCrew/cabin_crewRoutes.js";
+﻿import express from 'express';
+import {
+  getAllCabinCrew,
+  getCabinCrew,
+  createCabinCrew,
+  updateCabinCrew,
+  deleteCabinCrew
+} from '../../controllers/CabinCrew/cabin_crewController.js';
 
 const router = express.Router();
 
-router.get('/',);
-router.get('/:id',);
-router.post('/',);
-router.put('/:id',);
-router.delete('/:id',);
+router.get('/', getAllCabinCrew);
+router.get('/:id', getCabinCrew);
+router.post('/', createCabinCrew);
+router.put('/:id', updateCabinCrew);
+router.delete('/:id', deleteCabinCrew);
 
 export default router;
