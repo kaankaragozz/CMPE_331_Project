@@ -3,7 +3,10 @@ import { execSync } from "child_process";
 console.log("🌱 Seeding database...");
 
 try {
-  //Kaan:Flight
+  //Hakan: Auth
+  execSync("node ./seeds/Auth/users.js", { stdio: "inherit" });
+
+  /* //Kaan:Flight
   execSync("node seeds/airports.js", { stdio: "inherit" });
   execSync("node seeds/vehicle_types.js", { stdio: "inherit" });
   execSync("node seeds/vehicle_types.js", { stdio: "inherit" });
@@ -21,6 +24,10 @@ try {
   //Arif:Passenger
   execSync("node seeds/passengers.js", { stdio: "inherit" });
   execSync("node seeds/flight_passengers_assignments.js", { stdio: "inherit" });
+  execSync("node seeds/seat_type.js", { stdio: "inherit" });
+  execSync("node seeds/affiliated_seating.js", { stdio: "inherit" });
+  execSync("node seeds/infant_parent_relationship.js", { stdio: "inherit" });
+ */
 
 
 

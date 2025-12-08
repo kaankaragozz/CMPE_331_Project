@@ -1,25 +1,43 @@
+
+//Hakan:Auth
+import { initDB_users } from "../db/Auth/initDB_users.js";
+
+/*
 //Kaan:  Flight
-import { initDB_airports } from "./initDB_airports.js";
-import { initDB_flights } from "./initDB_flights.js";
-import { initDB_vehicle_types } from "./initDB_vehicle_types.js";
+import { initDB_airports } from "../db/Flight/initDB_airports.js";
+import { initDB_flights } from "../db/Flight/initDB_flights.js";
+import { initDB_vehicle_types } from "../db/Flight/initDB_vehicle_types.js";
 
 //Yusuf: CabinCrew
-import { initDB_cabin_crew } from "./initDB_cabin_crew.js";
-import { initDB_dish_recipes } from "./initDB_dish_recipes.js";
-import { initDB_cabin_crew_vehicle_restrictions } from "./initDB_cabin_crew_vehicle_restrictions.js";
-import { initDB_attendant_types } from "./initDB_attendant_types.js";
+import { initDB_cabin_crew } from "../db/CabinCrew/initDB_cabin_crew.js";
+import { initDB_dish_recipes } from "../db/CabinCrew/initDB_dish_recipes.js";
+import { initDB_cabin_crew_vehicle_restrictions } from "../db/CabinCrew/initDB_cabin_crew_vehicle_restrictions.js";
+import { initDB_attendant_types } from "../db/CabinCrew/initDB_attendant_types.js";
 
 //Tunahan: Pilot
-import { initDB_pilots } from "./initDB_pilots.js";
-import { initDB_pilots_languages } from "./initDB_pilots_languages.js";
+import { initDB_pilots } from "../db/Pilot/initDB_pilots.js";
+import { initDB_pilots_languages } from "../db/Pilot/initDB_pilots_languages.js";
+
 
 //Arif: Passenger
+import { initDB_passengers } from "../db/Passenger/initDB_passengers.js";
+import { initDB_flight_passengers_assignments } from "../db/Passenger/initDB_flight_passengers_assignments.js";
+import { initDB_seat_type } from "../db/Passenger/initDB_seat_type.js";
+import { initDB_affiliated_seating } from "../db/Passenger/initDB_affiliated_seating.js";
+import { initDB_infat_parent_relationship } from "../db/Passenger/initDB_infant_parent_relationship.js";
+*/
+
+
 
 
 
 export async function initDB() {
   try {
     // Await each async table creation
+    //Hakan:Auth
+    await initDB_users();
+
+    /*
     //Kaan:Flight
     await initDB_airports();
     await initDB_flights();
@@ -38,6 +56,10 @@ export async function initDB() {
     //Arif:Passenger
     await initDB_passengers();
     await initDB_flight_passengers_assignments();
+    await initDB_seat_type();
+    await initDB_affiliated_seating();
+    await initDB_infat_parent_relationship();
+    */
 
 
     console.log("DataBase initialized successfully")
