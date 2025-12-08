@@ -1,7 +1,8 @@
 import { sql } from "../config/db.js";
 
 //CRUD Operations for "cabin_crew" table
-export const getAllCabinCrew = async (req, res) => {
+export const 
+getAllCabinCrew = async (req, res) => {
   try {
     const allCabinCrew = await sql`
       SELECT cc.id, cc.first_name, cc.last_name, cc.age, cc.gender, cc.nationality, cc.known_languages, 
@@ -24,10 +25,9 @@ export const getAllCabinCrew = async (req, res) => {
       return res.status(404).json({ success: false, message: "No cabin crew found" });
     }
 
-    console.log("Fetched all cabin crew:", allCabinCrew);
     res.status(200).json({ success: true, data: allCabinCrew });
   } catch (error) {
-    console.log("Error in getAllCabinCrew:", error);
+    console.error("Error in getAllCabinCrew:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -58,7 +58,7 @@ export const getCabinCrew = async (req, res) => {
 
     res.status(200).json({ success: true, data: cabinCrew[0] });
   } catch (error) {
-    console.log("Error in getCabinCrew:", error);
+    console.error("Error in getCabinCrew:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -74,16 +74,18 @@ export const createCabinCrew = async (req, res) => {
 
     const createdId = newCabinCrew[0].id;
 
-    // Insert vehicle restrictions
-    for (let v of vehicle_restrictions) {
-      await sql`
-        INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
-        VALUES (${createdId}, ${v})
-      `;
+    // Insert vehicle restrictions if provided
+    if (vehicle_restrictions && Array.isArray(vehicle_restrictions) && vehicle_restrictions.length > 0) {
+      for (let v of vehicle_restrictions) {
+        await sql`
+          INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
+          VALUES (${createdId}, ${v})
+        `;
+      }
     }
 
-    // Insert dish recipes if the attendant is a chef
-    if (attendant_type_id === 3) { // Assuming 3 is the ID for chefs
+    // Insert dish recipes if provided and attendant is a chef
+    if (recipes && Array.isArray(recipes) && recipes.length > 0) {
       for (let recipe of recipes) {
         await sql`
           INSERT INTO dish_recipes (chef_id, recipe_name, description)
@@ -92,10 +94,9 @@ export const createCabinCrew = async (req, res) => {
       }
     }
 
-    console.log("Created new cabin crew:", newCabinCrew);
     res.status(201).json({ success: true, data: newCabinCrew[0] });
   } catch (error) {
-    console.log("Error in createCabinCrew:", error);
+    console.error("Error in createCabinCrew:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -118,34 +119,36 @@ export const updateCabinCrew = async (req, res) => {
       WHERE cabin_crew_id = ${id}
     `;
 
-    // Insert updated vehicle restrictions
-    for (let v of vehicle_restrictions) {
-      await sql`
-        INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
-        VALUES (${id}, ${v})
-      `;
+    // Insert updated vehicle restrictions if provided
+    if (vehicle_restrictions && Array.isArray(vehicle_restrictions) && vehicle_restrictions.length > 0) {
+      for (let v of vehicle_restrictions) {
+        await sql`
+          INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
+          VALUES (${id}, ${v})
+        `;
+      }
     }
 
-    // Delete existing dish recipes if the attendant is a chef
-    if (attendant_type_id === 3) {
+    // Delete and update dish recipes if provided
+    if (recipes && Array.isArray(recipes)) {
       await sql`
         DELETE FROM dish_recipes
         WHERE chef_id = ${id}
       `;
 
-      // Insert updated dish recipes
-      for (let recipe of recipes) {
-        await sql`
-          INSERT INTO dish_recipes (chef_id, recipe_name, description)
-          VALUES (${id}, ${recipe.recipe_name}, ${recipe.description})
-        `;
+      if (recipes.length > 0) {
+        for (let recipe of recipes) {
+          await sql`
+            INSERT INTO dish_recipes (chef_id, recipe_name, description)
+            VALUES (${id}, ${recipe.recipe_name}, ${recipe.description})
+          `;
+        }
       }
     }
 
-    console.log("Updated cabin crew:", updatedCabinCrew);
     res.status(200).json({ success: true, data: updatedCabinCrew[0] });
   } catch (error) {
-    console.log("Error in updateCabinCrew:", error);
+    console.error("Error in updateCabinCrew:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
@@ -157,10 +160,9 @@ export const deleteCabinCrew = async (req, res) => {
       DELETE FROM cabin_crew
       WHERE id = ${id}
     `;
-    console.log("Deleted cabin crew with ID:", id);
     res.status(200).json({ success: true, message: "Cabin crew deleted successfully" });
   } catch (error) {
-    console.log("Error in deleteCabinCrew:", error);
+    console.error("Error in deleteCabinCrew:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
