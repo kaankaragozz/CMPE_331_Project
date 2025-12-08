@@ -9,7 +9,12 @@ import cors from 'cors';
 
 import { initDB } from './db/initDB.js';
 import flightinfoRoutes from './routes/flightinfoRoutes.js';
-import cabinCrewRoutes from './routes/cabinCrewRoutes.js';
+
+//Yusuf: CabinCrew
+import cabin_crewRoutes from './routes/cabin_crewRoutes.js';
+import attendant_typesRoutes from './routes/attendant_typesRoutes.js';
+import dish_recipesRoutes from './routes/dish_recipesRoutes.js';
+import cabin_crew_vehicle_restrictionsRoutes from './routes/cabin_crew_vehicle_restrictionsRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,13 +27,18 @@ app.use(morgan('dev')); //HTTP request logger middleware for node.js
 
 //Route call 
 app.use("/api/flight", flightinfoRoutes);
-app.use("/api/cabin-crew", cabinCrewRoutes);
+
+//Yusuf: CabinCrew
+app.use("/api/cabin_crew", cabin_crewRoutes);
+app.use("/api/attendant_types", attendant_typesRoutes);
+app.use("/api/dish_recipes", dish_recipesRoutes);
+app.use("/api/cabin_crew_vehicle_restrictions", cabin_crew_vehicle_restrictionsRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     success: true, 
-    message: 'Flight API is running',
+    message: 'Flight & CabinCrew API is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -38,7 +48,6 @@ initDB()
   .then(() => {
     app.listen(PORT, () => {
       console.log("✅ Server is running on port: " + PORT);
-      console.log("✅ Flight API endpoints available at: http://localhost:" + PORT + "/api/flight");
     });
   })
   .catch((error) => {
