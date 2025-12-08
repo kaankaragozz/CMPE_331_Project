@@ -1,12 +1,18 @@
-import express from 'express';
-import { } from '../../controllers/cabin_crew_vehicle_restrictionsController.js';
+﻿import express from 'express';
+import {
+  getAllCabinCrewVehicleRestrictions,
+  getCabinCrewVehicleRestriction,
+  createCabinCrewVehicleRestriction,
+  updateCabinCrewVehicleRestriction,
+  deleteCabinCrewVehicleRestriction
+} from '../../controllers/CabinCrew/cabin_crew_vehicle_restrictionsController.js';
 
 const router = express.Router();
 
-router.get('/',);
-router.get('/:id',);
-router.post('/',);
-router.put('/:id',);
-router.delete('/:id',);
+router.get('/', getAllCabinCrewVehicleRestrictions);
+router.get('/:id', getCabinCrewVehicleRestriction);
+router.post('/', createCabinCrewVehicleRestriction);
+router.put('/:id', updateCabinCrewVehicleRestriction);
+router.delete('/:id', deleteCabinCrewVehicleRestriction);
 
 export default router;
