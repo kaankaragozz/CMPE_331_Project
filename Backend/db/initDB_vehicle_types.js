@@ -1,6 +1,6 @@
 import { sql } from "../config/db.js";
 
-export async function vehicle_types() {
+export async function initDB_vehicle_types() {
   try {
     await sql`
         CREATE TABLE IF NOT EXISTS vehicle_types (

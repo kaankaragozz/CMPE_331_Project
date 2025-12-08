@@ -1,6 +1,6 @@
 import { sql } from "../config/db.js";
 
-export async function flights() {
+export async function initDB_flights() {
   try {
     // Create flights table
     await sql`

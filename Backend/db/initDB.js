@@ -1,4 +1,4 @@
-//Kaan:  Flight
+﻿//Kaan:  Flight
 import { initDB_airports } from "./initDB_airports.js";
 import { initDB_flights } from "./initDB_flights.js";
 import { initDB_vehicle_types } from "./initDB_vehicle_types.js";
@@ -27,9 +27,9 @@ export async function initDB() {
 
     //Yusuf:CabinCrew
     await initDB_attendant_types();
-    await initDB_cabin_crew_vehicle_restrictions();
     await initDB_cabin_crew();
     await initDB_dish_recipes();
+    await initDB_cabin_crew_vehicle_restrictions();
 
     //Tunahan:Pilot
     await initDB_pilots();
