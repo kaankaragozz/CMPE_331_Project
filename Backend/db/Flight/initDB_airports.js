@@ -1,8 +1,9 @@
-import { sql } from "../config/db.js";
+import { sql } from '../../config/db.js';
 
-export async function initDB_airports() {
+export async function initAirportsTable() {
   try {
-    // Create airports table
+    console.log('📍 Creating `airports` table...');
+
     await sql`
       CREATE TABLE IF NOT EXISTS airports (
         id SERIAL PRIMARY KEY,
@@ -13,8 +14,22 @@ export async function initDB_airports() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-    console.log("✅ DataBase airports initialized successfully")
+
+    console.log('  ✅ `airports` table ensured');
+    return true;
   } catch (error) {
-    console.log("❌ Error initDB_airports", error);
+    console.error('❌ Error creating airports table:', error);
+    throw error;
   }
-};
+}
+
+export async function dropAirportsTable() {
+  try {
+    await sql`DROP TABLE IF EXISTS airports CASCADE`;
+    console.log('🗑️  `airports` table dropped');
+    return true;
+  } catch (error) {
+    console.error('❌ Error dropping airports table:', error);
+    throw error;
+  }
+}

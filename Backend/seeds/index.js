@@ -6,10 +6,12 @@ try {
   //Hakan: Auth
   execSync("node ./seeds/Auth/users.js", { stdio: "inherit" });
 
-  /* //Kaan:Flight
-  execSync("node seeds/airports.js", { stdio: "inherit" });
-  execSync("node seeds/vehicle_types.js", { stdio: "inherit" });
-  execSync("node seeds/vehicle_types.js", { stdio: "inherit" });
+  //Kaan:Flight
+  execSync("node seeds/Flight/airports.js", { stdio: "inherit" });
+  execSync("node seeds/Flight/vehicle_types.js", { stdio: "inherit" });
+  execSync("node seeds/Flight/flights.js", { stdio: "inherit" });
+
+  /*
 
   //Yusuf:CabinCrew
   execSync("node seeds/attendant_types.js", { stdio: "inherit" });

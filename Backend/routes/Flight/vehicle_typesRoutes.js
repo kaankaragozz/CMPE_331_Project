@@ -1,12 +1,12 @@
 import express from 'express';
-import { } from '../../controllers/vehicle_typesController.js';
+import { getAllVehicleTypes, getVehicleTypeById, createVehicleType, updateVehicleType, deleteVehicleType } from '../../controllers/Flight/vehicle_typesController.js';
 
 const router = express.Router();
 
-router.get('/',);
-router.get('/:id',);
-router.post('/',);
-router.put('/:id',);
-router.delete('/:id',);
+router.get('/', getAllVehicleTypes);
+router.get('/:id', getVehicleTypeById);
+router.post('/', createVehicleType);
+router.put('/:id', updateVehicleType);
+router.delete('/:id', deleteVehicleType);
 
 export default router;

@@ -2,11 +2,12 @@
 //Hakan:Auth
 import { initDB_users } from "../db/Auth/initDB_users.js";
 
-/*
 //Kaan:  Flight
-import { initDB_airports } from "../db/Flight/initDB_airports.js";
-import { initDB_flights } from "../db/Flight/initDB_flights.js";
-import { initDB_vehicle_types } from "../db/Flight/initDB_vehicle_types.js";
+import { initAirportsTable } from "../db/Flight/initDB_airports.js";
+import { initFlightsTable } from "../db/Flight/initDB_flights.js";
+import { initVehicleTypesTable } from "../db/Flight/initDB_vehicle_types.js";
+
+/*
 
 //Yusuf: CabinCrew
 import { initDB_cabin_crew } from "../db/CabinCrew/initDB_cabin_crew.js";
@@ -37,11 +38,12 @@ export async function initDB() {
     //Hakan:Auth
     await initDB_users();
 
-    /*
     //Kaan:Flight
-    await initDB_airports();
-    await initDB_flights();
-    await initDB_vehicle_types();
+    await initAirportsTable();
+    await initFlightsTable();
+    await initVehicleTypesTable();
+
+    /*
 
     //Yusuf:CabinCrew
     await initDB_attendant_types();

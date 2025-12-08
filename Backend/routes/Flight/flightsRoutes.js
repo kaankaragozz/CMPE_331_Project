@@ -1,12 +1,12 @@
 import express from 'express';
-import { } from '../../controllers/flightsController.js';
+import { getAllFlights, getFlightByNumber, createFlight, updateFlight, deleteFlight } from '../../controllers/Flight/flightsController.js';
 
 const router = express.Router();
 
-router.get('/',);
-router.get('/:id',);
-router.post('/',);
-router.put('/:id',);
-router.delete('/:id',);
+router.get('/', getAllFlights);
+router.get('/:flight_number', getFlightByNumber);
+router.post('/', createFlight);
+router.put('/:id', updateFlight);
+router.delete('/:id', deleteFlight);
 
 export default router;

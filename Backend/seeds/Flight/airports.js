@@ -1,28 +1,23 @@
-import { sql } from "../../config/db.js";
+import { sql } from '../../config/db.js';
 
-const SAMPLE_AIRPORTS = [
+export async function seedAirports() {
+  console.log("✈️ Seeding airports...");
 
-];
+  const airports = [
+    { code: 'IST', name: 'Istanbul Airport', city: 'Istanbul', country: 'Turkey' },
+    { code: 'JFK', name: 'John F. Kennedy International Airport', city: 'New York', country: 'United States' },
+    { code: 'LHR', name: 'Heathrow Airport', city: 'London', country: 'United Kingdom' },
+    { code: 'CDG', name: 'Charles de Gaulle Airport', city: 'Paris', country: 'France' },
+    { code: 'DXB', name: 'Dubai International Airport', city: 'Dubai', country: 'United Arab Emirates' },
+    { code: 'FRA', name: 'Frankfurt Airport', city: 'Frankfurt', country: 'Germany' },
+    { code: 'AMS', name: 'Amsterdam Airport Schiphol', city: 'Amsterdam', country: 'Netherlands' }
+  ];
 
-async function seedDatabase() {
-  try {
-    // first, clear existing data
-    await sql`TRUNCATE TABLE airports RESTART IDENTITY`;
-
-    // insert all airports
-    for (const airports of SAMPLE_PASSENGERS) {
-      await sql`
-        INSERT INTO  (, , , , , )
-        VALUES (${.}, ${.}, ${}, ${}, ${}, ${})
-      `;
-    }
-
-    console.log("Passengers Database seeded successfully");
-    process.exit(0); // success code
-  } catch (error) {
-    console.error("Error seeding database:", error);
-    process.exit(1); // failure code
+  for (const airport of airports) {
+    await sql`
+      INSERT INTO airports (code, name, city, country)
+      VALUES (${airport.code}, ${airport.name}, ${airport.city}, ${airport.country})
+      ON CONFLICT (code) DO NOTHING
+    `;
   }
 }
-
-seedDatabase(); 

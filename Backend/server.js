@@ -10,11 +10,12 @@ import denemeRoutes from './routes/denemeRoutes.js';
 //Hakan:Auth
 import authRoutes from "./routes/Auth/authRoutes.js";
 import userRoutes from "./routes/Auth/userRoutes.js";
-/*
 //Kaan:Flight
 import flightRoutes from "./routes/Flight/flightsRoutes.js";
 import vehicle_typesRoutes from './routes/Flight/vehicle_typesRoutes.js';
 import airportsRoutes from "./routes/Flight/airportsRoutes.js";
+
+/*
 
 //Yusuf:CabinCrew
 import cabin_crewRoutes from "./routes/CabinCrew/cabin_crewRoutes.js";
@@ -57,11 +58,12 @@ app.use(morgan('dev')); //HTTP request logger middleware for node.js
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/deneme", denemeRoutes);
-/*
 //Kaan:Flight
 app.use("/api/flight", flightRoutes);
 app.use("/api/vehicle_types", vehicle_typesRoutes);
 app.use("/api/airports", airportsRoutes);
+
+/*
 
 //Yusuf:CabinCrew
 app.use("/api/cabin_crew", cabin_crewRoutes);

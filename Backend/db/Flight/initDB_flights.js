@@ -1,8 +1,9 @@
-import { sql } from "../config/db.js";
+import { sql } from '../../config/db.js';
 
-export async function flights() {
+export async function initFlightsTable() {
   try {
-    // Create flights table
+    console.log('📍 Creating `flights` table...');
+
     await sql`
       CREATE TABLE IF NOT EXISTS flights (
         id SERIAL PRIMARY KEY,
@@ -21,8 +22,26 @@ export async function flights() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
-    console.log("✅ DataBase flights initialized successfully")
+
+    // Create indexes
+    await sql`CREATE INDEX IF NOT EXISTS idx_flights_flight_number ON flights(flight_number)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_flights_flight_date ON flights(flight_date)`;
+
+    console.log('  ✅ `flights` table and indexes ensured');
+    return true;
   } catch (error) {
-    console.log("❌ Error initDB_flights", error);
+    console.error('❌ Error creating flights table:', error);
+    throw error;
   }
-};
+}
+
+export async function dropFlightsTable() {
+  try {
+    await sql`DROP TABLE IF EXISTS flights CASCADE`;
+    console.log('🗑️  `flights` table dropped');
+    return true;
+  } catch (error) {
+    console.error('❌ Error dropping flights table:', error);
+    throw error;
+  }
+}
