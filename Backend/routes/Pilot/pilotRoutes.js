@@ -1,0 +1,30 @@
+import express from 'express';
+const router = express.Router();
+import {
+  getAllPilots,
+  filterPilots,
+  createPilot,
+  getPilotById,
+  updatePilot,
+  deletePilot
+} from '../../controllers/Pilot/pilotController.js';
+
+// GET /api/pilots - List all pilots
+router.get('/', getAllPilots);
+
+// GET /api/pilots/filter - Filter pilots by vehicle_restriction and/or seniority_level
+router.get('/filter', filterPilots);
+
+// GET /api/pilots/:id - Get a single pilot by ID
+router.get('/:id', getPilotById);
+
+// POST /api/pilots - Add a new pilot
+router.post('/', createPilot);
+
+// PUT /api/pilots/:id - Update a pilot by ID
+router.put('/:id', updatePilot);
+
+// DELETE /api/pilots/:id - Delete a pilot by ID
+router.delete('/:id', deletePilot);
+
+export default router;

@@ -1,17 +1,20 @@
-﻿
 //Hakan:Auth
-import { initDB_users } from "../db/Auth/initDB_users.js";
+import { initDB_users } from "./Auth/initDB_users.js";
 
 //Kaan:  Flight
-import { initAirportsTable } from "../db/Flight/initDB_airports.js";
-import { initFlightsTable } from "../db/Flight/initDB_flights.js";
-import { initVehicleTypesTable } from "../db/Flight/initDB_vehicle_types.js";
+import { initAirportsTable } from "./Flight/initDB_airports.js";
+import { initFlightsTable } from "./Flight/initDB_flights.js";
+import { initVehicleTypesTable } from "./Flight/initDB_vehicle_types.js";
 
 //Yusuf: CabinCrew
 import { initDB_cabin_crew } from "./CabinCrew/initDB_cabin_crew.js";
 import { initDB_dish_recipes } from "./CabinCrew/initDB_dish_recipes.js";
 import { initDB_cabin_crew_vehicle_restrictions } from "./CabinCrew/initDB_cabin_crew_vehicle_restrictions.js";
 import { initDB_attendant_types } from "./CabinCrew/initDB_attendant_types.js";
+
+//Tunahan: Pilot
+import { initLanguages } from "./Pilot/initDB_languages.js";
+import { initPilots } from "./Pilot/initDB_pilots.js";
 
 //Arif: Passenger
 import { initDB_affiliated_seating } from './Passenger/initDB_affiliated_seating.js';
@@ -36,6 +39,10 @@ export async function initDB() {
     await initDB_cabin_crew();
     await initDB_dish_recipes();
     await initDB_cabin_crew_vehicle_restrictions();
+
+    //Tunahan:Pilot
+    await initLanguages();
+    await initPilots();
 
     //Arif:Passenger
     await initDB_affiliated_seating();
