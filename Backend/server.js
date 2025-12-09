@@ -26,9 +26,7 @@ import cabin_crew_vehicle_restrictionsRoutes from "./routes/CabinCrew/cabin_crew
 // import pilots_languagesRoutes from "./routes/pilots_languagesRoutes.js";
 
 //Arif:Passengers
-// import passengersRoutes from "./routes/passengersRoutes.js";
-// import flight_passengers_assignmentsRoutes from "./routes/flight_passengers_assignmentsRoutes.js";
-
+import passengersRoutes from "./routes/passengersRoutes.js";
 
 import { initDB } from "./db/initDB.js";
 
@@ -67,8 +65,7 @@ app.use("/api/cabin_crew_vehicle_restrictions", cabin_crew_vehicle_restrictionsR
 // app.use("/api/pilots_languages", pilots_languagesRoutes);
 
 //Arif:Passenger
-// app.use("/api/passengers", passengersRoutes);
-// app.use("/api/flight_passengers_assignments", flight_passengers_assignmentsRoutes);
+app.use("/api/passengers", passengersRoutes);
 
 
 
