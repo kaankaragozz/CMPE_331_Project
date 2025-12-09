@@ -1,6 +1,6 @@
-const sequelize = require('../config/db');
-const Pilot = require('./Pilot');
-const Language = require('./Language');
+import { sequelize } from '../config/db.js';
+import Pilot from './Pilot.js';
+import Language from './Language.js';
 
 // Associations
 Pilot.belongsToMany(Language, {
@@ -17,7 +17,7 @@ Language.belongsToMany(Pilot, {
   otherKey: 'pilotId'
 });
 
-module.exports = {
+export {
   sequelize,
   Pilot,
   Language

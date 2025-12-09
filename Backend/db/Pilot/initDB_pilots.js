@@ -1,9 +1,7 @@
-const { Pilot } = require('../../models');
+import { Pilot } from '../../models/index.js';
 
-const initPilots = async () => {
+export const initPilots = async () => {
   console.log('Initializing pilots table...');
   await Pilot.sync({ alter: true });
   console.log('Pilots table initialized.');
 };
-
-module.exports = initPilots;

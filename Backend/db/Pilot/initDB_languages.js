@@ -1,9 +1,7 @@
-const { Language } = require('../../models');
+import { Language } from '../../models/index.js';
 
-const initLanguages = async () => {
+export const initLanguages = async () => {
   console.log('Initializing languages table...');
   await Language.sync({ alter: true });
   console.log('Languages table initialized.');
 };
-
-module.exports = initLanguages;

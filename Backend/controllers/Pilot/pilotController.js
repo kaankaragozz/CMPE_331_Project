@@ -1,8 +1,8 @@
-const { Pilot, Language } = require('../../models');
-const { Op } = require('sequelize');
+import { Pilot, Language } from '../../models/index.js';
+import { Op } from 'sequelize';
 
 // Get all pilots
-const getAllPilots = async (req, res) => {
+export const getAllPilots = async (req, res) => {
   try {
     const pilots = await Pilot.findAll({
       order: [['id', 'ASC']],
@@ -30,7 +30,7 @@ const getAllPilots = async (req, res) => {
 };
 
 // Filter pilots by vehicle_restriction and/or seniority_level
-const filterPilots = async (req, res) => {
+export const filterPilots = async (req, res) => {
   try {
     const { vehicle_restriction, seniority_level } = req.query;
     
@@ -76,7 +76,7 @@ const filterPilots = async (req, res) => {
 };
 
 // Create a new pilot
-const createPilot = async (req, res) => {
+export const createPilot = async (req, res) => {
   try {
     const { name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, languages } = req.body;
     
@@ -153,7 +153,7 @@ const createPilot = async (req, res) => {
 };
 
 // Get a single pilot by ID
-const getPilotById = async (req, res) => {
+export const getPilotById = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -189,7 +189,7 @@ const getPilotById = async (req, res) => {
 };
 
 // Update a pilot by ID
-const updatePilot = async (req, res) => {
+export const updatePilot = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, languages } = req.body;
@@ -273,7 +273,7 @@ const updatePilot = async (req, res) => {
 };
 
 // Delete a pilot by ID
-const deletePilot = async (req, res) => {
+export const deletePilot = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -300,13 +300,4 @@ const deletePilot = async (req, res) => {
       error: error.message
     });
   }
-};
-
-module.exports = {
-  getAllPilots,
-  filterPilots,
-  createPilot,
-  getPilotById,
-  updatePilot,
-  deletePilot
 };

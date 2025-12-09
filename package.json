@@ -1,26 +1,37 @@
 {
-  "name": "pilot-api",
+  "name": "cmpe_331_project",
   "version": "1.0.0",
-  "description": "Pilot Information API microservice for Flight Roster System",
-  "main": "Backend/server.js",
+  "description": "Flight Roster Web Application",
+  "main": "index.js",
   "scripts": {
-    "start": "node Backend/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node Backend/seeds/index.js",
     "dev": "nodemon Backend/server.js",
-    "seed": "node Backend/seeds/index.js"
+    "start": "node Backend/server.js"
   },
-  "keywords": ["pilot", "api", "express", "sequelize"],
+  "keywords": [
+    "pilot",
+    "api",
+    "express",
+    "sequelize"
+  ],
   "author": "",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kaankaragozz/CMPE_331_Project/issues"
+  },
+  "homepage": "https://github.com/kaankaragozz/CMPE_331_Project#readme",
   "dependencies": {
-    "express": "^4.18.2",
-    "pg": "^8.11.3",
+    "@neondatabase/serverless": "^1.0.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.35.0",
-    "dotenv": "^16.3.1",
-    "cors": "^2.8.5"
+    "sequelize": "^6.37.7"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.1.11"
   }
 }
-

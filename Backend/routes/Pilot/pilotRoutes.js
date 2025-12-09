@@ -1,13 +1,13 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const {
+import {
   getAllPilots,
   filterPilots,
   createPilot,
   getPilotById,
   updatePilot,
   deletePilot
-} = require('../../controllers/Pilot/pilotController');
+} from '../../controllers/Pilot/pilotController.js';
 
 // GET /api/pilots - List all pilots
 router.get('/', getAllPilots);
@@ -27,4 +27,4 @@ router.put('/:id', updatePilot);
 // DELETE /api/pilots/:id - Delete a pilot by ID
 router.delete('/:id', deletePilot);
 
-module.exports = router;
+export default router;

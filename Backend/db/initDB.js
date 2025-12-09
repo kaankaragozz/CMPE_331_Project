@@ -1,21 +1,59 @@
-const { sequelize } = require('../models');
-const initLanguages = require('./Pilot/initDB_languages');
-const initPilots = require('./Pilot/initDB_pilots');
+//Hakan:Auth
+import { initDB_users } from "./Auth/initDB_users.js";
 
-const initDB = async () => {
+//Kaan:  Flight
+import { initAirportsTable } from "./Flight/initDB_airports.js";
+import { initFlightsTable } from "./Flight/initDB_flights.js";
+import { initVehicleTypesTable } from "./Flight/initDB_vehicle_types.js";
+
+//Yusuf: CabinCrew
+import { initDB_cabin_crew } from "./CabinCrew/initDB_cabin_crew.js";
+import { initDB_dish_recipes } from "./CabinCrew/initDB_dish_recipes.js";
+import { initDB_cabin_crew_vehicle_restrictions } from "./CabinCrew/initDB_cabin_crew_vehicle_restrictions.js";
+import { initDB_attendant_types } from "./CabinCrew/initDB_attendant_types.js";
+
+//Tunahan: Pilot
+import { initLanguages } from "./Pilot/initDB_languages.js";
+import { initPilots } from "./Pilot/initDB_pilots.js";
+
+//Arif: Passenger
+import { initDB_affiliated_seating } from './Passenger/initDB_affiliated_seating.js';
+import { initDB_flight_passengers_assignments } from './Passenger/initDB_flight_passengers_assignments.js';
+import { initDB_infant_parent_relationship } from './Passenger/initDB_infant_parent_relationship.js';
+import { initDB_passengers } from './Passenger/initDB_passengers.js';
+import { initDB_seat_type } from './Passenger/initDB_seat_type.js';
+
+export async function initDB() {
   try {
-    console.log('Connecting to database...');
-    await sequelize.authenticate();
-    console.log('Database connection established.');
+    // Await each async table creation
+    //Hakan:Auth
+    await initDB_users();
 
-    console.log('Initializing database schema...');
+    //Kaan:Flight
+    await initAirportsTable();
+    await initFlightsTable();
+    await initVehicleTypesTable();
+
+    //Yusuf:CabinCrew
+    await initDB_attendant_types();
+    await initDB_cabin_crew();
+    await initDB_dish_recipes();
+    await initDB_cabin_crew_vehicle_restrictions();
+
+    //Tunahan:Pilot
     await initLanguages();
     await initPilots();
-    console.log('Database initialized successfully.');
+
+    //Arif:Passenger
+    await initDB_affiliated_seating();
+    await initDB_flight_passengers_assignments();
+    await initDB_infant_parent_relationship();
+    await initDB_passengers();
+    await initDB_seat_type();
+
+
+    console.log("DataBase initialized successfully")
   } catch (error) {
-    console.error('Error initializing database:', error);
-    throw error;
+    console.log("Error initDB", error);
   }
 };
-
-module.exports = initDB;

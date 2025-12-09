@@ -1,4 +1,4 @@
-import { sql } from '../config/db.js';
+import { sql } from '../../config/db.js';
 
 // GET all flights
 export const getAllFlights = async (req, res) => {

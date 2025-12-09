@@ -1,29 +1,39 @@
-const { sequelize } = require('../models');
-const seedLanguages = require('./Pilot/languages');
-const seedPilots = require('./Pilot/pilots');
+import { execSync } from "child_process";
 
-const seedDatabase = async () => {
-  try {
-    console.log('Seeding database...');
-    await sequelize.authenticate();
-    console.log('Database connection established.');
+console.log("🌱 Seeding database...");
 
-    console.log('Syncing models (force: true)...');
-    await sequelize.sync({ force: true });
-    console.log('Models synced successfully.');
+try {
+  //Hakan: Auth
+  execSync("node -r dotenv/config Backend/seeds/Auth/users.js", { stdio: "inherit" });
 
-    const languageByName = await seedLanguages();
-    await seedPilots(languageByName);
+  //Kaan:Flight
+  execSync("node -r dotenv/config Backend/seeds/Flight/airports.js", { stdio: "inherit" });
+  execSync("node -r dotenv/config Backend/seeds/Flight/vehicle_types.js", { stdio: "inherit" });
+  execSync("node -r dotenv/config Backend/seeds/Flight/flights.js", { stdio: "inherit" });
 
-    console.log('All seeds completed successfully.');
+  //Yusuf:CabinCrew
+  execSync("node -r dotenv/config Backend/seeds/CabinCrew/attendant_types.js", { stdio: "inherit" });
+  execSync("node -r dotenv/config Backend/seeds/CabinCrew/cabin_crew.js", { stdio: "inherit" });
+  execSync("node -r dotenv/config Backend/seeds/CabinCrew/dish_recipes.js", { stdio: "inherit" });
+  execSync("node -r dotenv/config Backend/seeds/CabinCrew/cabin_crew_vehicle_restrictions.js", { stdio: "inherit" });
 
-    await sequelize.close();
-    process.exit(0);
-  } catch (error) {
-    console.error('Error seeding database:', error);
-    await sequelize.close();
-    process.exit(1);
-  }
-};
+  //Tunahan:Pilot
+  execSync("node -r dotenv/config Backend/seeds/Pilot/languages.js", { stdio: "inherit" });
+  execSync("node -r dotenv/config Backend/seeds/Pilot/pilots.js", { stdio: "inherit" });
 
-seedDatabase();
+  //Arif:Passenger
+  //execSync("node -r dotenv/config Backend/seeds/Passenger/passengers.js", { stdio: "inherit" });
+  //execSync("node -r dotenv/config Backend/seeds/Passenger/flight_passengers_assignments.js", { stdio: "inherit" });
+  execSync("node -r dotenv/config Backend/seeds/Passenger/seat_type.js", { stdio: "inherit" });
+  //execSync("node -r dotenv/config Backend/seeds/Passenger/affiliated_seating.js", { stdio: "inherit" });
+  //execSync("node -r dotenv/config Backend/seeds/Passenger/infant_parent_relationship.js", { stdio: "inherit" });
+
+
+
+  // add more as needed...
+
+  console.log("✅ All seeds completed successfully!");
+} catch (error) {
+  console.error("❌ Seeding failed:", error);
+  process.exit(1);
+}
