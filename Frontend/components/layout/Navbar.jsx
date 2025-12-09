@@ -1,4 +1,6 @@
 export default function Navbar() {
+
+
   return (
     <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200">
       {/* Left side: Logo + Title */}
@@ -47,7 +49,11 @@ export default function Navbar() {
           </div>
         </div>
 
-        <button className="text-xs text-slate-500 hover:text-red-500">
+        <button onClick={() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("userRole");
+          window.location.reload();  // isAuthenticated şimdi false
+        }} className="text-xs text-slate-500 hover:text-red-500">
           Logout
         </button>
       </div>

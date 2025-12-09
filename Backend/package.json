@@ -1,32 +1,39 @@
 {
-  "name": "flight-api-backend",
+  "name": "cmpe331_webapp_proje",
   "version": "1.0.0",
-  "description": "Flight Information API Backend",
-  "main": "server.js",
-  "type": "module",
+  "description": "��#\u0000 \u0000C\u0000M\u0000P\u0000E\u0000_\u00003\u00003\u00001\u0000_\u0000P\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000\r\u0000 \u0000",
+  "main": "Backend/server.js",
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
+    "dev": "npm run seed && nodemon server.js",
     "seed": "node seeds/index.js"
   },
-  "keywords": [
-    "flight",
-    "api",
-    "express",
-    "postgresql"
-  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaankaragozz/CMPE_331_Project.git"
+  },
+  "keywords": [],
   "author": "",
+  "type": "module",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kaankaragozz/CMPE_331_Project/issues"
+  },
+  "homepage": "https://github.com/kaankaragozz/CMPE_331_Project#readme",
   "dependencies": {
+    "@arcjet/node": "^1.0.0-beta.15",
     "@neondatabase/serverless": "^1.0.2",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mailtrap": "^4.3.2",
     "morgan": "^1.10.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
   }
 }
-

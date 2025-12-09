@@ -14,18 +14,52 @@ export default function LoginPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Dummy validation – replace with real API call later
-    if (!form.username || !form.password) {
-      setError("Invalid username or password. Please try again.");
-      return;
-    }
-
     setError("");
-    console.log("Logging in with:", form);
-    // TODO: call backend & redirect on success
+
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.username,
+          password: form.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login failed");
+        return;
+      }
+
+      // Save token
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("userRole", data.user.role);
+
+      console.log("Logged in:", data);
+
+      // Redirect by role
+      if (data.user.role === "Admin") {
+        window.location.href = "/";  //Admin Page
+        window.location.reload();
+      } else if (data.user.role === "Pilot") {
+        window.location.href = "/pilot";
+        window.location.reload();
+      } else if (data.user.role === "CabinCrew") {
+        window.location.href = "/cabincrew";
+        window.location.reload();
+      } else {
+        window.location.href = "/passenger";
+        window.location.reload();
+      }
+
+    } catch (err) {
+      console.error(err)
+      setError("Server error");
+    }
   };
 
   return (
