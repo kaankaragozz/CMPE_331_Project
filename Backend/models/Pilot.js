@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const sequelize = require('../config/db');
 
 const Pilot = sequelize.define('Pilot', {
   id: {
@@ -41,7 +41,3 @@ const Pilot = sequelize.define('Pilot', {
 });
 
 module.exports = Pilot;
-
-
-
-

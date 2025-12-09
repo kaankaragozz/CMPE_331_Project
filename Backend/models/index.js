@@ -1,4 +1,4 @@
-const sequelize = require('../config/database');
+const sequelize = require('../config/db');
 const Pilot = require('./Pilot');
 const Language = require('./Language');
 
@@ -22,5 +22,3 @@ module.exports = {
   Pilot,
   Language
 };
-
-

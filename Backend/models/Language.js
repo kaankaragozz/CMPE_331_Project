@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const sequelize = require('../config/db');
 
 const Language = sequelize.define('Language', {
   id: {
@@ -22,5 +22,3 @@ const Language = sequelize.define('Language', {
 });
 
 module.exports = Language;
-
-

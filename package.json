@@ -2,11 +2,11 @@
   "name": "pilot-api",
   "version": "1.0.0",
   "description": "Pilot Information API microservice for Flight Roster System",
-  "main": "src/app.js",
+  "main": "Backend/server.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
-    "seed": "node src/seeds/index.js"
+    "start": "node Backend/server.js",
+    "dev": "nodemon Backend/server.js",
+    "seed": "node Backend/seeds/index.js"
   },
   "keywords": ["pilot", "api", "express", "sequelize"],
   "author": "",

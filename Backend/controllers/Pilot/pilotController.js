@@ -1,4 +1,4 @@
-const { Pilot, Language } = require('../models');
+const { Pilot, Language } = require('../../models');
 const { Op } = require('sequelize');
 
 // Get all pilots
@@ -310,7 +310,3 @@ module.exports = {
   updatePilot,
   deletePilot
 };
-
-
-
-

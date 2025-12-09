@@ -7,7 +7,7 @@ const {
   getPilotById,
   updatePilot,
   deletePilot
-} = require('../controllers/pilotController');
+} = require('../../controllers/Pilot/pilotController');
 
 // GET /api/pilots - List all pilots
 router.get('/', getAllPilots);
@@ -28,7 +28,3 @@ router.put('/:id', updatePilot);
 router.delete('/:id', deletePilot);
 
 module.exports = router;
-
-
-
-
