@@ -1,26 +1,39 @@
 import { sql } from "../../config/db.js";
 
-const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTONS = [
-
+const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS = [
+  { cabin_crew_id: 1, vehicle_type_id: 1 },
+  { cabin_crew_id: 1, vehicle_type_id: 2 },
+  { cabin_crew_id: 2, vehicle_type_id: 1 },
+  { cabin_crew_id: 3, vehicle_type_id: 1 },
+  { cabin_crew_id: 3, vehicle_type_id: 2 },
+  { cabin_crew_id: 3, vehicle_type_id: 3 },
+  { cabin_crew_id: 4, vehicle_type_id: 2 },
+  { cabin_crew_id: 5, vehicle_type_id: 1 },
+  { cabin_crew_id: 6, vehicle_type_id: 1 },
+  { cabin_crew_id: 6, vehicle_type_id: 2 },
+  { cabin_crew_id: 6, vehicle_type_id: 3 }
 ];
 
 async function seedDatabase() {
   try {
+    console.log("🚫 Seeding cabin crew vehicle restrictions...");
+    
     // first, clear existing data
-    await sql`TRUNCATE TABLE   RESTART IDENTITY`;
+    await sql`TRUNCATE TABLE cabin_crew_vehicle_restrictions RESTART IDENTITY CASCADE`;
 
-    // insert all 
-    for (const attendant_types of SAMPLE_ATTENDANT_TYPES) {
+    // insert all restrictions
+    for (const restriction of SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS) {
       await sql`
-        
+        INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
+        VALUES (${restriction.cabin_crew_id}, ${restriction.vehicle_type_id})
       `;
     }
 
-    console.log(" Database seeded successfully");
-    process.exit(0); // success code
+    console.log("✅ Cabin crew vehicle restrictions seeded successfully");
+    process.exit(0);
   } catch (error) {
-    console.error("Error seeding database:", error);
-    process.exit(1); // failure code
+    console.error("❌ Error seeding cabin crew vehicle restrictions:", error);
+    process.exit(1);
   }
 }
 
