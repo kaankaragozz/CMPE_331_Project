@@ -92,7 +92,7 @@ export const deleteCabinCrewVehicleRestriction = async (req, res) => {
     await sql`DELETE FROM cabin_crew_vehicle_restrictions WHERE id = ${id}`;
     res.status(200).json({ success: true, message: "Vehicle restriction deleted successfully" });
   } catch (error) {
-    console.error("Error in deleteCabinCrew VehicleRestriction:", error);
+    console.error("Error in deleteCabinCrewVehicleRestriction:", error);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
