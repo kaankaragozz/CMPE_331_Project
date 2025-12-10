@@ -1,12 +1,18 @@
 import express from 'express';
-import { } from '../../controllers/Pilot/pilots_languagesController.js';
-
 const router = express.Router();
+import {
+  getAllPilots,
+  getPilotById,
+  filterPilots
+} from '../../controllers/Pilot/pilots_languagesController.js';
 
-router.get('/',);
-router.get('/:id',);
-router.post('/',);
-router.put('/:id',);
-router.delete('/:id',);
+// GET /api/pilots - List all pilots (with languages)
+router.get('/', getAllPilots);
+
+// GET /api/pilots/filter - Filter pilots by vehicle_restriction and/or seniority_level
+router.get('/filter', filterPilots);
+
+// GET /api/pilots/:id - Get pilot by ID (with languages)
+router.get('/:id', getPilotById);
 
 export default router;

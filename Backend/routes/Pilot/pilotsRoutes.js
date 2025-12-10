@@ -1,12 +1,18 @@
 import express from 'express';
-import { } from '../../controllers/Pilot/pilotsController.js';
-
 const router = express.Router();
+import {
+  createPilot,
+  updatePilot,
+  deletePilot
+} from '../../controllers/Pilot/pilotsController.js';
 
-router.get('/',);
-router.get('/:id',);
-router.post('/',);
-router.put('/:id',);
-router.delete('/:id',);
+// POST /api/pilots - Create a new pilot
+router.post('/', createPilot);
+
+// PUT /api/pilots/:id - Update pilot
+router.put('/:id', updatePilot);
+
+// DELETE /api/pilots/:id - Delete pilot
+router.delete('/:id', deletePilot);
 
 export default router;

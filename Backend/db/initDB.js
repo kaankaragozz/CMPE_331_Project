@@ -20,6 +20,12 @@ import { initDB_infant_parent_relationship } from './Passenger/initDB_infant_par
 import { initDB_passengers } from './Passenger/initDB_passengers.js';
 import { initDB_seat_type } from './Passenger/initDB_seat_type.js';
 
+// Tunahan: Pilot
+import { createPilotsTable } from './Pilot/initDB_pilots.js';
+import { createLanguagesTable } from './Pilot/initDB_languages.js';
+import { createPilotLanguagesTable } from './Pilot/initDB_languages.js';
+
+
 export async function initDB() {
   try {
     // Await each async table creation
@@ -44,7 +50,11 @@ export async function initDB() {
     await initDB_passengers();
     await initDB_seat_type();
 
-
+    // Tunahan: Pilot
+    await createPilotsTable();
+    await createLanguagesTable();
+    await createPilotLanguagesTable();
+    
     console.log("DataBase initialized successfully")
   } catch (error) {
     console.log("Error initDB", error);
