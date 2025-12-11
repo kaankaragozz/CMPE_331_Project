@@ -1,3 +1,4 @@
+/* 
 import { sql } from '../config/db.js';
 
 // Initialize database schema
@@ -22,3 +23,4 @@ export async function initDB_flight_passengers_assignments() {
     console.error("❌ Error initializing flight_passenger_assignments database:", error);
   }
 }
+*/

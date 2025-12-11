@@ -1,3 +1,4 @@
+/*
 import { sql } from '../config/db.js';
 
 // Initialize database schema
@@ -17,3 +18,4 @@ export async function initDB_seat_type() {
     console.error("❌ Error initializing seat_type database:", error);
   }
 }
+*/

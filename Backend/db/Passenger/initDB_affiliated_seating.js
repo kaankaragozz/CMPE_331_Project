@@ -1,3 +1,4 @@
+/* 
 import { sql } from '../config/db.js';
 
 // Initialize database schema
@@ -19,3 +20,4 @@ export async function initDB_affiliated_seating() {
     console.error("❌ Error initializing affiliated_seating database:", error);
   }
 }
+*/     

@@ -1,3 +1,4 @@
+/*
 import { sql } from '../config/db.js';
 
 // Initialize database schema
@@ -20,3 +21,4 @@ export async function initDB_passengers() {
     console.error("❌ Error initializing passengers database:", error);
   }
 }
+*/
