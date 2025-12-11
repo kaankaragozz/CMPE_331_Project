@@ -26,7 +26,7 @@ import pilotsRoutes from "./routes/Pilot/pilotsRoutes.js";
 import pilots_languagesRoutes from "./routes/Pilot/pilots_languagesRoutes.js"; 
 
 //Arif:Passengers
-//import passengersRoutes from "./routes/passengersRoutes.js";
+import passengersRoutes from "./routes/Passenger/passengersRoutes.js";
 
 import { initDB } from "./db/initDB.js";
 

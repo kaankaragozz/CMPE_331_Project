@@ -24,7 +24,7 @@ import {
   addInfantRelationship,
   deleteInfantRelationship,
 
-} from '../controllers/Passenger/passengersController.js';
+} from '../../controllers/Passenger/passengersController.js';
 
 const router = express.Router();
 

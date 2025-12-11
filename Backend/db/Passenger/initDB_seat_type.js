@@ -1,5 +1,4 @@
-/*
-import { sql } from '../config/db.js';
+import { sql } from '../../config/db.js';
 
 // Initialize database schema
 export async function initDB_seat_type() {
@@ -18,4 +17,14 @@ export async function initDB_seat_type() {
     console.error("❌ Error initializing seat_type database:", error);
   }
 }
-*/
+
+export async function dropSeatTypeTable() {
+  try {
+    await sql`DROP TABLE IF EXISTS seat_type CASCADE`;
+    console.log('🗑️  `seat_type` table dropped');
+    return true;
+  } catch (error) {
+    console.error('❌ Error dropping seat_type table:', error);
+    throw error;
+  }
+}
