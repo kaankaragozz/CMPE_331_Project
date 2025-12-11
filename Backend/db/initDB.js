@@ -13,14 +13,12 @@ import { initDB_dish_recipes } from "./CabinCrew/initDB_dish_recipes.js";
 import { initDB_cabin_crew_vehicle_restrictions } from "./CabinCrew/initDB_cabin_crew_vehicle_restrictions.js";
 import { initDB_attendant_types } from "./CabinCrew/initDB_attendant_types.js";
 
-/*
 //Arif: Passenger
 import { initDB_affiliated_seating } from './Passenger/initDB_affiliated_seating.js';
 import { initDB_flight_passengers_assignments } from './Passenger/initDB_flight_passengers_assignments.js';
 import { initDB_infant_parent_relationship } from './Passenger/initDB_infant_parent_relationship.js';
 import { initDB_passengers } from './Passenger/initDB_passengers.js';
 import { initDB_seat_type } from './Passenger/initDB_seat_type.js';
-*/
 
 // Tunahan: Pilot
 import { createPilotsTable } from './Pilot/initDB_pilots.js'; 
