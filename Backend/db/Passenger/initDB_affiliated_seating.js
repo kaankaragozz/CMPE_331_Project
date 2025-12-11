@@ -1,4 +1,4 @@
-import { sql } from '../config/db.js';
+import { sql } from '../../config/db.js';
 
 // Initialize database schema
 export async function initDB_affiliated_seating() {
@@ -17,5 +17,16 @@ export async function initDB_affiliated_seating() {
     console.log("✅ Database affiliated_seating initialized successfully");
   } catch (error) {
     console.error("❌ Error initializing affiliated_seating database:", error);
+  }
+}
+
+export async function dropAffiliatedSeatingTable() {
+  try {
+    await sql`DROP TABLE IF EXISTS affiliated_seating CASCADE`;
+    console.log('🗑️  `affiliated_seating` table dropped');
+    return true;
+  } catch (error) {
+    console.error('❌ Error dropping affiliated_seating table:', error);
+    throw error;
   }
 }

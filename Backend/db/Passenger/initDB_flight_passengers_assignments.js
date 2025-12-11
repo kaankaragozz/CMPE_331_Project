@@ -1,4 +1,4 @@
-import { sql } from '../config/db.js';
+import { sql } from '../../config/db.js';
 
 // Initialize database schema
 export async function initDB_flight_passengers_assignments() {
@@ -20,5 +20,16 @@ export async function initDB_flight_passengers_assignments() {
     console.log("✅ Database flight_passenger_assignments initialized successfully");
   } catch (error) {
     console.error("❌ Error initializing flight_passenger_assignments database:", error);
+  }
+}
+
+export async function dropFlightPassengerAssignmentsTable() {
+  try {
+    await sql`DROP TABLE IF EXISTS flight_passenger_assignments CASCADE`;
+    console.log('🗑️  `flight_passenger_assignments` table dropped');
+    return true;
+  } catch (error) {
+    console.error('❌ Error dropping flight_passenger_assignments table:', error);
+    throw error;
   }
 }

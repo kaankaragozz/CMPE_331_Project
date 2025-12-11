@@ -1,4 +1,4 @@
-import { sql } from '../config/db.js';
+import { sql } from '../../config/db.js';
 
 /* ===============================================================
    1. PASSENGER & ASSIGNMENT CORE OPERATIONS

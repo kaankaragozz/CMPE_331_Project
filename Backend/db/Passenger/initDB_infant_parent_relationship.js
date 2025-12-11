@@ -1,4 +1,4 @@
-import { sql } from '../config/db.js';
+import { sql } from '../../config/db.js';
 
 // Initialize database schema
 export async function initDB_infant_parent_relationship() {
@@ -18,5 +18,16 @@ export async function initDB_infant_parent_relationship() {
     console.log("✅ Database infant_parent_relationship initialized successfully");
   } catch (error) {
     console.error("❌ Error initializing infant_parent_relationship database:", error);
+  }
+}
+
+export async function dropInfantParentRelationshipTable() {
+  try {
+    await sql`DROP TABLE IF EXISTS infant_parent_relationship CASCADE`;
+    console.log('🗑️  `infant_parent_relationship` table dropped');
+    return true;
+  } catch (error) {
+    console.error('❌ Error dropping infant_parent_relationship table:', error);
+    throw error;
   }
 }

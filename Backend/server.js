@@ -26,7 +26,7 @@ import cabin_crew_vehicle_restrictionsRoutes from "./routes/CabinCrew/cabin_crew
 // import pilots_languagesRoutes from "./routes/pilots_languagesRoutes.js";
 
 //Arif:Passengers
-import passengersRoutes from "./routes/passengersRoutes.js";
+import passengersRoutes from "./routes/Passenger/passengersRoutes.js";
 
 import { initDB } from "./db/initDB.js";
 
