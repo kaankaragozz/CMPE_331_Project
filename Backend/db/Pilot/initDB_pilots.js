@@ -3,7 +3,9 @@ import { sql } from '../../config/db.js';
 export const initDB_pilots = async () => {
   try {
     console.log('Creating pilots table...');
-    await sql(`
+    
+    // FIX: SQL query syntax corrected to use tagged template literal (sql`...`)
+    await sql`
       CREATE TABLE IF NOT EXISTS pilots (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -16,13 +18,14 @@ export const initDB_pilots = async () => {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
     console.log('✓ Pilots table created');
   } catch (error) {
+    // Log error if table creation fails
     console.error('Error initializing pilots table:', error);
     throw error;
   }
 };
 
-// Backwards-compatible alias/name used by orchestrator
+// Alias used by the database initialization orchestrator (initDB.js)
 export const createPilotsTable = initDB_pilots;

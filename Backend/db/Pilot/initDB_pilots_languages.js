@@ -1,9 +1,11 @@
 import { sql } from '../../config/db.js';
 
+// Main function to initialize both languages and pilot_languages tables (used if called directly)
 export const initDB_languages = async () => {
   try {
     console.log('Creating languages table...');
-    await sql(`
+    // FIX: SQL query syntax corrected to use tagged template literal (sql`...`)
+    await sql`
       CREATE TABLE IF NOT EXISTS languages (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
@@ -11,11 +13,12 @@ export const initDB_languages = async () => {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
     console.log('✓ Languages table created');
 
     console.log('Creating pilot_languages junction table...');
-    await sql(`
+    // FIX: SQL query syntax corrected to use tagged template literal (sql`...`)
+    await sql`
       CREATE TABLE IF NOT EXISTS pilot_languages (
         pilot_id INTEGER NOT NULL REFERENCES pilots(id) ON DELETE CASCADE,
         language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
@@ -23,7 +26,7 @@ export const initDB_languages = async () => {
         updated_at TIMESTAMP DEFAULT NOW(),
         PRIMARY KEY (pilot_id, language_id)
       )
-    `);
+    `;
     console.log('✓ Pilot_languages junction table created');
   } catch (error) {
     console.error('Error initializing languages tables:', error);
@@ -31,10 +34,12 @@ export const initDB_languages = async () => {
   }
 };
 
-// Split exports for more explicit control in orchestrator
+// Export individual table creation functions for explicit control in the orchestrator (initDB.js)
+
 export const createLanguagesTable = async () => {
   try {
-    await sql(`
+    // FIX: SQL query syntax corrected to use tagged template literal (sql`...`)
+    await sql`
       CREATE TABLE IF NOT EXISTS languages (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
@@ -42,7 +47,7 @@ export const createLanguagesTable = async () => {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       )
-    `);
+    `;
     console.log('✓ Languages table created');
   } catch (error) {
     console.error('Error creating languages table:', error);
@@ -52,7 +57,8 @@ export const createLanguagesTable = async () => {
 
 export const createPilotLanguagesTable = async () => {
   try {
-    await sql(`
+    // FIX: SQL query syntax corrected to use tagged template literal (sql`...`)
+    await sql`
       CREATE TABLE IF NOT EXISTS pilot_languages (
         pilot_id INTEGER NOT NULL REFERENCES pilots(id) ON DELETE CASCADE,
         language_id INTEGER NOT NULL REFERENCES languages(id) ON DELETE CASCADE,
@@ -60,7 +66,7 @@ export const createPilotLanguagesTable = async () => {
         updated_at TIMESTAMP DEFAULT NOW(),
         PRIMARY KEY (pilot_id, language_id)
       )
-    `);
+    `;
     console.log('✓ Pilot_languages junction table created');
   } catch (error) {
     console.error('Error creating pilot_languages table:', error);

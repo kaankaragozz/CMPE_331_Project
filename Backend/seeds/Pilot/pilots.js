@@ -5,7 +5,7 @@ const seedPilots = async () => {
     console.log('Seeding pilots...');
 
     // Clear pilots table to ensure idempotent seeding
-    await sql('TRUNCATE TABLE pilots RESTART IDENTITY CASCADE');
+    await sql`TRUNCATE TABLE pilots RESTART IDENTITY CASCADE`;
     
     const pilots = [
       // Senior Pilots (3)
@@ -25,18 +25,18 @@ const seedPilots = async () => {
 
     // Insert pilots
     for (const pilot of pilots) {
-      await sql(
-        'INSERT INTO pilots (name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-        [pilot.name, pilot.age, pilot.gender, pilot.nationality, pilot.vehicle_restriction, pilot.allowed_range, pilot.seniority_level]
-      );
+      await sql`
+        INSERT INTO pilots (name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level)
+        VALUES (${pilot.name}, ${pilot.age}, ${pilot.gender}, ${pilot.nationality}, ${pilot.vehicle_restriction}, ${pilot.allowed_range}, ${pilot.seniority_level})
+      `;
     }
 
     console.log(`✓ Inserted ${pilots.length} pilots`);
 
     // Assign languages to pilots
     console.log('Assigning languages to pilots...');
-    const allPilots = await sql('SELECT id FROM pilots ORDER BY id ASC');
-    const allLanguages = await sql('SELECT id FROM languages ORDER BY id ASC');
+    const allPilots = await sql`SELECT id FROM pilots ORDER BY id ASC`;
+    const allLanguages = await sql`SELECT id FROM languages ORDER BY id ASC`;
 
     if (allPilots.length > 0 && allLanguages.length > 0) {
       let assignmentIndex = 0;
@@ -45,15 +45,17 @@ const seedPilots = async () => {
         const langIndex2 = (assignmentIndex + 1) % allLanguages.length;
         
         if (langIndex1 !== langIndex2) {
-          await sql(
-            'INSERT INTO pilot_languages (pilot_id, language_id) VALUES ($1, $2), ($1, $3) ON CONFLICT DO NOTHING',
-            [pilot.id, allLanguages[langIndex1].id, allLanguages[langIndex2].id]
-          );
+          await sql`
+            INSERT INTO pilot_languages (pilot_id, language_id)
+            VALUES (${pilot.id}, ${allLanguages[langIndex1].id}), (${pilot.id}, ${allLanguages[langIndex2].id})
+            ON CONFLICT DO NOTHING
+          `;
         } else if (allLanguages.length > 1) {
-          await sql(
-            'INSERT INTO pilot_languages (pilot_id, language_id) VALUES ($1, $2), ($1, $3) ON CONFLICT DO NOTHING',
-            [pilot.id, allLanguages[langIndex1].id, allLanguages[(langIndex1 + 1) % allLanguages.length].id]
-          );
+          await sql`
+            INSERT INTO pilot_languages (pilot_id, language_id)
+            VALUES (${pilot.id}, ${allLanguages[langIndex1].id}), (${pilot.id}, ${allLanguages[(langIndex1 + 1) % allLanguages.length].id})
+            ON CONFLICT DO NOTHING
+          `;
         }
         
         assignmentIndex += 2;

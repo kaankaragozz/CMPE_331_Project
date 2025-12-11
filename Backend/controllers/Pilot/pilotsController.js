@@ -21,7 +21,7 @@ export const createPilot = async (req, res) => {
       });
     }
     
-    // Insert pilot
+    // Insert pilot (tagged template kullanımı doğru)
     const result = await sql`
       INSERT INTO pilots (name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, created_at, updated_at) 
       VALUES (${name}, ${age}, ${gender}, ${nationality}, ${vehicle_restriction}, ${allowed_range}, ${seniority_level}, NOW(), NOW()) 
@@ -33,7 +33,7 @@ export const createPilot = async (req, res) => {
     // Insert languages if provided
     if (language_ids && Array.isArray(language_ids) && language_ids.length > 0) {
       for (const langId of language_ids) {
-        await sql(
+        await sql.query(
           'INSERT INTO pilot_languages (pilot_id, language_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
           [pilotId, langId]
         );
@@ -64,7 +64,7 @@ export const updatePilot = async (req, res) => {
     const { name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, language_ids } = req.body;
     
     // Check if pilot exists
-    const existing = await sql('SELECT id FROM pilots WHERE id = $1', [id]);
+    const existing = await sql.query('SELECT id FROM pilots WHERE id = $1', [id]);
     if (existing.length === 0) {
       return res.status(404).json({
         success: false,
@@ -127,18 +127,18 @@ export const updatePilot = async (req, res) => {
     
     if (updateFields.length > 1) {
       const query = `UPDATE pilots SET ${updateFields.join(', ')} WHERE id = $${paramIndex} RETURNING id`;
-      await sql(query, updateParams);
+      await sql.query(query, updateParams);
     }
     
     // Update languages if provided
     if (language_ids !== undefined) {
       // Delete existing languages for this pilot
-      await sql('DELETE FROM pilot_languages WHERE pilot_id = $1', [id]);
+      await sql.query('DELETE FROM pilot_languages WHERE pilot_id = $1', [id]);
       
       // Insert new languages
       if (Array.isArray(language_ids) && language_ids.length > 0) {
         for (const langId of language_ids) {
-          await sql(
+          await sql.query(
             'INSERT INTO pilot_languages (pilot_id, language_id) VALUES ($1, $2)',
             [id, langId]
           );
@@ -169,7 +169,7 @@ export const deletePilot = async (req, res) => {
     const { id } = req.params;
     
     // Check if pilot exists
-    const existing = await sql('SELECT id FROM pilots WHERE id = $1', [id]);
+    const existing = await sql.query('SELECT id FROM pilots WHERE id = $1', [id]);
     if (existing.length === 0) {
       return res.status(404).json({
         success: false,
@@ -177,8 +177,8 @@ export const deletePilot = async (req, res) => {
       });
     }
     
-    // Delete pilot (cascade will handle pilot_languages entries due to foreign key)
-    await sql('DELETE FROM pilots WHERE id = $1', [id]);
+    // Delete pilot
+    await sql.query('DELETE FROM pilots WHERE id = $1', [id]);
     
     res.status(200).json({
       success: true,

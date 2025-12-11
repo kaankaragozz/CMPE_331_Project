@@ -4,8 +4,8 @@ const seedLanguages = async () => {
   try {
     console.log('Seeding languages...');
 
-    // Clear languages and junction table to ensure idempotent seeding
-    await sql('TRUNCATE TABLE languages, pilot_languages RESTART IDENTITY CASCADE');
+    // TRUNCATE Sorgusu: Tırnaklı Şablon ile düzeltildi
+    await sql`TRUNCATE TABLE languages, pilot_languages RESTART IDENTITY CASCADE`;
     
     const languages = [
       { name: 'Turkish', code: 'TR' },
@@ -16,10 +16,12 @@ const seedLanguages = async () => {
     ];
 
     for (const lang of languages) {
-      await sql(
-        'INSERT INTO languages (name, code) VALUES ($1, $2) ON CONFLICT (code) DO NOTHING',
-        [lang.name, lang.code]
-      );
+      // INSERT Sorgusu: Tırnaklı Şablon ile düzeltildi
+      await sql`
+        INSERT INTO languages (name, code) 
+        VALUES (${lang.name}, ${lang.code}) 
+        ON CONFLICT (code) DO NOTHING
+      `;
     }
 
     console.log(`✓ Inserted ${languages.length} languages`);

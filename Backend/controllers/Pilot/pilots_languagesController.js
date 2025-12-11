@@ -2,7 +2,7 @@ import { sql } from '../../config/db.js';
 
 // Helper function to fetch pilot with languages
 export const getPilotWithLanguages = async (pilotId) => {
-  const result = await sql(`
+  const result = await sql`
     SELECT 
       p.id,
       p.name,
@@ -18,9 +18,9 @@ export const getPilotWithLanguages = async (pilotId) => {
     FROM pilots p
     LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
     LEFT JOIN languages l ON pl.language_id = l.id
-    WHERE p.id = $1
+    WHERE p.id = ${pilotId}
     GROUP BY p.id
-  `, [pilotId]);
+  `;
   
   return result.length > 0 ? result[0] : null;
 };
@@ -28,7 +28,7 @@ export const getPilotWithLanguages = async (pilotId) => {
 // Get all pilots with languages
 export const getAllPilots = async (req, res) => {
   try {
-    const pilots = await sql(`
+    const pilots = await sql`
       SELECT 
         p.id,
         p.name,
@@ -46,7 +46,7 @@ export const getAllPilots = async (req, res) => {
       LEFT JOIN languages l ON pl.language_id = l.id
       GROUP BY p.id
       ORDER BY p.id ASC
-    `);
+    `;
     
     res.status(200).json({
       success: true,
@@ -129,7 +129,8 @@ export const filterPilots = async (req, res) => {
     
     query += ' GROUP BY p.id ORDER BY p.id ASC';
     
-    const pilots = await sql(query, params);
+    // BURADA ARTIK sql(...) DEĞİL, sql.query(...)
+    const pilots = await sql.query(query, params);
     
     res.status(200).json({
       success: true,

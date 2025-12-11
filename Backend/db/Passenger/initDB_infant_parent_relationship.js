@@ -1,3 +1,4 @@
+/*
 import { sql } from '../config/db.js';
 
 // Initialize database schema
@@ -20,3 +21,4 @@ export async function initDB_infant_parent_relationship() {
     console.error("❌ Error initializing infant_parent_relationship database:", error);
   }
 }
+*/
