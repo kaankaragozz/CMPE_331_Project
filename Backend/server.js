@@ -65,7 +65,7 @@ app.use("/api/pilots", pilots_languagesRoutes);
 app.use("/api/pilots_languages", pilotsRoutes);
 
 //Arif:Passenger
-//app.use("/api/passengers", passengersRoutes);
+app.use("/api/passengers", passengersRoutes);
 
 
 
