@@ -22,10 +22,11 @@ export const createPilot = async (req, res) => {
     }
     
     // Insert pilot
-    const result = await sql(
-      'INSERT INTO pilots (name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) RETURNING id',
-      [name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level]
-    );
+    const result = await sql`
+      INSERT INTO pilots (name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, created_at, updated_at) 
+      VALUES (${name}, ${age}, ${gender}, ${nationality}, ${vehicle_restriction}, ${allowed_range}, ${seniority_level}, NOW(), NOW()) 
+      RETURNING id
+    `;
     
     const pilotId = result[0].id;
     

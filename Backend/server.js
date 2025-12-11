@@ -22,8 +22,8 @@ import dish_recipesRoutes from "./routes/CabinCrew/dish_recipesRoutes.js";
 import cabin_crew_vehicle_restrictionsRoutes from "./routes/CabinCrew/cabin_crew_vehicle_restrictionsRoutes.js";
 
 //Tunahan:Pilot
-// import pilotsRoutes from "./routes/pilotsRoutes.js";
-// import pilots_languagesRoutes from "./routes/pilots_languagesRoutes.js";
+import pilotsRoutes from "./routes/Pilot/pilotsRoutes.js"; 
+import pilots_languagesRoutes from "./routes/Pilot/pilots_languagesRoutes.js"; 
 
 //Arif:Passengers
 import passengersRoutes from "./routes/passengersRoutes.js";
@@ -61,8 +61,8 @@ app.use("/api/dish_recipes", dish_recipesRoutes);
 app.use("/api/cabin_crew_vehicle_restrictions", cabin_crew_vehicle_restrictionsRoutes);
 
 //Tunahan:Pilot
-// app.use("/api/pilots", pilotsRoutes);
-// app.use("/api/pilots_languages", pilots_languagesRoutes);
+app.use("/api/pilots", pilotsRoutes); 
+app.use("/api/pilots_languages", pilots_languagesRoutes);
 
 //Arif:Passenger
 app.use("/api/passengers", passengersRoutes);
