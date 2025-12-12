@@ -1,59 +1,57 @@
-import { sql } from "../../config/db.js";
+import { sql } from '../../config/db.js';
 
-const SAMPLE_PASSENGERS = [
-  { flight_id: 101, name: "Alice Johnson", age: 28, gender: "F", nationality: "Turkish", seat_type: "Economy" },
-  { flight_id: 102, name: "Bob Smith", age: 34, gender: "M", nationality: "German", seat_type: "Business" },
-  { flight_id: 103, name: "Carla Gomez", age: 22, gender: "F", nationality: "Spanish", seat_type: "Economy" },
-  { flight_id: 101, name: "David Lee", age: 45, gender: "M", nationality: "Korean", seat_type: "First Class" },
-  { flight_id: 104, name: "Emma Brown", age: 31, gender: "F", nationality: "British", seat_type: "Business" },
-  { flight_id: 105, name: "Frank Wilson", age: 39, gender: "M", nationality: "American", seat_type: "Economy" },
-  { flight_id: 102, name: "Grace Chen", age: 27, gender: "F", nationality: "Chinese", seat_type: "Economy" },
-  { flight_id: 103, name: "Henry Davis", age: 50, gender: "M", nationality: "Canadian", seat_type: "First Class" },
-  { flight_id: 104, name: "Isabella Rossi", age: 24, gender: "F", nationality: "Italian", seat_type: "Business" },
-  { flight_id: 105, name: "Jack Thompson", age: 36, gender: "M", nationality: "Australian", seat_type: "Economy" },
+export async function seedPassengers() {
+  console.log("👥 Seeding passengers...");
 
-  { flight_id: 101, name: "Karen Taylor", age: 29, gender: "F", nationality: "Dutch", seat_type: "Economy" },
-  { flight_id: 102, name: "Liam Martinez", age: 41, gender: "M", nationality: "Mexican", seat_type: "Business" },
-  { flight_id: 103, name: "Mia Patel", age: 26, gender: "F", nationality: "Indian", seat_type: "Economy" },
-  { flight_id: 104, name: "Noah Anderson", age: 38, gender: "M", nationality: "Swedish", seat_type: "First Class" },
-  { flight_id: 105, name: "Olivia Clark", age: 32, gender: "F", nationality: "Canadian", seat_type: "Business" },
-  { flight_id: 101, name: "Peter Walker", age: 44, gender: "M", nationality: "Irish", seat_type: "Economy" },
-  { flight_id: 102, name: "Quinn Lewis", age: 23, gender: "F", nationality: "New Zealander", seat_type: "Economy" },
-  { flight_id: 103, name: "Ryan Hall", age: 37, gender: "M", nationality: "British", seat_type: "Business" },
-  { flight_id: 104, name: "Sophia Allen", age: 30, gender: "F", nationality: "French", seat_type: "Economy" },
-  { flight_id: 105, name: "Thomas Young", age: 48, gender: "M", nationality: "German", seat_type: "First Class" },
-  { flight_id: 101, name: "Uma Scott", age: 25, gender: "F", nationality: "Japanese", seat_type: "Economy" },
-  { flight_id: 102, name: "Victor King", age: 33, gender: "M", nationality: "American", seat_type: "Business" },
-  { flight_id: 103, name: "Wendy Adams", age: 27, gender: "F", nationality: "Canadian", seat_type: "Economy" },
-  { flight_id: 104, name: "Xander Baker", age: 40, gender: "M", nationality: "Australian", seat_type: "First Class" },
-  { flight_id: 105, name: "Yara Rivera", age: 29, gender: "F", nationality: "Brazilian", seat_type: "Business" },
-  { flight_id: 101, name: "Zachary White", age: 35, gender: "M", nationality: "Irish", seat_type: "Economy" },
-  { flight_id: 102, name: "Abby Green", age: 31, gender: "F", nationality: "Swedish", seat_type: "Economy" },
-  { flight_id: 103, name: "Brandon Carter", age: 42, gender: "M", nationality: "British", seat_type: "Business" },
-  { flight_id: 104, name: "Clara Moore", age: 28, gender: "F", nationality: "Italian", seat_type: "Economy" },
-  { flight_id: 105, name: "Daniel Perez", age: 46, gender: "M", nationality: "Spanish", seat_type: "First Class" },
+  const passengers = [
+    // Family 1 (The Yilmaz Family)
+    { name: 'Ahmet Yilmaz', age: 35, gender: 'Male', nationality: 'Turkey' },
+    { name: 'Ayse Yilmaz', age: 32, gender: 'Female', nationality: 'Turkey' },
+    { name: 'Can Yilmaz', age: 8, gender: 'Male', nationality: 'Turkey' },
+    { name: 'Bebek Yilmaz', age: 1, gender: 'Female', nationality: 'Turkey' }, // Infant
 
-];
+    // Family 2 (The Smiths)
+    { name: 'John Smith', age: 45, gender: 'Male', nationality: 'USA' },
+    { name: 'Sarah Smith', age: 42, gender: 'Female', nationality: 'USA' },
+    { name: 'Mike Smith', age: 12, gender: 'Male', nationality: 'USA' },
 
-async function seedDatabase() {
+    // Business Travelers
+    { name: 'Hans Mueller', age: 50, gender: 'Male', nationality: 'Germany' },
+    { name: 'Elena Rossi', age: 29, gender: 'Female', nationality: 'Italy' },
+    { name: 'Yuki Tanaka', age: 38, gender: 'Female', nationality: 'Japan' },
+    { name: 'Pierre Dubois', age: 41, gender: 'Male', nationality: 'France' },
+    { name: 'Linda Johnson', age: 55, gender: 'Female', nationality: 'UK' },
+
+    // Students / Solo Travelers
+    { name: 'Maria Garcia', age: 22, gender: 'Female', nationality: 'Spain' },
+    { name: 'Lars Jensen', age: 24, gender: 'Male', nationality: 'Denmark' },
+    { name: 'Sophie Martin', age: 21, gender: 'Female', nationality: 'France' },
+    { name: 'Ali Vural', age: 23, gender: 'Male', nationality: 'Turkey' },
+    { name: 'Zeynep Demir', age: 25, gender: 'Female', nationality: 'Turkey' },
+    { name: 'Ibrahim Kaya', age: 28, gender: 'Male', nationality: 'Turkey' },
+    
+    // Extra Travelers
+    { name: 'Bruce Wayne', age: 40, gender: 'Male', nationality: 'USA' },
+    { name: 'Clark Kent', age: 35, gender: 'Male', nationality: 'USA' },
+    { name: 'Diana Prince', age: 300, gender: 'Female', nationality: 'Greece' },
+    { name: 'Peter Parker', age: 18, gender: 'Male', nationality: 'USA' }
+  ];
+
   try {
-    // first, clear existing data
-    await sql`TRUNCATE TABLE passengers RESTART IDENTITY`;
-
-    // insert all passengers
-    for (const passengers of SAMPLE_PASSENGERS) {
-      await sql`
-        INSERT INTO passengers (flight_id, name, age, gender, nationality, seat_type)
-        VALUES (${passengers.flight_id}, ${passengers.name}, ${passengers.age}, ${passengers.gender}, ${passengers.nationality}, ${passengers.seat_type})
-      `;
+    for (const p of passengers) {
+      // Check if passenger exists to avoid duplicates on re-run
+      const existing = await sql`SELECT passenger_id FROM passengers WHERE name = ${p.name}`;
+      
+      if (existing.length === 0) {
+        await sql`
+          INSERT INTO passengers (name, age, gender, nationality)
+          VALUES (${p.name}, ${p.age}, ${p.gender}, ${p.nationality})
+        `;
+      }
     }
-
-    console.log("Passengers Database seeded successfully");
-    process.exit(0); // success code
+    console.log(`✅ ${passengers.length} passengers processed successfully.`);
   } catch (error) {
-    console.error("Error seeding database:", error);
-    process.exit(1); // failure code
+    console.error("❌ Error seeding passengers:", error);
+    throw error; // Re-throw to stop execution if needed
   }
 }
-
-seedDatabase();
