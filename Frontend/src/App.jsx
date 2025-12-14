@@ -57,8 +57,8 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="/flights" element={<FlightSelectionPage />} />
             <Route path="/flights/:flightNumber/crew" element={<CrewAssignmentPage />} />
-            <Route path="/flights/:flightId/passengers" element={<SeatAssignmentPage />} />
             <Route path="/flights/:flightNumber" element={<FlightDetailsPage />} />
+            <Route path="/flights/:flightNumber/passengers" element={<SeatAssignmentPage />}/>
             <Route path="/roster/:flightId/plane" element={<PlaneSeatMapPage />} />
             <Route path="/roster/:flightId/tabular" element={<RosterTabularPage />} />
             <Route path="/user/profile" element={<UserProfilePage />} />

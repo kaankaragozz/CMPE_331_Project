@@ -627,3 +627,125 @@ export const getCrewAssignment = async (req, res) => {
   }
 };
 
+// GET /api/flight/:flight_number/passengers
+export const getFlightPassengers = async (req, res) => {
+  const { flight_number } = req.params;
+
+  const pattern = /^[A-Z]{2}\d{4}$/;
+  if (!pattern.test(flight_number.toUpperCase())) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid flight number format. Must be in AANNNN format (e.g., AA1001)",
+    });
+  }
+
+  try {
+    // 1) find flight id
+    const flightRows = await sql`
+      SELECT id FROM flights WHERE UPPER(flight_number) = UPPER(${flight_number})
+    `;
+    if (flightRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Flight with number ${flight_number} not found`,
+      });
+    }
+    const flightId = flightRows[0].id;
+
+    // 2) load passengers for that flight
+    //    NOTE: We purposely select p.* so we don't need to know exact column names
+    const passengers = await sql`
+      SELECT
+        p.*,
+        fpa.seat_number
+      FROM flight_passengers_assignments fpa
+      JOIN passengers p ON fpa.passenger_id = p.id
+      WHERE fpa.flight_id = ${flightId}
+      ORDER BY p.id
+    `;
+
+    return res.status(200).json({
+      success: true,
+      data: passengers,
+    });
+  } catch (error) {
+    console.error("Error in getFlightPassengers:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+// POST /api/flight/:flight_number/passengers/seats
+export const savePassengerSeats = async (req, res) => {
+  const { flight_number } = req.params;
+  const { seats = [] } = req.body;
+
+  const pattern = /^[A-Z]{2}\d{4}$/;
+  if (!pattern.test(flight_number.toUpperCase())) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid flight number format. Must be in AANNNN format (e.g., AA1234)",
+    });
+  }
+
+  if (!Array.isArray(seats)) {
+    return res.status(400).json({
+      success: false,
+      message: "Payload must contain a 'seats' array.",
+    });
+  }
+
+  try {
+    const flightRows = await sql`
+      SELECT id FROM flights WHERE UPPER(flight_number) = UPPER(${flight_number})
+    `;
+    if (flightRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Flight with number ${flight_number} not found`,
+      });
+    }
+    const flightId = flightRows[0].id;
+
+    // clear old seat assignments
+    await sql`
+      DELETE FROM flight_passengers_assignments
+      WHERE flight_id = ${flightId}
+    `;
+
+    // insert new ones
+    for (const s of seats) {
+      if (!s.passenger_id) continue;
+      await sql`
+        INSERT INTO flight_passengers_assignments (
+          flight_id,
+          passenger_id,
+          seat_number
+        )
+        VALUES (${flightId}, ${s.passenger_id}, ${s.seat_number || null})
+      `;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Seat assignments saved successfully.",
+      data: {
+        flight_id: flightId,
+        flight_number,
+        seats,
+      },
+    });
+  } catch (error) {
+    console.error("Error in savePassengerSeats:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
