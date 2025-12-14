@@ -50,6 +50,11 @@ export const getCabinCrewVehicleRestriction = async (req, res) => {
 
 export const createCabinCrewVehicleRestriction = async (req, res) => {
   const { cabin_crew_id, vehicle_type_id } = req.body;
+  
+  if (!cabin_crew_id || !vehicle_type_id) {
+    return res.status(400).json({ success: false, message: "Missing required fields: cabin_crew_id, vehicle_type_id" });
+  }
+  
   try {
     const newRestriction = await sql`
       INSERT INTO cabin_crew_vehicle_restrictions (cabin_crew_id, vehicle_type_id)
@@ -60,13 +65,18 @@ export const createCabinCrewVehicleRestriction = async (req, res) => {
     res.status(201).json({ success: true, data: newRestriction[0] });
   } catch (error) {
     console.error("Error in createCabinCrewVehicleRestriction:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 
 export const updateCabinCrewVehicleRestriction = async (req, res) => {
   const { id } = req.params;
   const { cabin_crew_id, vehicle_type_id } = req.body;
+  
+  if (!cabin_crew_id || !vehicle_type_id) {
+    return res.status(400).json({ success: false, message: "Missing required fields: cabin_crew_id, vehicle_type_id" });
+  }
+  
   try {
     const updatedRestriction = await sql`
       UPDATE cabin_crew_vehicle_restrictions
@@ -82,7 +92,7 @@ export const updateCabinCrewVehicleRestriction = async (req, res) => {
     res.status(200).json({ success: true, data: updatedRestriction[0] });
   } catch (error) {
     console.error("Error in updateCabinCrewVehicleRestriction:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 

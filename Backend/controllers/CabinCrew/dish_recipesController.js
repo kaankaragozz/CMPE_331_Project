@@ -46,6 +46,11 @@ export const getDishRecipe = async (req, res) => {
 
 export const createDishRecipe = async (req, res) => {
   const { chef_id, recipe_name, description } = req.body;
+  
+  if (!chef_id || !recipe_name || !description) {
+    return res.status(400).json({ success: false, message: "Missing required fields: chef_id, recipe_name, description" });
+  }
+  
   try {
     const newDishRecipe = await sql`
       INSERT INTO dish_recipes (chef_id, recipe_name, description)
@@ -56,13 +61,18 @@ export const createDishRecipe = async (req, res) => {
     res.status(201).json({ success: true, data: newDishRecipe[0] });
   } catch (error) {
     console.error("Error in createDishRecipe:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 
 export const updateDishRecipe = async (req, res) => {
   const { id } = req.params;
   const { chef_id, recipe_name, description } = req.body;
+  
+  if (!chef_id || !recipe_name || !description) {
+    return res.status(400).json({ success: false, message: "Missing required fields: chef_id, recipe_name, description" });
+  }
+  
   try {
     const updatedDishRecipe = await sql`
       UPDATE dish_recipes
@@ -78,7 +88,7 @@ export const updateDishRecipe = async (req, res) => {
     res.status(200).json({ success: true, data: updatedDishRecipe[0] });
   } catch (error) {
     console.error("Error in updateDishRecipe:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 

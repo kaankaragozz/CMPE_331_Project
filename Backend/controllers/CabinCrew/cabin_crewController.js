@@ -64,6 +64,11 @@ export const getCabinCrew = async (req, res) => {
 
 export const createCabinCrew = async (req, res) => {
   const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id, vehicle_restrictions, recipes } = req.body;
+  
+  if (!first_name || !last_name || !age || !gender || !nationality || !known_languages || !attendant_type_id) {
+    return res.status(400).json({ success: false, message: "Missing required fields: first_name, last_name, age, gender, nationality, known_languages, attendant_type_id" });
+  }
+  
   try {
     const newCabinCrew = await sql`
       INSERT INTO cabin_crew (first_name, last_name, age, gender, nationality, known_languages, attendant_type_id)
@@ -101,6 +106,11 @@ export const createCabinCrew = async (req, res) => {
 export const updateCabinCrew = async (req, res) => {
   const { id } = req.params;
   const { first_name, last_name, age, gender, nationality, known_languages, attendant_type_id, vehicle_restrictions, recipes } = req.body;
+  
+  if (!first_name || !last_name || !age || !gender || !nationality || !known_languages || !attendant_type_id) {
+    return res.status(400).json({ success: false, message: "Missing required fields: first_name, last_name, age, gender, nationality, known_languages, attendant_type_id" });
+  }
+  
   try {
     const updatedCabinCrew = await sql`
       UPDATE cabin_crew

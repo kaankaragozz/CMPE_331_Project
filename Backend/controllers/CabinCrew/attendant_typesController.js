@@ -38,6 +38,11 @@ export const getAttendantType = async (req, res) => {
 
 export const createAttendantType = async (req, res) => {
   const { type_name, min_count, max_count } = req.body;
+  
+  if (!type_name || min_count === undefined || max_count === undefined) {
+    return res.status(400).json({ success: false, message: "Missing required fields: type_name, min_count, max_count" });
+  }
+  
   try {
     const newAttendantType = await sql`
       INSERT INTO attendant_types (type_name, min_count, max_count)
@@ -48,13 +53,18 @@ export const createAttendantType = async (req, res) => {
     res.status(201).json({ success: true, data: newAttendantType[0] });
   } catch (error) {
     console.error("Error in createAttendantType:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 
 export const updateAttendantType = async (req, res) => {
   const { id } = req.params;
   const { type_name, min_count, max_count } = req.body;
+  
+  if (!type_name || min_count === undefined || max_count === undefined) {
+    return res.status(400).json({ success: false, message: "Missing required fields: type_name, min_count, max_count" });
+  }
+  
   try {
     const updatedAttendantType = await sql`
       UPDATE attendant_types
@@ -70,7 +80,7 @@ export const updateAttendantType = async (req, res) => {
     res.status(200).json({ success: true, data: updatedAttendantType[0] });
   } catch (error) {
     console.error("Error in updateAttendantType:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: error.message || "Internal Server Error" });
   }
 };
 
