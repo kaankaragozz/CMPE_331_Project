@@ -27,6 +27,9 @@ import {
   createPilotLanguagesTable
 } from './Pilot/initDB_pilots_languages.js';
 
+// Baris: Cabin Crew Assginments
+import { initFlightCrewAssignmentsTables } from "./Flight/initDB_flight_crew_assignments.js";
+
 export async function initDB() {
   try {
     // Await each async table creation
@@ -44,7 +47,6 @@ export async function initDB() {
     await initDB_dish_recipes();
     await initDB_cabin_crew_vehicle_restrictions();
 
-
     //Arif:Passenger
     await initDB_affiliated_seating();
     await initDB_flight_passengers_assignments();
@@ -56,6 +58,9 @@ export async function initDB() {
     await createPilotsTable();
     await createLanguagesTable();
     await createPilotLanguagesTable();
+
+    // Baris: crew assignments (after flights, pilots, cabin_crew exist)
+    await initFlightCrewAssignmentsTables();
 
     console.log("DataBase initialized successfully")
   } catch (error) {

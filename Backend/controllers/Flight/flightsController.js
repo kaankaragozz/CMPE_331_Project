@@ -494,3 +494,136 @@ export const deleteFlight = async (req, res) => {
   }
 };
 
+// controllers/Flight/flightsController.js
+export const saveCrewAssignment = async (req, res) => {
+  const { flight_number } = req.params;
+  const { pilots = [], cabin_crew = [] } = req.body;
+
+  const flightNumberPattern = /^[A-Z]{2}\d{4}$/;
+  if (!flightNumberPattern.test(flight_number.toUpperCase())) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid flight number format. Must be in AANNNN format (e.g., AA1234)",
+    });
+  }
+
+  if (!Array.isArray(pilots) || !Array.isArray(cabin_crew)) {
+    return res.status(400).json({
+      success: false,
+      message: "Payload must contain 'pilots' and 'cabin_crew' arrays.",
+    });
+  }
+
+  try {
+    const flightRows = await sql`
+      SELECT id FROM flights WHERE UPPER(flight_number) = UPPER(${flight_number})
+    `;
+    if (flightRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Flight with number ${flight_number} not found`,
+      });
+    }
+
+    const flightId = flightRows[0].id;
+
+    // clear existing assignments
+    await sql`DELETE FROM flight_pilot_assignments WHERE flight_id = ${flightId}`;
+    await sql`DELETE FROM flight_cabin_crew_assignments WHERE flight_id = ${flightId}`;
+
+    // insert new pilots
+    for (const pilotId of pilots) {
+      await sql`
+        INSERT INTO flight_pilot_assignments (flight_id, pilot_id)
+        VALUES (${flightId}, ${pilotId})
+        ON CONFLICT (flight_id, pilot_id) DO NOTHING
+      `;
+    }
+
+    // insert new cabin crew
+    for (const cabinId of cabin_crew) {
+      await sql`
+        INSERT INTO flight_cabin_crew_assignments (flight_id, cabin_crew_id)
+        VALUES (${flightId}, ${cabinId})
+        ON CONFLICT (flight_id, cabin_crew_id) DO NOTHING
+      `;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Crew assignment saved successfully.",
+      data: {
+        flight_id: flightId,
+        flight_number,
+        pilots,
+        cabin_crew,
+      },
+    });
+  } catch (error) {
+    console.error("Error in saveCrewAssignment:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+export const getCrewAssignment = async (req, res) => {
+  const { flight_number } = req.params;
+
+  const flightNumberPattern = /^[A-Z]{2}\d{4}$/;
+  if (!flightNumberPattern.test(flight_number.toUpperCase())) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid flight number format. Must be in AANNNN format (e.g., AA1234)",
+    });
+  }
+
+  try {
+    const flightRows = await sql`
+      SELECT id FROM flights WHERE UPPER(flight_number) = UPPER(${flight_number})
+    `;
+    if (flightRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Flight with number ${flight_number} not found`,
+      });
+    }
+
+    const flightId = flightRows[0].id;
+
+    const pilots = await sql`
+      SELECT p.*
+      FROM flight_pilot_assignments fpa
+      JOIN pilots p ON fpa.pilot_id = p.id
+      WHERE fpa.flight_id = ${flightId}
+    `;
+
+    const cabinCrew = await sql`
+      SELECT c.*
+      FROM flight_cabin_crew_assignments fca
+      JOIN cabin_crew c ON fca.cabin_crew_id = c.id
+      WHERE fca.flight_id = ${flightId}
+    `;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        flight_id: flightId,
+        flight_number,
+        pilots,
+        cabin_crew: cabinCrew,
+      },
+    });
+  } catch (error) {
+    console.error("Error in getCrewAssignment:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
