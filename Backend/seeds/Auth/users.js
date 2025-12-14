@@ -11,8 +11,6 @@ const SAMPLE_USERS = [
 
 async function seedUsers() {
   try {
-    // ✅ Ensure all tables exist first
-    await initDB_users();
     console.log("Tables are ready. Seeding users...");
 
     // Clear users table

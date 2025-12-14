@@ -1,9 +1,10 @@
 import { sql } from '../../config/db.js';
+import { initDB_passengers } from './initDB_passengers.js';
 
 // Initialize database schema
 export async function initDB_affiliated_seating() {
   try {
-
+    await initDB_passengers();
     // Create affiliated_seating table
     await sql`
       CREATE TABLE IF NOT EXISTS affiliated_seating (

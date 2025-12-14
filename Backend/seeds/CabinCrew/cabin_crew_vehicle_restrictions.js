@@ -1,4 +1,5 @@
 import { sql } from "../../config/db.js";
+import { seedVehicleTypes } from "../Flight/vehicle_types.js";
 
 const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS = [
   { cabin_crew_id: 1, vehicle_type_id: 1 },
@@ -16,8 +17,9 @@ const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS = [
 
 async function seedDatabase() {
   try {
+    await seedVehicleTypes();
     console.log("🚫 Seeding cabin crew vehicle restrictions...");
-    
+
     // first, clear existing data
     await sql`TRUNCATE TABLE cabin_crew_vehicle_restrictions RESTART IDENTITY CASCADE`;
 

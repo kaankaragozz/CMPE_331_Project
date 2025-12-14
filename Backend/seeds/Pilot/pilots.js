@@ -6,7 +6,7 @@ const seedPilots = async () => {
 
     // Clear pilots table to ensure idempotent seeding
     await sql`TRUNCATE TABLE pilots RESTART IDENTITY CASCADE`;
-    
+
     const pilots = [
       // Senior Pilots (3)
       { name: 'John Smith', age: 45, gender: 'Male', nationality: 'American', vehicle_restriction: 'Boeing 737', allowed_range: 5000, seniority_level: 'Senior' },
@@ -43,7 +43,7 @@ const seedPilots = async () => {
       for (const pilot of allPilots) {
         const langIndex1 = assignmentIndex % allLanguages.length;
         const langIndex2 = (assignmentIndex + 1) % allLanguages.length;
-        
+
         if (langIndex1 !== langIndex2) {
           await sql`
             INSERT INTO pilot_languages (pilot_id, language_id)
@@ -57,7 +57,7 @@ const seedPilots = async () => {
             ON CONFLICT DO NOTHING
           `;
         }
-        
+
         assignmentIndex += 2;
       }
       console.log(`✓ Assigned languages to ${allPilots.length} pilots`);

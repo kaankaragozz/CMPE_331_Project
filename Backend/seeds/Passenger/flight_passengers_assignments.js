@@ -6,7 +6,7 @@ export async function seedAssignments() {
   try {
     // 1. Get Seat Types
     const seatTypes = await sql`SELECT seat_type_id, type_name FROM seat_type`;
-    
+
     if (seatTypes.length === 0) {
       console.warn("⚠️ No seat types found! Run fixSeatTypes.js first.");
       return;
@@ -74,3 +74,5 @@ export async function seedAssignments() {
     throw error;
   }
 }
+
+seedAssignments();

@@ -1,8 +1,10 @@
 import { sql } from '../../config/db.js';
+import { initDB_seat_type } from './initDB_seat_type.js';
 
 // Initialize database schema
 export async function initDB_flight_passengers_assignments() {
   try {
+    await initDB_seat_type();
 
     // Create flight_passenger_assignments table
     await sql`

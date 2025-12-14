@@ -1,7 +1,7 @@
 import { sql } from '../../config/db.js';
 
 // Initialize database schema
-export async function initDB() {
+export async function seedSeatType() {
   try {
 
     // Seed seat_type table with 'Business' and 'Economy'
@@ -18,3 +18,6 @@ export async function initDB() {
     console.error("❌ Error seeding seat_type database:", error);
   }
 }
+
+seedSeatType();
+

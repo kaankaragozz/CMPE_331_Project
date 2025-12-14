@@ -1,4 +1,5 @@
 import { sql } from "../../config/db.js";
+import { initDB_attendant_types } from "../../db/CabinCrew/initDB_attendant_types.js";
 
 const SAMPLE_ATTENDANT_TYPES = [
   { type_name: 'flight_attendant', min_count: 4, max_count: 8 },
@@ -9,8 +10,9 @@ const SAMPLE_ATTENDANT_TYPES = [
 
 async function seedDatabase() {
   try {
+
     console.log("🧑‍✈️ Seeding attendant types...");
-    
+
     // first, clear existing data
     await sql`TRUNCATE TABLE attendant_types RESTART IDENTITY CASCADE`;
 

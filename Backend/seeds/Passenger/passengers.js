@@ -29,7 +29,7 @@ export async function seedPassengers() {
     { name: 'Ali Vural', age: 23, gender: 'Male', nationality: 'Turkey' },
     { name: 'Zeynep Demir', age: 25, gender: 'Female', nationality: 'Turkey' },
     { name: 'Ibrahim Kaya', age: 28, gender: 'Male', nationality: 'Turkey' },
-    
+
     // Extra Travelers
     { name: 'Bruce Wayne', age: 40, gender: 'Male', nationality: 'USA' },
     { name: 'Clark Kent', age: 35, gender: 'Male', nationality: 'USA' },
@@ -41,7 +41,7 @@ export async function seedPassengers() {
     for (const p of passengers) {
       // Check if passenger exists to avoid duplicates on re-run
       const existing = await sql`SELECT passenger_id FROM passengers WHERE name = ${p.name}`;
-      
+
       if (existing.length === 0) {
         await sql`
           INSERT INTO passengers (name, age, gender, nationality)
@@ -55,3 +55,5 @@ export async function seedPassengers() {
     throw error; // Re-throw to stop execution if needed
   }
 }
+
+seedPassengers();

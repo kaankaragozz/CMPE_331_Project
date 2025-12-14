@@ -1,8 +1,10 @@
 import { sql } from '../../config/db.js';
+import { initVehicleTypesTable } from './initDB_vehicle_types.js';
 
 export async function initFlightsTable() {
   try {
     console.log('📍 Creating `flights` table...');
+    await initVehicleTypesTable();
 
     await sql`
       CREATE TABLE IF NOT EXISTS flights (

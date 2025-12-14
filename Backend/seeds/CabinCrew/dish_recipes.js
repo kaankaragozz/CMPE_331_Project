@@ -1,4 +1,5 @@
 import { sql } from "../../config/db.js";
+import { initDB_dish_recipes } from "../../db/CabinCrew/initDB_dish_recipes.js";
 
 const SAMPLE_DISH_RECIPES = [
   { chef_id: 5, recipe_name: 'Mediterranean Salmon', description: 'Grilled salmon with olive oil, lemon, and fresh herbs' },
@@ -11,7 +12,7 @@ const SAMPLE_DISH_RECIPES = [
 async function seedDatabase() {
   try {
     console.log("🍽️ Seeding dish recipes...");
-    
+
     // first, clear existing data
     await sql`TRUNCATE TABLE dish_recipes RESTART IDENTITY CASCADE`;
 

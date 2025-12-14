@@ -1,4 +1,6 @@
 import { sql } from '../../config/db.js';
+import { initDB_pilots } from '../../db/Pilot/initDB_pilots.js';
+import { initDB_languages } from '../../db/Pilot/initDB_pilots_languages.js';
 
 const seedLanguages = async () => {
   try {
@@ -6,7 +8,7 @@ const seedLanguages = async () => {
 
     // TRUNCATE Sorgusu: Tırnaklı Şablon ile düzeltildi
     await sql`TRUNCATE TABLE languages, pilot_languages RESTART IDENTITY CASCADE`;
-    
+
     const languages = [
       { name: 'Turkish', code: 'TR' },
       { name: 'English', code: 'EN' },

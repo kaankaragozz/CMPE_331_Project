@@ -6,7 +6,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 //Route Import
-import denemeRoutes from './routes/denemeRoutes.js';
 //Hakan:Auth
 import authRoutes from "./routes/Auth/authRoutes.js";
 import userRoutes from "./routes/Auth/userRoutes.js";
@@ -22,13 +21,14 @@ import dish_recipesRoutes from "./routes/CabinCrew/dish_recipesRoutes.js";
 import cabin_crew_vehicle_restrictionsRoutes from "./routes/CabinCrew/cabin_crew_vehicle_restrictionsRoutes.js";
 
 //Tunahan:Pilot
-import pilotsRoutes from "./routes/Pilot/pilotsRoutes.js"; 
-import pilots_languagesRoutes from "./routes/Pilot/pilots_languagesRoutes.js"; 
+import pilotsRoutes from "./routes/Pilot/pilotsRoutes.js";
+import pilots_languagesRoutes from "./routes/Pilot/pilots_languagesRoutes.js";
 
 //Arif:Passengers
 import passengersRoutes from "./routes/Passenger/passengersRoutes.js";
 
 import { initDB } from "./db/initDB.js";
+import { seedDB } from './seeds/index.js';
 
 
 dotenv.config(); //To use .env file 
@@ -48,7 +48,6 @@ app.use(morgan('dev')); //HTTP request logger middleware for node.js
 //Hakan: Auth
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/deneme", denemeRoutes);
 //Kaan:Flight
 app.use("/api/flight", flightRoutes);
 app.use("/api/vehicle_types", vehicle_typesRoutes);
@@ -61,7 +60,7 @@ app.use("/api/dish_recipes", dish_recipesRoutes);
 app.use("/api/cabin_crew_vehicle_restrictions", cabin_crew_vehicle_restrictionsRoutes);
 
 //Tunahan:Pilot
-app.use("/api/pilots", pilots_languagesRoutes); 
+app.use("/api/pilots", pilots_languagesRoutes);
 app.use("/api/pilots_languages", pilotsRoutes);
 
 //Arif:Passenger
@@ -71,7 +70,11 @@ app.use("/api/passengers", passengersRoutes);
 
 //Listen to Backend Server 
 initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log("Server is running on port: " + PORT);
-  });
+  seedDB().then(() => {
+    app.listen(PORT, () => {
+      console.log("Server is running on port: " + PORT);
+    });
+
+  })
+
 })

@@ -1,4 +1,5 @@
 import { sql } from "../../config/db.js";
+import { initDB_cabin_crew } from "../../db/CabinCrew/initDB_cabin_crew.js";
 
 const SAMPLE_CABIN_CREW = [
   { first_name: 'Emma', last_name: 'Johnson', age: 28, gender: 'Female', nationality: 'American', known_languages: ['English', 'Spanish'], attendant_type_id: 1 },
@@ -14,7 +15,7 @@ const SAMPLE_CABIN_CREW = [
 async function seedDatabase() {
   try {
     console.log("👥 Seeding cabin crew...");
-    
+
     // first, clear existing data
     await sql`TRUNCATE TABLE cabin_crew RESTART IDENTITY CASCADE`;
 

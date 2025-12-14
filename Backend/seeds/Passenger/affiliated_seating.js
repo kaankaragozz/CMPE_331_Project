@@ -15,10 +15,10 @@ export async function seedAffiliations() {
     const affiliations = [
       // Yilmaz Family (Husband <-> Wife)
       { p1: 'Ahmet Yilmaz', p2: 'Ayse Yilmaz', flight: FLIGHT_IST_FRA },
-      
+
       // Smith Family (Husband <-> Wife)
       { p1: 'John Smith', p2: 'Sarah Smith', flight: FLIGHT_IST_JFK },
-      
+
       // Smith Family (Mother <-> Child)
       { p1: 'Sarah Smith', p2: 'Mike Smith', flight: FLIGHT_IST_JFK }
     ];
@@ -41,3 +41,5 @@ export async function seedAffiliations() {
     throw error;
   }
 }
+
+seedAffiliations();

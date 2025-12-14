@@ -21,3 +21,5 @@ export async function seedAirports() {
     `;
   }
 }
+
+seedAirports();
