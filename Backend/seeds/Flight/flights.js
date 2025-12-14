@@ -20,7 +20,7 @@ export async function seedFlights() {
   const flights = [
     {
       flight_number: 'AA1001',
-      flight_date: new Date('2024-12-15T08:30:00'),
+      flight_date: new Date('2025-12-15T08:30:00'),
       duration_minutes: 180,
       distance_km: 1200.5,
       source_airport_code: 'IST',
@@ -30,7 +30,7 @@ export async function seedFlights() {
     },
     {
       flight_number: 'AA1002',
-      flight_date: new Date('2024-12-15T14:45:00'),
+      flight_date: new Date('2025-12-15T14:45:00'),
       duration_minutes: 420,
       distance_km: 3200.0,
       source_airport_code: 'IST',
@@ -40,7 +40,7 @@ export async function seedFlights() {
     },
     {
       flight_number: 'AA1003',
-      flight_date: new Date('2024-12-16T10:00:00'),
+      flight_date: new Date('2025-12-16T10:00:00'),
       duration_minutes: 210,
       distance_km: 2500.7,
       source_airport_code: 'IST',
@@ -50,7 +50,7 @@ export async function seedFlights() {
     },
     {
       flight_number: 'AA1004',
-      flight_date: new Date('2024-12-16T16:20:00'),
+      flight_date: new Date('2025-12-16T16:20:00'),
       duration_minutes: 165,
       distance_km: 980.3,
       source_airport_code: 'FRA',
@@ -68,7 +68,7 @@ export async function seedFlights() {
     },
     {
       flight_number: 'AA1005',
-      flight_date: new Date('2024-12-17T09:15:00'),
+      flight_date: new Date('2025-12-17T09:15:00'),
       duration_minutes: 285,
       distance_km: 2100.8,
       source_airport_code: 'IST',
@@ -78,7 +78,7 @@ export async function seedFlights() {
     },
     {
       flight_number: 'AA1006',
-      flight_date: new Date('2024-12-17T18:30:00'),
+      flight_date: new Date('2025-12-17T18:30:00'),
       duration_minutes: 195,
       distance_km: 1350.2,
       source_airport_code: 'AMS',
