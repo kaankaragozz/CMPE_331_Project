@@ -4,6 +4,15 @@ import { useNavigate } from "react-router-dom";
 
 const API_BASE_URL = "http://localhost:3000/api";
 
+function formatFlightDate(isoString) {
+  if (!isoString) return "N/A";
+  const d = new Date(isoString);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}/${month}/${day}`;
+}
+
 export default function FlightSelectionPage() {
   const [filters, setFilters] = useState({
     flightNumber: "",
@@ -202,9 +211,7 @@ export default function FlightSelectionPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {filteredFlights.map((flight) => {
             const flightNumber = flight.flight_number;
-            const dateTime = flight.flight_date
-              ? new Date(flight.flight_date).toLocaleString()
-              : "N/A";
+            const dateTime = formatFlightDate(flight.flight_date);
 
             const originCode =
               flight.source?.airport_code || flight.source?.code || "N/A";
