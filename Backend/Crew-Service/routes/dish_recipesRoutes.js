@@ -5,7 +5,7 @@ import {
   createDishRecipe,
   updateDishRecipe,
   deleteDishRecipe
-} from '../../controllers/CabinCrew/dish_recipesController.js';
+} from '../controllers/dish_recipesController.js';
 
 const router = express.Router();
 

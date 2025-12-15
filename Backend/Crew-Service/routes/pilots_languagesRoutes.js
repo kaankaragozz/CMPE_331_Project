@@ -4,7 +4,7 @@ import {
   getAllPilots,
   getPilotById,
   filterPilots
-} from '../../controllers/Pilot/pilots_languagesController.js';
+} from '../controllers/pilots_languagesController.js';
 
 // GET /api/pilots - List all pilots (with languages)
 router.get('/', getAllPilots);

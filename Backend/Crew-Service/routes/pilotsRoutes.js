@@ -4,7 +4,7 @@ import {
   createPilot,
   updatePilot,
   deletePilot
-} from '../../controllers/Pilot/pilotsController.js';
+} from '../controllers/pilotsController.js';
 
 // POST /api/pilots - Create a new pilot
 router.post('/', createPilot);

@@ -5,7 +5,7 @@ import {
   createAttendantType,
   updateAttendantType,
   deleteAttendantType
-} from '../../controllers/CabinCrew/attendant_typesController.js';
+} from '../controllers/attendant_typesController.js';
 
 const router = express.Router();
 

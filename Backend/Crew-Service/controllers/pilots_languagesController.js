@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 // Helper function to fetch pilot with languages
 export const getPilotWithLanguages = async (pilotId) => {
@@ -21,7 +21,7 @@ export const getPilotWithLanguages = async (pilotId) => {
     WHERE p.id = ${pilotId}
     GROUP BY p.id
   `;
-  
+
   return result.length > 0 ? result[0] : null;
 };
 
@@ -47,7 +47,7 @@ export const getAllPilots = async (req, res) => {
       GROUP BY p.id
       ORDER BY p.id ASC
     `;
-    
+
     res.status(200).json({
       success: true,
       count: pilots.length,
@@ -66,16 +66,16 @@ export const getAllPilots = async (req, res) => {
 export const getPilotById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const pilot = await getPilotWithLanguages(id);
-    
+
     if (!pilot) {
       return res.status(404).json({
         success: false,
         message: 'Pilot not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: pilot
@@ -93,7 +93,7 @@ export const getPilotById = async (req, res) => {
 export const filterPilots = async (req, res) => {
   try {
     const { vehicle_restriction, seniority_level } = req.query;
-    
+
     let query = `
       SELECT 
         p.id,
@@ -114,24 +114,24 @@ export const filterPilots = async (req, res) => {
     `;
     const params = [];
     let paramIndex = 1;
-    
+
     if (vehicle_restriction) {
       query += ` AND p.vehicle_restriction = $${paramIndex}`;
       params.push(vehicle_restriction);
       paramIndex++;
     }
-    
+
     if (seniority_level) {
       query += ` AND p.seniority_level = $${paramIndex}`;
       params.push(seniority_level);
       paramIndex++;
     }
-    
+
     query += ' GROUP BY p.id ORDER BY p.id ASC';
-    
+
     // BURADA ARTIK sql(...) DEĞİL, sql.query(...)
     const pilots = await sql.query(query, params);
-    
+
     res.status(200).json({
       success: true,
       count: pilots.length,

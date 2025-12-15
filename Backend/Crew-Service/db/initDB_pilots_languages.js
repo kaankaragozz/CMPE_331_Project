@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 // Main function to initialize both languages and pilot_languages tables (used if called directly)
 export const initDB_languages = async () => {

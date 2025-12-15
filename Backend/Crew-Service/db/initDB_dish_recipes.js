@@ -1,4 +1,4 @@
-﻿import { sql } from "../../config/db.js";
+﻿import { sql } from "../config/db.js";
 
 export async function initDB_dish_recipes() {
   try {

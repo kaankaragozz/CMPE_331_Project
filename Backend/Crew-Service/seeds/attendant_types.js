@@ -1,5 +1,4 @@
-import { sql } from "../../config/db.js";
-import { initDB_attendant_types } from "../../db/CabinCrew/initDB_attendant_types.js";
+import { sql } from "../config/db.js";
 
 const SAMPLE_ATTENDANT_TYPES = [
   { type_name: 'flight_attendant', min_count: 4, max_count: 8 },
@@ -8,7 +7,7 @@ const SAMPLE_ATTENDANT_TYPES = [
   { type_name: 'purser', min_count: 1, max_count: 1 }
 ];
 
-async function seedDatabase() {
+export async function seedAttendantTypes() {
   try {
 
     console.log("🧑‍✈️ Seeding attendant types...");
@@ -25,11 +24,10 @@ async function seedDatabase() {
     }
 
     console.log("✅ Attendant types seeded successfully");
-    process.exit(0);
+
   } catch (error) {
     console.error("❌ Error seeding attendant types:", error);
-    process.exit(1);
+
   }
 }
 
-seedDatabase();

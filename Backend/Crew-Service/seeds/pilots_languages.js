@@ -1,21 +1,20 @@
-import { sql } from '../../config/db.js';
-import { initDB_pilots } from '../../db/Pilot/initDB_pilots.js';
-import { initDB_languages } from '../../db/Pilot/initDB_pilots_languages.js';
+import { sql } from '../config/db.js';
 
-const seedLanguages = async () => {
+const languages = [
+  { name: 'Turkish', code: 'TR' },
+  { name: 'English', code: 'EN' },
+  { name: 'German', code: 'DE' },
+  { name: 'French', code: 'FR' },
+  { name: 'Spanish', code: 'ES' }
+];
+
+export async function seedLanguages() {
   try {
     console.log('Seeding languages...');
 
     // TRUNCATE Sorgusu: Tırnaklı Şablon ile düzeltildi
     await sql`TRUNCATE TABLE languages, pilot_languages RESTART IDENTITY CASCADE`;
 
-    const languages = [
-      { name: 'Turkish', code: 'TR' },
-      { name: 'English', code: 'EN' },
-      { name: 'German', code: 'DE' },
-      { name: 'French', code: 'FR' },
-      { name: 'Spanish', code: 'ES' }
-    ];
 
     for (const lang of languages) {
       // INSERT Sorgusu: Tırnaklı Şablon ile düzeltildi
@@ -27,11 +26,9 @@ const seedLanguages = async () => {
     }
 
     console.log(`✓ Inserted ${languages.length} languages`);
-    process.exit(0);
+
   } catch (error) {
     console.error('Error seeding languages:', error);
-    process.exit(1);
+
   }
 };
-
-seedLanguages();

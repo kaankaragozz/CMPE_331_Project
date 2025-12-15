@@ -5,7 +5,7 @@ import {
   createCabinCrewVehicleRestriction,
   updateCabinCrewVehicleRestriction,
   deleteCabinCrewVehicleRestriction
-} from '../../controllers/CabinCrew/cabin_crew_vehicle_restrictionsController.js';
+} from '../controllers/cabin_crew_vehicle_restrictionsController.js';
 
 const router = express.Router();
 

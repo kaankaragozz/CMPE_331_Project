@@ -1,4 +1,4 @@
-﻿import { sql } from "../../config/db.js";
+﻿import { sql } from "../config/db.js";
 
 //CRUD Operations for "cabin_crew_vehicle_restrictions" table
 export const getAllCabinCrewVehicleRestrictions = async (req, res) => {
@@ -12,7 +12,7 @@ export const getAllCabinCrewVehicleRestrictions = async (req, res) => {
       JOIN vehicle_types vt ON ccvr.vehicle_type_id = vt.id
       ORDER BY ccvr.created_at DESC
     `;
-    
+
     if (allRestrictions.length === 0) {
       return res.status(404).json({ success: false, message: "No vehicle restrictions found" });
     }

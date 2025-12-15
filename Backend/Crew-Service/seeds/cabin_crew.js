@@ -1,5 +1,4 @@
-import { sql } from "../../config/db.js";
-import { initDB_cabin_crew } from "../../db/CabinCrew/initDB_cabin_crew.js";
+import { sql } from "../config/db.js";
 
 const SAMPLE_CABIN_CREW = [
   { first_name: 'Emma', last_name: 'Johnson', age: 28, gender: 'Female', nationality: 'American', known_languages: ['English', 'Spanish'], attendant_type_id: 1 },
@@ -12,7 +11,7 @@ const SAMPLE_CABIN_CREW = [
   { first_name: 'Ethan', last_name: 'Taylor', age: 33, gender: 'Male', nationality: 'British', known_languages: ['English', 'German'], attendant_type_id: 1 }
 ];
 
-async function seedDatabase() {
+export async function seedCabinCrew() {
   try {
     console.log("👥 Seeding cabin crew...");
 
@@ -28,11 +27,10 @@ async function seedDatabase() {
     }
 
     console.log("✅ Cabin crew seeded successfully");
-    process.exit(0);
+
   } catch (error) {
     console.error("❌ Error seeding cabin crew:", error);
-    process.exit(1);
+
   }
 }
 
-seedDatabase();

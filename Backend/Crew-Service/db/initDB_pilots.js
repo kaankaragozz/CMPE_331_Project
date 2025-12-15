@@ -1,9 +1,9 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
-export const initDB_pilots = async () => {
+const initDB_pilots = async () => {
   try {
     console.log('Creating pilots table...');
-    
+
     // FIX: SQL query syntax corrected to use tagged template literal (sql`...`)
     await sql`
       CREATE TABLE IF NOT EXISTS pilots (

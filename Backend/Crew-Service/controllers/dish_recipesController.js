@@ -1,4 +1,4 @@
-﻿import { sql } from "../../config/db.js";
+﻿import { sql } from "../config/db.js";
 
 //CRUD Operations for "dish_recipes" table
 export const getAllDishRecipes = async (req, res) => {
@@ -10,7 +10,7 @@ export const getAllDishRecipes = async (req, res) => {
       JOIN cabin_crew cc ON dr.chef_id = cc.id
       ORDER BY dr.created_at DESC
     `;
-    
+
     if (allDishRecipes.length === 0) {
       return res.status(404).json({ success: false, message: "No dish recipes found" });
     }

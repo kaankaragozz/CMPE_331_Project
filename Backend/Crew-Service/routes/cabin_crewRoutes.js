@@ -5,7 +5,7 @@ import {
   createCabinCrew,
   updateCabinCrew,
   deleteCabinCrew
-} from '../../controllers/CabinCrew/cabin_crewController.js';
+} from '../controllers/cabin_crewController.js';
 
 const router = express.Router();
 

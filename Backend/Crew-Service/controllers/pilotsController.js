@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 import { getPilotWithLanguages } from './pilots_languagesController.js';
 
 // Create a new pilot (basic insert) and return aggregated pilot

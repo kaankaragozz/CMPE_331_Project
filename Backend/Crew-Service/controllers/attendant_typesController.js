@@ -1,4 +1,4 @@
-﻿import { sql } from "../../config/db.js";
+﻿import { sql } from "../config/db.js";
 
 //CRUD Operations for "attendant_types" table
 export const getAllAttendantTypes = async (req, res) => {
@@ -6,7 +6,7 @@ export const getAllAttendantTypes = async (req, res) => {
     const allAttendantTypes = await sql`
       SELECT * FROM attendant_types ORDER BY id ASC
     `;
-    
+
     if (allAttendantTypes.length === 0) {
       return res.status(404).json({ success: false, message: "No attendant types found" });
     }

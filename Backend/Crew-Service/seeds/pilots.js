@@ -1,6 +1,6 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
-const seedPilots = async () => {
+export const seedPilots = async () => {
   try {
     console.log('Seeding pilots...');
 
@@ -63,11 +63,11 @@ const seedPilots = async () => {
       console.log(`✓ Assigned languages to ${allPilots.length} pilots`);
     }
 
-    process.exit(0);
+
   } catch (error) {
     console.error('Error seeding pilots:', error);
-    process.exit(1);
+
   }
 };
 
-seedPilots();
+

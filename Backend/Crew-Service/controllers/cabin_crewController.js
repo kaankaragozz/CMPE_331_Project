@@ -1,4 +1,4 @@
-﻿import { sql } from "../../config/db.js";
+﻿import { sql } from "../config/db.js";
 
 //CRUD Operations for "cabin_crew" table
 export const getAllCabinCrew = async (req, res) => {

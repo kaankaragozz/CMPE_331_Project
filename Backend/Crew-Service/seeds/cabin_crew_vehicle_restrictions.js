@@ -1,5 +1,5 @@
-import { sql } from "../../config/db.js";
-import { seedVehicleTypes } from "../../Flight-Service/seeds/vehicle_types.js";
+import { sql } from "../config/db.js";
+import { seedVehicleTypes } from "../Flight-Service/seeds/vehicle_types.js";
 
 const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS = [
   { cabin_crew_id: 1, vehicle_type_id: 1 },
@@ -15,7 +15,7 @@ const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS = [
   { cabin_crew_id: 6, vehicle_type_id: 3 }
 ];
 
-async function seedDatabase() {
+export async function seedCabinCrewVehicleRestrictions() {
   try {
     await seedVehicleTypes();
     console.log("🚫 Seeding cabin crew vehicle restrictions...");
@@ -32,11 +32,10 @@ async function seedDatabase() {
     }
 
     console.log("✅ Cabin crew vehicle restrictions seeded successfully");
-    process.exit(0);
+
   } catch (error) {
     console.error("❌ Error seeding cabin crew vehicle restrictions:", error);
-    process.exit(1);
+
   }
 }
 
-seedDatabase();
