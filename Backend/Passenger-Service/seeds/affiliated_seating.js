@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 export async function seedAffiliations() {
   console.log("🔗 Seeding affiliations (Family/Groups)...");
@@ -42,4 +42,3 @@ export async function seedAffiliations() {
   }
 }
 
-seedAffiliations();

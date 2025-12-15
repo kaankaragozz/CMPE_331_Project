@@ -6,7 +6,7 @@ import {
   createPassenger,
   updatePassenger,
   deletePassenger,
-  
+
   // Flight Assignments
   getPassengersByFlight,
   addPassengerToFlight,
@@ -24,17 +24,17 @@ import {
   addInfantRelationship,
   deleteInfantRelationship,
 
-} from '../../controllers/Passenger/passengersController.js';
+} from '../controllers/passengersController.js';
 
 const router = express.Router();
 
 router.get('/', getAllPassengers);
 router.get('/:id', getPassengerById);
-router.post('/', createPassenger); 
+router.post('/', createPassenger);
 router.put('/:id', updatePassenger);
 router.delete('/:id', deletePassenger);
 router.get('/flight/:flight_number', getPassengersByFlight);
-router.post('/flight-assignment', addPassengerToFlight); 
+router.post('/flight-assignment', addPassengerToFlight);
 router.delete('/flight/:flight_number/:passenger_id', removePassengerFromFlight);
 router.post('/flight/:flight_number/assign-seats', autoAssignSeats);
 router.put('/flight/:flight_number/manual-assign', assignSeatManually);

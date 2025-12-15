@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 // Initialize database schema
 export async function seedSeatType() {
@@ -19,5 +19,4 @@ export async function seedSeatType() {
   }
 }
 
-seedSeatType();
 

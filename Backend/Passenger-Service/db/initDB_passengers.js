@@ -1,9 +1,9 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 // Initialize database schema
 export async function initDB_passengers() {
   try {
-    
+
     // Create passengers table (Core Entity)
     await sql`
       CREATE TABLE IF NOT EXISTS passengers (

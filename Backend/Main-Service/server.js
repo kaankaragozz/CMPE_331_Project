@@ -29,6 +29,7 @@ app.use(morgan("dev"));
 // =====================
 const AUTH_SERVICE = process.env.AUTH_SERVICE_URL;
 const CREW_SERVICE = process.env.CREW_SERVICE_URL;
+const FLIGHT_SERVICE = process.env.FLIGHT_SERVICE_URL;
 
 // =====================
 // Health Check
@@ -78,6 +79,27 @@ app.use("/api/crew", async (req, res) => {
   } catch (err) {
     res.status(err.response?.status || 500).json({
       error: "Crew Service error",
+      details: err.response?.data || err.message,
+    });
+  }
+});
+
+// =====================
+// Flight Service Proxy
+// =====================
+app.use("/api/flight", async (req, res) => {
+  try {
+    const response = await axios({
+      method: req.method,
+      url: `${FLIGHT_SERVICE}${req.url}`, // 👈 NOT req.originalUrl
+      data: req.body,
+      headers: req.headers,
+    });
+
+    res.status(response.status).json(response.data);
+  } catch (err) {
+    res.status(err.response?.status || 500).json({
+      error: "Flight Service error",
       details: err.response?.data || err.message,
     });
   }

@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 // Initialize database schema
 export async function initDB_infant_parent_relationship() {

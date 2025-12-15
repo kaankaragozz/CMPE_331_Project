@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 import { initDB_passengers } from './initDB_passengers.js';
 
 // Initialize database schema

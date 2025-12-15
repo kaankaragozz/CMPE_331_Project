@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 /* ===============================================================
    1. PASSENGER & ASSIGNMENT CORE OPERATIONS
@@ -46,10 +46,10 @@ export const createPassenger = async (req, res) => {
       RETURNING passenger_id, name, age, gender, nationality
     `;
 
-    res.status(201).json({ 
-      success: true, 
-      message: 'Passenger created successfully (not assigned to flight yet)', 
-      data: newPassenger[0] 
+    res.status(201).json({
+      success: true,
+      message: 'Passenger created successfully (not assigned to flight yet)',
+      data: newPassenger[0]
     });
 
   } catch (error) {
@@ -87,7 +87,7 @@ export const deletePassenger = async (req, res) => {
   const { id } = req.params;
   try {
     const deleted = await sql`DELETE FROM passengers WHERE passenger_id = ${id} RETURNING passenger_id`;
-    
+
     if (deleted.length === 0) {
       return res.status(404).json({ success: false, message: 'Passenger not found' });
     }
@@ -232,10 +232,10 @@ export const autoAssignSeats = async (req, res) => {
     }
 
     const seatTypes = await sql`SELECT seat_type_id, type_name FROM seat_type`;
-    const typeMap = {}; 
+    const typeMap = {};
     seatTypes.forEach(t => {
-        if(t.type_name.toLowerCase().includes('business')) typeMap[t.seat_type_id] = 'Business';
-        else if(t.type_name.toLowerCase().includes('economy')) typeMap[t.seat_type_id] = 'Economy';
+      if (t.type_name.toLowerCase().includes('business')) typeMap[t.seat_type_id] = 'Business';
+      else if (t.type_name.toLowerCase().includes('economy')) typeMap[t.seat_type_id] = 'Economy';
     });
 
     let assignedCount = 0;

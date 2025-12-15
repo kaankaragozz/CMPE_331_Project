@@ -1,9 +1,9 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 // Initialize database schema
 export async function initDB_seat_type() {
   try {
-    
+
     // Create seat_type table
     await sql`
       CREATE TABLE IF NOT EXISTS seat_type (

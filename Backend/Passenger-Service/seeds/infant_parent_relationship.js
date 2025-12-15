@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 export async function seedInfants() {
   console.log("👶 Seeding infant-parent relationships...");
@@ -35,4 +35,4 @@ export async function seedInfants() {
   }
 }
 
-seedInfants();
+
