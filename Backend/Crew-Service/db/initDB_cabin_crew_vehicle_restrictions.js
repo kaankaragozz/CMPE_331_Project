@@ -1,9 +1,8 @@
 ﻿import { sql } from "../config/db.js";
-import { initVehicleTypesTable } from "../../db/Flight/initDB_vehicle_types.js";
+
 
 export async function initDB_cabin_crew_vehicle_restrictions() {
   try {
-    await initVehicleTypesTable();
     await sql`
       CREATE TABLE IF NOT EXISTS cabin_crew_vehicle_restrictions (
         id SERIAL PRIMARY KEY,

@@ -25,7 +25,7 @@ import pilotsLanguagesRoutes from "./routes/pilots_languagesRoutes.js";
 //CabinCrew
 import { initDB_attendant_types } from "./db/initDB_attendant_types.js";
 import { initDB_cabin_crew } from "./db/initDB_cabin_crew.js";
-//import { initDB_cabin_crew_vehicle_restrictions } from "./db/initDB_cabin_crew_vehicle_restrictions.js";
+import { initDB_cabin_crew_vehicle_restrictions } from "./db/initDB_cabin_crew_vehicle_restrictions.js";
 import { initDB_dish_recipes } from "./db/initDB_dish_recipes.js";
 //Pilot
 import { createPilotsTable } from "./db/initDB_pilots.js";
@@ -37,7 +37,7 @@ import { createPilotLanguagesTable, createLanguagesTable } from "./db/initDB_pil
 //CabinCrew
 import { seedAttendantTypes } from "./seeds/attendant_types.js";
 import { seedCabinCrew } from "./seeds/cabin_crew.js";
-//import { seedCabinCrewVehicleRestrictions } from "./seeds/cabin_crew_vehicle_restrictions.js";
+import { seedCabinCrewVehicleRestrictions } from "./seeds/cabin_crew_vehicle_restrictions.js";
 import { seedDishRecipes } from "./seeds/dish_recipes.js";
 //Pilot
 import { seedPilots } from "./seeds/pilots.js";
@@ -75,7 +75,7 @@ app.get("/health", (req, res) => {
 // =====================
 app.use("/api/attendant-types", attendantTypesRoutes);
 app.use("/api/cabin-crew", cabinCrewRoutes);
-//app.use("/api/cabin-crew-vehicle-restrictions", cabinCrewVehicleRestrictionsRoutes);
+app.use("/api/cabin-crew-vehicle-restrictions", cabinCrewVehicleRestrictionsRoutes);
 app.use("/api/dish-recipes", dishRecipesRoutes);
 app.use("/api/pilots", pilotsRoutes);
 app.use("/api/pilots-languages", pilotsLanguagesRoutes);
@@ -85,7 +85,7 @@ app.use("/api/pilots-languages", pilotsLanguagesRoutes);
 // =====================
 initDB_attendant_types()
   .then(() => initDB_cabin_crew())
-  //.then(() => initDB_cabin_crew_vehicle_restrictions())
+  .then(() => initDB_cabin_crew_vehicle_restrictions())
   .then(() => initDB_dish_recipes())
 
   //Pilot
@@ -97,7 +97,7 @@ initDB_attendant_types()
       //CabinCrew
       await seedAttendantTypes();
       await seedCabinCrew();
-      //await seedCabinCrewVehicleRestrictions();
+      await seedCabinCrewVehicleRestrictions();
       await seedDishRecipes();
       //Pilot
       await seedPilots();

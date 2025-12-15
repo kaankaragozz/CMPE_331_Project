@@ -4,7 +4,12 @@
   "description": "Main Service",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:flight\" \"npm run dev:passenger\" \"npm run dev:crew\" \"npm run dev:main\"",
+    "dev:auth": "cd ../Auth-Service && npm install && npm run dev",
+    "dev:flight": "cd ../Flight-Service && npm install && npm run dev",
+    "dev:passenger": "cd ../Passenger-Service && npm install && npm run dev",
+    "dev:crew": "cd ../Crew-Service && npm install && npm run dev",
+    "dev:main": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -33,6 +38,7 @@
     "morgan": "^1.10.1"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "nodemon": "^3.1.11"
   }
 }

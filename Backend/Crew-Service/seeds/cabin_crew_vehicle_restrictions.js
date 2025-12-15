@@ -1,5 +1,5 @@
 import { sql } from "../config/db.js";
-import { seedVehicleTypes } from "../Flight-Service/seeds/vehicle_types.js";
+
 
 const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS = [
   { cabin_crew_id: 1, vehicle_type_id: 1 },
@@ -17,7 +17,6 @@ const SAMPLE_CABIN_CREW_VEHICLE_RESTRICTIONS = [
 
 export async function seedCabinCrewVehicleRestrictions() {
   try {
-    await seedVehicleTypes();
     console.log("🚫 Seeding cabin crew vehicle restrictions...");
 
     // first, clear existing data

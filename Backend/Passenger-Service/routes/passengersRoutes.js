@@ -33,6 +33,7 @@ router.get('/:id', getPassengerById);
 router.post('/', createPassenger);
 router.put('/:id', updatePassenger);
 router.delete('/:id', deletePassenger);
+
 router.get('/flight/:flight_number', getPassengersByFlight);
 router.post('/flight-assignment', addPassengerToFlight);
 router.delete('/flight/:flight_number/:passenger_id', removePassengerFromFlight);

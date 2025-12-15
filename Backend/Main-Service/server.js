@@ -30,6 +30,7 @@ app.use(morgan("dev"));
 const AUTH_SERVICE = process.env.AUTH_SERVICE_URL;
 const CREW_SERVICE = process.env.CREW_SERVICE_URL;
 const FLIGHT_SERVICE = process.env.FLIGHT_SERVICE_URL;
+const PASSENGER_SERVICE = process.env.PASSENGER_SERVICE_URL;
 
 // =====================
 // Health Check
@@ -45,15 +46,14 @@ app.get("/health", (req, res) => {
 // =====================
 // Auth Service Proxy
 // =====================
-app.use("/api/auth", async (req, res) => {
+app.use("/api/users", async (req, res) => {
   try {
     const response = await axios({
       method: req.method,
-      url: `${AUTH_SERVICE}${req.originalUrl}`,
+      url: `${AUTH_SERVICE}${req.originalUrl}`, // forwards /api/users
       data: req.body,
-      headers: req.headers
+      headers: req.headers,
     });
-
     res.status(response.status).json(response.data);
   } catch (err) {
     res.status(err.response?.status || 500).json({
@@ -66,32 +66,80 @@ app.use("/api/auth", async (req, res) => {
 // =====================
 // Crew Service Proxy
 // =====================
-app.use("/api/crew", async (req, res) => {
-  try {
-    const response = await axios({
-      method: req.method,
-      url: `${CREW_SERVICE}${req.url}`, // 👈 NOT req.originalUrl
-      data: req.body,
-      headers: req.headers,
-    });
+const crewServiceRoutes = [
+  "/api/attendant-types",
+  "/api/cabin-crew",
+  "/api/cabin-crew-vehicle-restrictions",
+  "/api/dish-recipes",
+  "/api/pilots",
+  "/api/pilots-languages",
+];
 
-    res.status(response.status).json(response.data);
-  } catch (err) {
-    res.status(err.response?.status || 500).json({
-      error: "Crew Service error",
-      details: err.response?.data || err.message,
-    });
-  }
+crewServiceRoutes.forEach((route) => {
+  app.use(route, async (req, res) => {
+    try {
+      // If req.url is '/', don't add extra slash
+      const pathSuffix = req.url === "/" ? "" : req.url;
+      const forwardUrl = `${CREW_SERVICE}${route}${pathSuffix}`;
+      console.log("Forwarding to Crew Service:", forwardUrl);
+
+      const response = await axios({
+        method: req.method,
+        url: forwardUrl,
+        data: req.body,
+        headers: req.headers,
+      });
+
+      res.status(response.status).json(response.data);
+    } catch (err) {
+      console.error("Crew Service proxy error:", err.message);
+      res.status(err.response?.status || 500).json({
+        error: "Crew Service error",
+        details: err.response?.data || err.message,
+      });
+    }
+  });
 });
-
 // =====================
 // Flight Service Proxy
 // =====================
-app.use("/api/flight", async (req, res) => {
+const flightServiceRoutes = [
+  "/api/airports",
+  "/api/flights",
+  "/api/vehicle-types",
+];
+
+flightServiceRoutes.forEach((route) => {
+  app.use(route, async (req, res) => {
+    try {
+      // Forward to Flight Service with full path
+      const forwardUrl = `${FLIGHT_SERVICE}${route}${req.url}`;
+      console.log("Forwarding to Flight Service:", forwardUrl);
+
+      const response = await axios({
+        method: req.method,
+        url: forwardUrl,
+        data: req.body,
+        headers: req.headers,
+      });
+
+      res.status(response.status).json(response.data);
+    } catch (err) {
+      console.error("Flight Service proxy error:", err.message);
+      res.status(err.response?.status || 500).json({
+        error: "Flight Service error",
+        details: err.response?.data || err.message,
+      });
+    }
+  });
+});
+
+// Passenger Service Proxy
+app.use("/api/passengers", async (req, res) => {
   try {
     const response = await axios({
       method: req.method,
-      url: `${FLIGHT_SERVICE}${req.url}`, // 👈 NOT req.originalUrl
+      url: `${PASSENGER_SERVICE}${req.originalUrl}`, // use originalUrl
       data: req.body,
       headers: req.headers,
     });
@@ -99,11 +147,12 @@ app.use("/api/flight", async (req, res) => {
     res.status(response.status).json(response.data);
   } catch (err) {
     res.status(err.response?.status || 500).json({
-      error: "Flight Service error",
+      error: "Passenger Service error",
       details: err.response?.data || err.message,
     });
   }
 });
+
 
 // =====================
 // Server Start
