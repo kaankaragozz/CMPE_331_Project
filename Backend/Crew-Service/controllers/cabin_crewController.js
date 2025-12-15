@@ -6,7 +6,6 @@ export const getAllCabinCrew = async (req, res) => {
     const allCabinCrew = await sql`
       SELECT cc.id, cc.first_name, cc.last_name, cc.age, cc.gender, cc.nationality, cc.known_languages, 
              at.type_name AS attendant_type, 
-             ARRAY_AGG(vt.type_name) AS vehicle_restrictions,
              CASE WHEN at.type_name = 'chef' THEN (
                SELECT JSON_AGG(JSON_BUILD_OBJECT('recipe_name', dr.recipe_name, 'description', dr.description))
                FROM dish_recipes dr
@@ -14,9 +13,6 @@ export const getAllCabinCrew = async (req, res) => {
              ) ELSE NULL END AS recipes
       FROM cabin_crew cc
       JOIN attendant_types at ON cc.attendant_type_id = at.id
-      LEFT JOIN cabin_crew_vehicle_restrictions cvr ON cc.id = cvr.cabin_crew_id
-      LEFT JOIN vehicle_types vt ON cvr.vehicle_type_id = vt.id
-      GROUP BY cc.id, at.type_name
       ORDER BY cc.created_at DESC
     `;
 
@@ -37,7 +33,6 @@ export const getCabinCrew = async (req, res) => {
     const cabinCrew = await sql`
       SELECT cc.id, cc.first_name, cc.last_name, cc.age, cc.gender, cc.nationality, cc.known_languages, 
              at.type_name AS attendant_type, 
-             ARRAY_AGG(vt.type_name) AS vehicle_restrictions,
              CASE WHEN at.type_name = 'chef' THEN (
                SELECT JSON_AGG(JSON_BUILD_OBJECT('recipe_name', dr.recipe_name, 'description', dr.description))
                FROM dish_recipes dr
@@ -45,10 +40,7 @@ export const getCabinCrew = async (req, res) => {
              ) ELSE NULL END AS recipes
       FROM cabin_crew cc
       JOIN attendant_types at ON cc.attendant_type_id = at.id
-      LEFT JOIN cabin_crew_vehicle_restrictions cvr ON cc.id = cvr.cabin_crew_id
-      LEFT JOIN vehicle_types vt ON cvr.vehicle_type_id = vt.id
       WHERE cc.id = ${id}
-      GROUP BY cc.id, at.type_name
     `;
 
     if (cabinCrew.length === 0) {
