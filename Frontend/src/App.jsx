@@ -7,7 +7,7 @@ import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
 import FlightSelectionPage from "./pages/Flights/FlightSelectionPage.jsx";
 import CrewAssignmentPage from "./pages/Flights/CrewAssignmentPage.jsx";
 import SeatAssignmentPage from "./pages/Passengers/SeatAssignmentPage.jsx";
-import PlaneSeatMapPage from "./pages/Roster/PlaneSeatMapPage.jsx";
+import PlaneSeatMapPage from "./pages/Flights/PlaneSeatMapPage.jsx";
 import RosterTabularPage from "./pages/Roster/RosterTabularPage.jsx";
 import UserProfilePage from "./pages/User/UserProfilePage.jsx";
 import FlightDetailsPage from "./pages/Flights/FlightDetailsPage.jsx";
@@ -59,7 +59,7 @@ export default function App() {
             <Route path="/flights/:flightNumber/crew" element={<CrewAssignmentPage />} />
             <Route path="/flights/:flightNumber" element={<FlightDetailsPage />} />
             <Route path="/flights/:flightNumber/passengers" element={<SeatAssignmentPage />}/>
-            <Route path="/roster/:flightId/plane" element={<PlaneSeatMapPage />} />
+            <Route path="/flights/:flightNumber/plane" element={<PlaneSeatMapPage />} />
             <Route path="/roster/:flightId/tabular" element={<RosterTabularPage />} />
             <Route path="/user/profile" element={<UserProfilePage />} />
           </>
