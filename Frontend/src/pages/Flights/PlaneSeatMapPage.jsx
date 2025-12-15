@@ -2,8 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+const API_BASE_URL = "http://localhost:3000/api";
 
 // fallback config if seating_plan is missing or malformed
 const FALLBACK_ROW_COUNT = 15;

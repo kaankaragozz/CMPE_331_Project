@@ -1,81 +1,143 @@
 // src/pages/Roster/RosterTabularPage.jsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-const INITIAL_ROSTER = [
-  {
-    type: "Pilot",
-    name: "John Doe",
-    id: "P101",
-    seatNo: "Cockpit",
-    nationality: "American",
-    role: "Captain",
-  },
-  {
-    type: "Cabin Crew",
-    name: "Jane Smith",
-    id: "CC201",
-    seatNo: "A1",
-    nationality: "British",
-    role: "Flight Attendant",
-  },
-  {
-    type: "Passenger",
-    name: "Alice Johnson",
-    id: "PA301",
-    seatNo: "12A",
-    nationality: "Canadian",
-    role: "N/A",
-  },
-  {
-    type: "Passenger",
-    name: "Bob Williams",
-    id: "PA302",
-    seatNo: "12B",
-    nationality: "German",
-    role: "N/A",
-  },
-  {
-    type: "Pilot",
-    name: "Emily Brown",
-    id: "P102",
-    seatNo: "Cockpit",
-    nationality: "French",
-    role: "First Officer",
-  },
-  {
-    type: "Cabin Crew",
-    name: "Michael Davis",
-    id: "CC202",
-    seatNo: "A2",
-    nationality: "Australian",
-    role: "Flight Attendant",
-  },
-  {
-    type: "Passenger",
-    name: "Sarah Miller",
-    id: "PA303",
-    seatNo: "14C",
-    nationality: "Japanese",
-    role: "N/A",
-  },
-];
+const API_BASE_URL = "http://localhost:3000/api";
 
 export default function RosterTabularPage() {
-  const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState("name"); // name | type | seatNo
+  const params = useParams();
+  const navigate = useNavigate();
 
+  // support different param names just in case
+  const flightNumber =
+    params.flightNumber || params.id || params.flightId || "";
+
+  const [flightInfo, setFlightInfo] = useState(null);
+  const [roster, setRoster] = useState([]);
+
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState("name"); // name | type | seatNo | nationality
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [saveMessage, setSaveMessage] = useState("");
+
+  // --- load data from backend ---
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!flightNumber) {
+        setError("No flight number in URL. Check your route definition.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+        setSaveMessage("");
+
+        // 1) flight summary
+        const flightRes = await fetch(
+          `${API_BASE_URL}/flight/${flightNumber}`
+        );
+        if (!flightRes.ok) {
+          const text = await flightRes.text();
+          throw new Error(
+            `Failed to load flight (${flightRes.status}): ${text}`
+          );
+        }
+        const flightJson = await flightRes.json();
+        const flight = flightJson.data || flightJson;
+        setFlightInfo(flight);
+
+        // 2) crew assignments (pilots + cabin crew)
+        let pilots = [];
+        let cabinCrew = [];
+        try {
+          const crewRes = await fetch(
+            `${API_BASE_URL}/flight/${flightNumber}/crew`
+          );
+          if (crewRes.ok) {
+            const crewJson = await crewRes.json();
+            const payload = crewJson.data || crewJson;
+
+            pilots =
+              payload.pilots ||
+              payload.flightCrew ||
+              payload.pilotAssignments ||
+              [];
+            cabinCrew =
+              payload.cabinCrew ||
+              payload.cabin_crew ||
+              payload.cabinCrewAssignments ||
+              [];
+          } else if (crewRes.status !== 404) {
+            // 404 might just mean not implemented yet
+            console.warn(
+              "Crew endpoint not OK:",
+              crewRes.status,
+              await crewRes.text()
+            );
+          }
+        } catch (e) {
+          console.warn("Error fetching crew:", e);
+        }
+
+        // 3) passengers for this flight
+        let passengers = [];
+        try {
+          const paxRes = await fetch(
+            `${API_BASE_URL}/passengers/flight/${flightNumber}`
+          );
+          if (paxRes.ok) {
+            const paxJson = await paxRes.json();
+            passengers = paxJson.data || paxJson || [];
+          } else if (paxRes.status !== 404) {
+            const text = await paxRes.text();
+            console.warn(
+              "Passengers endpoint not OK:",
+              paxRes.status,
+              text
+            );
+          }
+        } catch (e) {
+          console.warn("Error fetching passengers:", e);
+        }
+
+        // 4) build combined roster
+        const combinedRoster = buildCombinedRoster(
+          flightNumber,
+          pilots,
+          cabinCrew,
+          passengers
+        );
+
+        setRoster(combinedRoster);
+      } catch (err) {
+        console.error(err);
+        setError(err.message || "Failed to load roster data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flightNumber]);
+
+  // --- search & sort on combined roster ---
   const filteredAndSortedRoster = useMemo(() => {
     const lower = search.trim().toLowerCase();
 
-    let data = INITIAL_ROSTER.filter((item) => {
+    let data = roster.filter((item) => {
       if (!lower) return true;
       return (
         item.type.toLowerCase().includes(lower) ||
         item.name.toLowerCase().includes(lower) ||
         item.id.toLowerCase().includes(lower) ||
-        item.seatNo.toLowerCase().includes(lower) ||
-        item.nationality.toLowerCase().includes(lower) ||
-        item.role.toLowerCase().includes(lower)
+        (item.seatNo || "").toLowerCase().includes(lower) ||
+        (item.nationality || "").toLowerCase().includes(lower) ||
+        (item.role || "").toLowerCase().includes(lower)
       );
     });
 
@@ -88,7 +150,7 @@ export default function RosterTabularPage() {
     });
 
     return data;
-  }, [search, sortKey]);
+  }, [search, sortKey, roster]);
 
   const handleExportJSON = () => {
     const blob = new Blob(
@@ -98,31 +160,112 @@ export default function RosterTabularPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "roster.json";
+    link.download = `roster-${flightNumber || "flight"}.json`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
   };
 
-  const handleSaveToDatabase = () => {
-    // later: replace with real API call
-    console.log("Saving to database:", filteredAndSortedRoster);
-    alert("Roster would be saved to database (see console for payload).");
+  const handleSaveToDatabase = async () => {
+    if (!flightNumber) return;
+    setSaveMessage("");
+    setError("");
+
+    try {
+      // this assumes you will implement this endpoint on backend
+      const res = await fetch(
+        `${API_BASE_URL}/flight/${flightNumber}/roster`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            flight_number: flightNumber,
+            roster: filteredAndSortedRoster,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(
+          `Failed to save roster (${res.status}): ${text}`
+        );
+      }
+
+      setSaveMessage("Roster saved to database successfully.");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.message ||
+          "Failed to save roster to database. Endpoint may not be implemented yet."
+      );
+    }
   };
+
+  const handleBackToFlights = () => {
+    navigate("/flights");
+  };
+
+  const headerTitle = flightInfo
+    ? `Combined Roster – Flight ${flightInfo.flight_number || flightNumber}`
+    : "Combined Roster";
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold text-slate-900">
-        Combined Roster
-      </h2>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            {headerTitle}
+          </h2>
+          {flightInfo && (
+            <p className="text-sm text-slate-500 mt-1">
+              {flightInfo.source?.airport_code || flightInfo.source?.code || "??"}{" "}
+              →{" "}
+              {flightInfo.destination?.airport_code ||
+                flightInfo.destination?.code ||
+                "??"}{" "}
+              •{" "}
+              {flightInfo.vehicle_type?.type_name || "Unknown aircraft"}{" "}
+              •{" "}
+              {flightInfo.flight_date
+                ? new Date(flightInfo.flight_date).toLocaleString()
+                : "Unknown date"}
+            </p>
+          )}
+          {loading && (
+            <p className="text-xs text-slate-400 mt-1">
+              Loading roster data...
+            </p>
+          )}
+          {error && (
+            <p className="text-xs text-red-500 mt-1">
+              {error}
+            </p>
+          )}
+          {saveMessage && (
+            <p className="text-xs text-emerald-600 mt-1">
+              {saveMessage}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleBackToFlights}
+          className="inline-flex items-center rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        >
+          Back to Flights
+        </button>
+      </div>
 
       {/* Search + sort + buttons */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by name, type, ID, seat, nationality..."
             className="w-full sm:max-w-xs rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -149,14 +292,16 @@ export default function RosterTabularPage() {
           <button
             type="button"
             onClick={handleExportJSON}
-            className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+            className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-70"
+            disabled={roster.length === 0}
           >
             Export as JSON
           </button>
           <button
             type="button"
             onClick={handleSaveToDatabase}
-            className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600"
+            className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-70"
+            disabled={roster.length === 0}
           >
             Save to Database
           </button>
@@ -196,13 +341,13 @@ export default function RosterTabularPage() {
                 </tr>
               ))}
 
-              {filteredAndSortedRoster.length === 0 && (
+              {!loading && filteredAndSortedRoster.length === 0 && (
                 <tr>
                   <td
                     className="px-4 py-3 text-center text-slate-500"
                     colSpan={6}
                   >
-                    No roster entries match your search.
+                    No roster entries found for this flight.
                   </td>
                 </tr>
               )}
@@ -212,4 +357,77 @@ export default function RosterTabularPage() {
       </div>
     </div>
   );
+}
+
+// helper: build combined roster array from backend data
+function buildCombinedRoster(flightNumber, pilots, cabinCrew, passengers) {
+  const items = [];
+
+  // Pilots
+  (pilots || []).forEach((p, index) => {
+    const id = p.pilot_id ?? p.id ?? `pilot-${index}`;
+    const seatNo =
+      p.seat_number || p.seat || "Cockpit";
+    const nationality = p.nationality || "";
+    const seniority = p.seniority_level || p.rank || "";
+
+    items.push({
+      type: "Pilot",
+      name: p.name || p.full_name || `Pilot ${index + 1}`,
+      id: String(id),
+      seatNo,
+      nationality,
+      role: seniority
+        ? capitalizeFirst(seniority)
+        : "Pilot",
+    });
+  });
+
+  // Cabin crew
+  (cabinCrew || []).forEach((c, index) => {
+    const id = c.attendant_id ?? c.id ?? `cabin-${index}`;
+    const seatNo = c.seat_number || c.seat || "";
+    const nationality = c.nationality || "";
+    const role =
+      c.attendant_type || c.role || "Cabin Crew";
+
+    items.push({
+      type: "Cabin Crew",
+      name: c.name || `Cabin Crew ${index + 1}`,
+      id: String(id),
+      seatNo,
+      nationality,
+      role: capitalizeFirst(role),
+    });
+  });
+
+  // Passengers
+  (passengers || []).forEach((p, index) => {
+    const id = p.passenger_id ?? p.id ?? `passenger-${index}`;
+    const seatNo =
+      p.seat_number || p.seat || "Unassigned";
+    const nationality = p.nationality || "";
+    const seatClass = p.seat_class || p.class || "";
+    const isInfant = p.is_infant || false;
+
+    items.push({
+      type: "Passenger",
+      name: p.name || `Passenger ${index + 1}`,
+      id: String(id),
+      seatNo,
+      nationality,
+      role: isInfant
+        ? "Infant"
+        : seatClass
+        ? seatClass
+        : "N/A",
+    });
+  });
+
+  return items;
+}
+
+function capitalizeFirst(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }

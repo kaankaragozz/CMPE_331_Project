@@ -749,3 +749,19 @@ export const savePassengerSeats = async (req, res) => {
     });
   }
 };
+
+export const getCrewRosterForFlight = async (req, res) => {
+  // TODO: join pilots + cabin crew + passengers
+  return res.status(501).json({
+    success: false,
+    message: "getCrewRosterForFlight not implemented yet"
+  });
+};
+
+export const saveRosterForFlight = async (req, res) => {
+  // TODO: persist roster JSON in a rosters table
+  return res.status(501).json({
+    success: false,
+    message: "saveRosterForFlight not implemented yet"
+  });
+};
