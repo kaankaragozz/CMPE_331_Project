@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 // GET all flights
 export const getAllFlights = async (req, res) => {
@@ -47,17 +47,17 @@ export const getAllFlights = async (req, res) => {
       ORDER BY f.flight_date DESC
     `;
 
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       count: flights.length,
-      data: flights 
+      data: flights
     });
   } catch (error) {
     console.error("Error in getAllFlights:", error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: "Internal Server Error",
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -65,7 +65,7 @@ export const getAllFlights = async (req, res) => {
 // GET flight by flight number
 export const getFlightByNumber = async (req, res) => {
   const { flight_number } = req.params;
-  
+
   // Validate flight number format (AANNNN)
   const flightNumberPattern = /^[A-Z]{2}\d{4}$/;
   if (!flightNumberPattern.test(flight_number.toUpperCase())) {
@@ -159,7 +159,7 @@ export const createFlight = async (req, res) => {
 
   // Validation
   if (!flight_number || !flight_date || !duration_minutes || !distance_km ||
-      !source_airport_code || !destination_airport_code || !vehicle_type_id) {
+    !source_airport_code || !destination_airport_code || !vehicle_type_id) {
     return res.status(400).json({
       success: false,
       message: "Missing required fields: flight_number, flight_date, duration_minutes, distance_km, source_airport_code, destination_airport_code, vehicle_type_id"
@@ -188,7 +188,7 @@ export const createFlight = async (req, res) => {
     const sourceAirport = await sql`
       SELECT id FROM airports WHERE UPPER(code) = UPPER(${source_airport_code})
     `;
-    
+
     const destAirport = await sql`
       SELECT id FROM airports WHERE UPPER(code) = UPPER(${destination_airport_code})
     `;
@@ -258,7 +258,7 @@ export const createFlight = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in createFlight:", error);
-    
+
     // Handle unique constraint violation
     if (error.message && error.message.includes('unique')) {
       return res.status(409).json({

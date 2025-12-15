@@ -1,4 +1,4 @@
-import { sql } from '../../config/db.js';
+import { sql } from '../config/db.js';
 
 export async function seedAirports() {
   console.log("✈️ Seeding airports...");
@@ -22,4 +22,3 @@ export async function seedAirports() {
   }
 }
 
-seedAirports();

@@ -1,8 +1,8 @@
 {
-  "name": "cmpe331_webapp_proje",
+  "name": "main-service",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000C\u0000M\u0000P\u0000E\u0000_\u00003\u00003\u00001\u0000_\u0000P\u0000r\u0000o\u0000j\u0000e\u0000c\u0000t\u0000\r\u0000 \u0000",
-  "main": "Backend/server.js",
+  "description": "Main Service",
+  "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js"
   },

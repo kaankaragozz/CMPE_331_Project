@@ -1,4 +1,4 @@
-import { sql } from "../../config/db.js";
+import { sql } from "../config/db.js";
 
 // GET all vehicle types
 export const getAllVehicleTypes = async (req, res) => {
