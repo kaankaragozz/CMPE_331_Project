@@ -454,28 +454,21 @@ export const updateFlight = async (req, res) => {
 
 // DELETE flight
 export const deleteFlight = async (req, res) => {
-  const { flight_number } = req.params;
-
-  // Validate flight number format
-  const flightNumberPattern = /^[A-Z]{2}\d{4}$/;
-  if (!flightNumberPattern.test(flight_number.toUpperCase())) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid flight number format. Must be in AANNNN format"
-    });
-  }
+  // Route tanımında /:id olduğu için req.params.id kullanıyoruz
+  const { id } = req.params;
 
   try {
+    // ID üzerinden silme işlemi yapıyoruz
     const deletedFlight = await sql`
       DELETE FROM flights 
-      WHERE UPPER(flight_number) = UPPER(${flight_number})
+      WHERE id = ${id}
       RETURNING *
     `;
 
     if (deletedFlight.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `Flight with number ${flight_number} not found`
+        message: `Flight with id ${id} not found`
       });
     }
 
