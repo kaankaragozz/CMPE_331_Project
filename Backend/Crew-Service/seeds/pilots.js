@@ -81,7 +81,7 @@ export const seedPilots = async () => {
     await sql`TRUNCATE TABLE pilot_languages RESTART IDENTITY CASCADE`;
 
     let assignmentCount = 0;
-    for (const pilot of allPilots) {
+      for (const pilot of allPilots) {
       // Each pilot gets 2 languages (cycling through available languages)
       const langIndex1 = assignmentCount % allLanguages.length;
       const langIndex2 = (assignmentCount + 1) % allLanguages.length;
@@ -90,11 +90,11 @@ export const seedPilots = async () => {
       const languageId2 = allLanguages[langIndex2].id;
 
       // Insert both languages for this pilot
-      await sql`
-        INSERT INTO pilot_languages (pilot_id, language_id)
+          await sql`
+            INSERT INTO pilot_languages (pilot_id, language_id)
         VALUES (${pilot.id}, ${languageId1}), (${pilot.id}, ${languageId2})
         ON CONFLICT (pilot_id, language_id) DO NOTHING
-      `;
+          `;
 
       assignmentCount += 2;
     }
@@ -120,12 +120,12 @@ export const seedPilots = async () => {
 
     // Insert the 5 additional language assignments
     for (const assignment of extraAssignments) {
-      await sql`
-        INSERT INTO pilot_languages (pilot_id, language_id)
+          await sql`
+            INSERT INTO pilot_languages (pilot_id, language_id)
         VALUES (${assignment.pilot_id}, ${assignment.language_id})
         ON CONFLICT (pilot_id, language_id) DO NOTHING
-      `;
-    }
+          `;
+        }
 
     console.log(`✓ Added ${extraAssignments.length} additional language assignments`);
 

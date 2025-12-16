@@ -26,9 +26,17 @@ export const getPilotWithLanguages = async (pilotId) => {
   return result.length > 0 ? result[0] : null;
 };
 
-// Get all pilots with languages
+// Get all pilots with languages (with optional filtering via query params)
 export const getAllPilots = async (req, res) => {
   try {
+    const { vehicle_restriction, seniority_level } = req.query;
+
+    // If filters are provided, use filterPilots logic
+    if (vehicle_restriction || seniority_level) {
+      return filterPilots(req, res);
+    }
+
+    // No filters, return all pilots
     const pilots = await sql`
       SELECT 
         p.id,
@@ -167,22 +175,22 @@ export const filterPilots = async (req, res) => {
     } else {
       // No filters, return all
       pilots = await sql`
-        SELECT 
-          p.id,
-          p.name,
-          p.age,
-          p.gender,
-          p.nationality,
+      SELECT 
+        p.id,
+        p.name,
+        p.age,
+        p.gender,
+        p.nationality,
           vt.type_name as vehicle_restriction,
-          p.allowed_range,
-          p.seniority_level,
-          p.created_at,
-          p.updated_at,
-          COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
-        FROM pilots p
+        p.allowed_range,
+        p.seniority_level,
+        p.created_at,
+        p.updated_at,
+        COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
+      FROM pilots p
         LEFT JOIN vehicle_types vt ON p.vehicle_type_id = vt.id
-        LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
-        LEFT JOIN languages l ON pl.language_id = l.id
+      LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
+      LEFT JOIN languages l ON pl.language_id = l.id
         GROUP BY p.id, vt.type_name
         ORDER BY p.id ASC
       `;
