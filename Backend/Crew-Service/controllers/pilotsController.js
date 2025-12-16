@@ -11,16 +11,17 @@ export const getAllPilots = async (req, res) => {
         p.age,
         p.gender,
         p.nationality,
-        p.vehicle_restriction,
+        vt.type_name as vehicle_restriction,
         p.allowed_range,
         p.seniority_level,
         p.created_at,
         p.updated_at,
         COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
       FROM pilots p
+      LEFT JOIN vehicle_types vt ON p.vehicle_type_id = vt.id
       LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
       LEFT JOIN languages l ON pl.language_id = l.id
-      GROUP BY p.id
+      GROUP BY p.id, vt.type_name
       ORDER BY p.id ASC
     `;
 
@@ -70,13 +71,13 @@ export const getPilotById = async (req, res) => {
 // Create a new pilot (basic insert) and return aggregated pilot
 export const createPilot = async (req, res) => {
   try {
-    const { name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, language_ids } = req.body;
+    const { name, age, gender, nationality, vehicle_type_id, allowed_range, seniority_level, language_ids } = req.body;
 
     // Validation
-    if (!name || !age || !gender || !nationality || !vehicle_restriction || !allowed_range || !seniority_level) {
+    if (!name || !age || !gender || !nationality || !vehicle_type_id || !allowed_range || !seniority_level) {
       return res.status(400).json({
         success: false,
-        message: 'All fields are required: name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level'
+        message: 'All fields are required: name, age, gender, nationality, vehicle_type_id, allowed_range, seniority_level'
       });
     }
 
@@ -89,8 +90,8 @@ export const createPilot = async (req, res) => {
 
     // Insert pilot (tagged template kullanımı doğru)
     const result = await sql`
-      INSERT INTO pilots (name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, created_at, updated_at) 
-      VALUES (${name}, ${age}, ${gender}, ${nationality}, ${vehicle_restriction}, ${allowed_range}, ${seniority_level}, NOW(), NOW()) 
+      INSERT INTO pilots (name, age, gender, nationality, vehicle_type_id, allowed_range, seniority_level, created_at, updated_at) 
+      VALUES (${name}, ${age}, ${gender}, ${nationality}, ${vehicle_type_id}, ${allowed_range}, ${seniority_level}, NOW(), NOW()) 
       RETURNING id
     `;
 
@@ -128,7 +129,7 @@ export const createPilot = async (req, res) => {
 export const updatePilot = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level, language_ids } = req.body;
+    const { name, age, gender, nationality, vehicle_type_id, allowed_range, seniority_level, language_ids } = req.body;
 
     // Check if pilot exists
     const existing = await sql`
@@ -163,8 +164,8 @@ export const updatePilot = async (req, res) => {
     if (nationality !== undefined) {
       await sql`UPDATE pilots SET nationality = ${nationality}, updated_at = NOW() WHERE id = ${id}`;
     }
-    if (vehicle_restriction !== undefined) {
-      await sql`UPDATE pilots SET vehicle_restriction = ${vehicle_restriction}, updated_at = NOW() WHERE id = ${id}`;
+    if (vehicle_type_id !== undefined) {
+      await sql`UPDATE pilots SET vehicle_type_id = ${vehicle_type_id}, updated_at = NOW() WHERE id = ${id}`;
     }
     if (allowed_range !== undefined) {
       await sql`UPDATE pilots SET allowed_range = ${allowed_range}, updated_at = NOW() WHERE id = ${id}`;

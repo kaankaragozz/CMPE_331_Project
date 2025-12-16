@@ -7,27 +7,47 @@ export const seedPilots = async () => {
     // Clear pilots table to ensure idempotent seeding
     await sql`TRUNCATE TABLE pilots RESTART IDENTITY CASCADE`;
 
+    // Get vehicle types from database to map names to IDs
+    const vehicleTypes = await sql`
+      SELECT id, type_name FROM vehicle_types ORDER BY id
+    `;
+    const vehicleTypeMap = {};
+    vehicleTypes.forEach(vt => {
+      vehicleTypeMap[vt.type_name] = vt.id;
+      // Also map short names (Boeing 737 -> Boeing 737-800)
+      if (vt.type_name.includes('Boeing 737')) {
+        vehicleTypeMap['Boeing 737'] = vt.id;
+      }
+    });
+
     const pilots = [
-      // Senior Pilots (3)
-      { name: 'John Smith', age: 45, gender: 'Male', nationality: 'American', vehicle_restriction: 'Boeing 737', allowed_range: 5000, seniority_level: 'Senior' },
-      { name: 'Sarah Johnson', age: 42, gender: 'Female', nationality: 'British', vehicle_restriction: 'Airbus A320', allowed_range: 6000, seniority_level: 'Senior' },
-      { name: 'Michael Chen', age: 48, gender: 'Male', nationality: 'Chinese', vehicle_restriction: 'Boeing 737', allowed_range: 5500, seniority_level: 'Senior' },
-      // Junior Pilots (4)
-      { name: 'Emily Davis', age: 32, gender: 'Female', nationality: 'Canadian', vehicle_restriction: 'Airbus A320', allowed_range: 4000, seniority_level: 'Junior' },
-      { name: 'David Wilson', age: 29, gender: 'Male', nationality: 'Australian', vehicle_restriction: 'Boeing 737', allowed_range: 3500, seniority_level: 'Junior' },
-      { name: 'Lisa Anderson', age: 31, gender: 'Female', nationality: 'Swedish', vehicle_restriction: 'Airbus A320', allowed_range: 4200, seniority_level: 'Junior' },
-      { name: 'Robert Brown', age: 28, gender: 'Male', nationality: 'German', vehicle_restriction: 'Boeing 737', allowed_range: 3800, seniority_level: 'Junior' },
-      // Trainee Pilots (3)
-      { name: 'James Taylor', age: 24, gender: 'Male', nationality: 'American', vehicle_restriction: 'Boeing 737', allowed_range: 2000, seniority_level: 'Trainee' },
-      { name: 'Maria Garcia', age: 25, gender: 'Female', nationality: 'Spanish', vehicle_restriction: 'Airbus A320', allowed_range: 2200, seniority_level: 'Trainee' },
-      { name: 'Thomas Lee', age: 23, gender: 'Male', nationality: 'Korean', vehicle_restriction: 'Boeing 737', allowed_range: 1800, seniority_level: 'Trainee' }
+      // Senior Pilots (3) - Different vehicle types
+      { name: 'John Smith', age: 45, gender: 'Male', nationality: 'American', vehicle_type_name: 'Boeing 737-800', allowed_range: 5000, seniority_level: 'Senior' },
+      { name: 'Sarah Johnson', age: 42, gender: 'Female', nationality: 'British', vehicle_type_name: 'Airbus A320', allowed_range: 6000, seniority_level: 'Senior' },
+      { name: 'Michael Chen', age: 48, gender: 'Male', nationality: 'Chinese', vehicle_type_name: 'Boeing 787 Dreamliner', allowed_range: 7000, seniority_level: 'Senior' },
+      // Junior Pilots (4) - Mix of vehicle types
+      { name: 'Emily Davis', age: 32, gender: 'Female', nationality: 'Canadian', vehicle_type_name: 'Airbus A320', allowed_range: 4000, seniority_level: 'Junior' },
+      { name: 'David Wilson', age: 29, gender: 'Male', nationality: 'Australian', vehicle_type_name: 'Boeing 737-800', allowed_range: 3500, seniority_level: 'Junior' },
+      { name: 'Lisa Anderson', age: 31, gender: 'Female', nationality: 'Swedish', vehicle_type_name: 'Boeing 787 Dreamliner', allowed_range: 4500, seniority_level: 'Junior' },
+      { name: 'Robert Brown', age: 28, gender: 'Male', nationality: 'German', vehicle_type_name: 'Boeing 737-800', allowed_range: 3800, seniority_level: 'Junior' },
+      // Trainee Pilots (3) - Mix of vehicle types
+      { name: 'James Taylor', age: 24, gender: 'Male', nationality: 'American', vehicle_type_name: 'Boeing 737-800', allowed_range: 2000, seniority_level: 'Trainee' },
+      { name: 'Maria Garcia', age: 25, gender: 'Female', nationality: 'Spanish', vehicle_type_name: 'Airbus A320', allowed_range: 2200, seniority_level: 'Trainee' },
+      { name: 'Thomas Lee', age: 23, gender: 'Male', nationality: 'Korean', vehicle_type_name: 'Boeing 737-800', allowed_range: 1800, seniority_level: 'Trainee' }
     ];
 
-    // Insert pilots
+    // Insert pilots using vehicle_type_id
     for (const pilot of pilots) {
+      const vehicleTypeId = vehicleTypeMap[pilot.vehicle_type_name];
+      
+      if (!vehicleTypeId) {
+        console.error(`❌ Vehicle type "${pilot.vehicle_type_name}" not found for pilot ${pilot.name}`);
+        continue;
+      }
+
       await sql`
-        INSERT INTO pilots (name, age, gender, nationality, vehicle_restriction, allowed_range, seniority_level)
-        VALUES (${pilot.name}, ${pilot.age}, ${pilot.gender}, ${pilot.nationality}, ${pilot.vehicle_restriction}, ${pilot.allowed_range}, ${pilot.seniority_level})
+        INSERT INTO pilots (name, age, gender, nationality, vehicle_type_id, allowed_range, seniority_level)
+        VALUES (${pilot.name}, ${pilot.age}, ${pilot.gender}, ${pilot.nationality}, ${vehicleTypeId}, ${pilot.allowed_range}, ${pilot.seniority_level})
       `;
     }
 
