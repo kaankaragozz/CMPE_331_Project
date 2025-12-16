@@ -1,33 +1,114 @@
 import { sql } from '../config/db.js';
 import { getPilotWithLanguages } from './pilots_languagesController.js';
 
-// Get all pilots with languages
+// Get all pilots with languages (with optional filtering via query params)
 export const getAllPilots = async (req, res) => {
   try {
-    const pilots = await sql`
-      SELECT 
-        p.id,
-        p.name,
-        p.age,
-        p.gender,
-        p.nationality,
-        vt.type_name as vehicle_restriction,
-        p.allowed_range,
-        p.seniority_level,
-        p.created_at,
-        p.updated_at,
-        COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
-      FROM pilots p
-      LEFT JOIN vehicle_types vt ON p.vehicle_type_id = vt.id
-      LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
-      LEFT JOIN languages l ON pl.language_id = l.id
-      GROUP BY p.id, vt.type_name
-      ORDER BY p.id ASC
-    `;
+    const { seniority_level, vehicle_type_id } = req.query;
+
+    let pilots;
+
+    // Build query with conditional filters
+    if (vehicle_type_id && seniority_level) {
+      // Filter by both vehicle_type_id and seniority_level
+      pilots = await sql`
+        SELECT 
+          p.id,
+          p.name,
+          p.age,
+          p.gender,
+          p.nationality,
+          vt.type_name as vehicle_restriction,
+          p.allowed_range,
+          p.seniority_level,
+          p.created_at,
+          p.updated_at,
+          COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
+        FROM pilots p
+        LEFT JOIN vehicle_types vt ON p.vehicle_type_id = vt.id
+        LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
+        LEFT JOIN languages l ON pl.language_id = l.id
+        WHERE p.vehicle_type_id = ${vehicle_type_id} AND p.seniority_level = ${seniority_level}
+        GROUP BY p.id, vt.type_name
+        ORDER BY p.id ASC
+      `;
+    } else if (vehicle_type_id) {
+      // Filter by vehicle_type_id only
+      pilots = await sql`
+        SELECT 
+          p.id,
+          p.name,
+          p.age,
+          p.gender,
+          p.nationality,
+          vt.type_name as vehicle_restriction,
+          p.allowed_range,
+          p.seniority_level,
+          p.created_at,
+          p.updated_at,
+          COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
+        FROM pilots p
+        LEFT JOIN vehicle_types vt ON p.vehicle_type_id = vt.id
+        LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
+        LEFT JOIN languages l ON pl.language_id = l.id
+        WHERE p.vehicle_type_id = ${vehicle_type_id}
+        GROUP BY p.id, vt.type_name
+        ORDER BY p.id ASC
+      `;
+    } else if (seniority_level) {
+      // Filter by seniority_level only
+      pilots = await sql`
+        SELECT 
+          p.id,
+          p.name,
+          p.age,
+          p.gender,
+          p.nationality,
+          vt.type_name as vehicle_restriction,
+          p.allowed_range,
+          p.seniority_level,
+          p.created_at,
+          p.updated_at,
+          COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
+        FROM pilots p
+        LEFT JOIN vehicle_types vt ON p.vehicle_type_id = vt.id
+        LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
+        LEFT JOIN languages l ON pl.language_id = l.id
+        WHERE p.seniority_level = ${seniority_level}
+        GROUP BY p.id, vt.type_name
+        ORDER BY p.id ASC
+      `;
+    } else {
+      // No filters, return all pilots
+      pilots = await sql`
+        SELECT 
+          p.id,
+          p.name,
+          p.age,
+          p.gender,
+          p.nationality,
+          vt.type_name as vehicle_restriction,
+          p.allowed_range,
+          p.seniority_level,
+          p.created_at,
+          p.updated_at,
+          COALESCE(json_agg(l.name) FILTER (WHERE l.name IS NOT NULL), '[]'::json) as languages
+        FROM pilots p
+        LEFT JOIN vehicle_types vt ON p.vehicle_type_id = vt.id
+        LEFT JOIN pilot_languages pl ON p.id = pl.pilot_id
+        LEFT JOIN languages l ON pl.language_id = l.id
+        GROUP BY p.id, vt.type_name
+        ORDER BY p.id ASC
+      `;
+    }
 
     res.status(200).json({
       success: true,
       count: pilots.length,
+      filters: {
+        vehicle_type_id: vehicle_type_id || null,
+        seniority_level: seniority_level || null
+      },
       data: pilots
     });
   } catch (error) {
