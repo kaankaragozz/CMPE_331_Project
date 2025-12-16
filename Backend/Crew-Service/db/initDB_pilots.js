@@ -4,7 +4,7 @@ const initDB_pilots = async () => {
   try {
     console.log('Creating pilots table...');
 
-    // FIX: SQL query syntax corrected to use tagged template literal (sql`...`)
+    // Create table with correct schema using IF NOT EXISTS
     await sql`
       CREATE TABLE IF NOT EXISTS pilots (
         id SERIAL PRIMARY KEY,

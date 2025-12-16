@@ -66,7 +66,7 @@ export const seedPilots = async () => {
 
   } catch (error) {
     console.error('Error seeding pilots:', error);
-
+    throw error;
   }
 };
 

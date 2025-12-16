@@ -15,11 +15,12 @@ export async function seedAttendantTypes() {
     // first, clear existing data
     await sql`TRUNCATE TABLE attendant_types RESTART IDENTITY CASCADE`;
 
-    // insert all attendant types
+    // insert all attendant types with conflict handling
     for (const attendant_type of SAMPLE_ATTENDANT_TYPES) {
       await sql`
         INSERT INTO attendant_types (type_name, min_count, max_count)
         VALUES (${attendant_type.type_name}, ${attendant_type.min_count}, ${attendant_type.max_count})
+        ON CONFLICT (type_name) DO NOTHING
       `;
     }
 
@@ -27,7 +28,7 @@ export async function seedAttendantTypes() {
 
   } catch (error) {
     console.error("❌ Error seeding attendant types:", error);
-
+    throw error;
   }
 }
 

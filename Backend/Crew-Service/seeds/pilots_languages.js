@@ -29,6 +29,6 @@ export async function seedLanguages() {
 
   } catch (error) {
     console.error('Error seeding languages:', error);
-
+    throw error;
   }
 };
