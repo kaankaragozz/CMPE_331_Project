@@ -14,17 +14,13 @@ const router = express.Router();
 // Routes for /api/pilots
 // Note: The prefix "/api/pilots" is defined in server.js
 // We use "/" here to refer to the base path.
+// IMPORTANT: Specific routes (with methods) must come before parameterized routes
 // =================================================================
 
 // @route   GET /api/pilots
 // @desc    Get all pilots
 // @access  Public
 router.get('/', getAllPilots);
-
-// @route   GET /api/pilots/:id
-// @desc    Get a single pilot by ID
-// @access  Public
-router.get('/:id', getPilotById);
 
 // @route   POST /api/pilots
 // @desc    Create a new pilot
@@ -40,5 +36,11 @@ router.put('/:id', updatePilot);
 // @desc    Delete a pilot
 // @access  Public
 router.delete('/:id', deletePilot);
+
+// @route   GET /api/pilots/:id
+// @desc    Get a single pilot by ID
+// @access  Public
+// NOTE: This must come last to avoid catching DELETE/PUT requests
+router.get('/:id', getPilotById);
 
 export default router;

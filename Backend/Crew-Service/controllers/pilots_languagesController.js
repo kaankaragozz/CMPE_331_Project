@@ -205,3 +205,90 @@ export const filterPilots = async (req, res) => {
     });
   }
 };
+
+// Delete all languages from a pilot (pilot_languages junction table)
+export const deleteAllPilotLanguages = async (req, res) => {
+  try {
+    const { pilot_id } = req.params;
+
+    if (!pilot_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'pilot_id is required'
+      });
+    }
+
+    // Check if pilot exists
+    const pilotExists = await sql`SELECT id FROM pilots WHERE id = ${pilot_id}`;
+    if (pilotExists.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pilot not found'
+      });
+    }
+
+    // Delete all languages for this pilot
+    const result = await sql`
+      DELETE FROM pilot_languages 
+      WHERE pilot_id = ${pilot_id}
+    `;
+
+    res.status(200).json({
+      success: true,
+      message: 'All pilot language associations deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting pilot languages:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting pilot languages',
+      error: error.message
+    });
+  }
+};
+
+// Delete a specific language from a pilot (pilot_languages junction table)
+export const deletePilotLanguage = async (req, res) => {
+  try {
+    const { pilot_id, language_id } = req.params;
+
+    // Validate parameters
+    if (!pilot_id || !language_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both pilot_id and language_id are required'
+      });
+    }
+
+    // Check if the pilot_languages entry exists
+    const existing = await sql`
+      SELECT * FROM pilot_languages 
+      WHERE pilot_id = ${pilot_id} AND language_id = ${language_id}
+    `;
+
+    if (existing.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Pilot language association not found'
+      });
+    }
+
+    // Delete the pilot_languages entry
+    await sql`
+      DELETE FROM pilot_languages 
+      WHERE pilot_id = ${pilot_id} AND language_id = ${language_id}
+    `;
+
+    res.status(200).json({
+      success: true,
+      message: 'Pilot language association deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting pilot language:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting pilot language',
+      error: error.message
+    });
+  }
+};

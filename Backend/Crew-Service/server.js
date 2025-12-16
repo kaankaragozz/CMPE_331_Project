@@ -99,9 +99,9 @@ initDB_attendant_types()
       await seedCabinCrew();
       await seedCabinCrewVehicleRestrictions();
       await seedDishRecipes();
-      //Pilot
-      await seedPilots();
+      //Pilot - Languages must be seeded first before pilots
       await seedLanguages();
+      await seedPilots();
       //await seedPilotsLanguages();
     }
 
