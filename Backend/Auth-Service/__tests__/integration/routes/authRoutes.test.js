@@ -1,5 +1,9 @@
 import request from "supertest";
-import app from "../../server.js"; // ✅ correct now   // server.js : Build Express app
+import app from "../../../server.js"; // ✅ correct now   // server.js : Build Express app
+
+/* =====================
+   GREY BOX (integration Test)
+===================== */
 
 describe("Auth Routes", () => {
   test("GET /health → 200", async () => {

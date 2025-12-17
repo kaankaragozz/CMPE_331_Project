@@ -2,11 +2,15 @@ import request from "supertest";
 import { jest } from "@jest/globals";
 
 /* =====================
+   GREY BOX (integration Test)
+===================== */
+
+/* =====================
    MOCK sql (ESM)
 ===================== */
 const sqlMock = jest.fn();
 
-jest.unstable_mockModule("../../config/db.js", () => ({
+jest.unstable_mockModule("../../../config/db.js", () => ({
   sql: (...args) => sqlMock(...args),
 }));
 
@@ -24,7 +28,7 @@ jest.unstable_mockModule("bcryptjs", () => ({
 /* =====================
    IMPORT APP AFTER MOCKS
 ===================== */
-const app = (await import("../../server.js")).default;
+const app = (await import("../../../server.js")).default;
 
 describe("User Routes", () => {
   beforeEach(() => {

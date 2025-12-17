@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "test": "set NODE_ENV=test && node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
+    "test": "set NODE_ENV=test && node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test:coverage": "set NODE_ENV=test && node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
   },
   "repository": {
     "type": "git",
@@ -42,6 +43,9 @@
   },
   "jest": {
     "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/jest.setup.js"
+    ],
     "transform": {}
   }
 }

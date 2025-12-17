@@ -1,11 +1,15 @@
 import { jest } from "@jest/globals";
 
 /* =====================
+   WHITE BOX (UNIT TEST)
+===================== */
+
+/* =====================
    MOCK sql (ESM)
 ===================== */
 const sqlMock = jest.fn();
 
-jest.unstable_mockModule("../../config/db.js", () => ({
+jest.unstable_mockModule("../../../config/db.js", () => ({
   sql: (...args) => sqlMock(...args),
 }));
 
@@ -25,7 +29,7 @@ jest.unstable_mockModule("bcryptjs", () => ({
 /* =====================
    IMPORT AFTER ALL MOCKS
 ===================== */
-const { signup, login } = await import("../../controllers/authController.js");
+const { signup, login } = await import("../../../controllers/authController.js");
 
 describe("Auth Controller", () => {
   let req, res;
