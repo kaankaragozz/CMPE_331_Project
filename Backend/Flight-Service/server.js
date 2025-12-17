@@ -71,22 +71,22 @@ export default app;
 // Server Start
 // =====================
 if (process.env.NODE_ENV !== "test") {
-  initAirportsTable()
-    .then(() => initFlightsTable())
-    .then(() => initVehicleTypesTable())
-    .then(async () => {
-      if (process.env.NODE_ENV !== "production") {
-        await seedVehicleTypes();
-        await seedAirports();
-        await seedFlights();
-      }
+initAirportsTable()
+  .then(() => initFlightsTable())
+  .then(() => initVehicleTypesTable())
+  .then(async () => {
+    if (process.env.NODE_ENV !== "production") {
+      await seedVehicleTypes();
+      await seedAirports();
+      await seedFlights();
+    }
 
-      app.listen(PORT, () => {
-        console.log(`✈️ Flight Service running on port ${PORT}`);
-      });
-    })
-    .catch((err) => {
-      console.error("❌ Failed to start Flight Service:", err);
-      process.exit(1);
+    app.listen(PORT, () => {
+      console.log(`✈️ Flight Service running on port ${PORT}`);
     });
+  })
+  .catch((err) => {
+    console.error("❌ Failed to start Flight Service:", err);
+    process.exit(1);
+  });
 }

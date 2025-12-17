@@ -89,34 +89,34 @@ export default app;
 // Server Start (Auth-style)
 // =====================
 if (process.env.NODE_ENV !== "test") {
-  initDB_attendant_types()
-    .then(() => initDB_cabin_crew())
-    .then(() => initDB_cabin_crew_vehicle_restrictions())
-    .then(() => initDB_dish_recipes())
+initDB_attendant_types()
+  .then(() => initDB_cabin_crew())
+  .then(() => initDB_cabin_crew_vehicle_restrictions())
+  .then(() => initDB_dish_recipes())
 
-    //Pilot
-    .then(() => createPilotsTable())       // ✅ parent
-    .then(() => createLanguagesTable())
-    .then(() => createPilotLanguagesTable())  // junction (needs both)
-    .then(async () => {
-      if (process.env.NODE_ENV !== "production") {
-        //CabinCrew
-        await seedAttendantTypes();
-        await seedCabinCrew();
-        await seedCabinCrewVehicleRestrictions();
-        await seedDishRecipes();
+  //Pilot
+  .then(() => createPilotsTable())       // ✅ parent
+  .then(() => createLanguagesTable())
+  .then(() => createPilotLanguagesTable())  // junction (needs both)
+  .then(async () => {
+    if (process.env.NODE_ENV !== "production") {
+      //CabinCrew
+      await seedAttendantTypes();
+      await seedCabinCrew();
+      await seedCabinCrewVehicleRestrictions();
+      await seedDishRecipes();
         //Pilot - Languages must be seeded first before pilots
         await seedLanguages();
-        await seedPilots();
-        //await seedPilotsLanguages();
-      }
+      await seedPilots();
+      //await seedPilotsLanguages();
+    }
 
-      app.listen(PORT, () => {
-        console.log(`🧑‍✈️ Crew Service running on port ${PORT}`);
-      });
-    })
-    .catch((err) => {
-      console.error("❌ Failed to start Crew Service:", err);
-      process.exit(1);
+    app.listen(PORT, () => {
+      console.log(`🧑‍✈️ Crew Service running on port ${PORT}`);
     });
+  })
+  .catch((err) => {
+    console.error("❌ Failed to start Crew Service:", err);
+    process.exit(1);
+  });
 }
