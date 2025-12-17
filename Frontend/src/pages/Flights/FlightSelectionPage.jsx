@@ -1,45 +1,39 @@
-import { useState, useMemo } from "react";
+// src/pages/Flights/FlightSelectionPage.jsx
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const DUMMY_FLIGHTS = [
-  {
-    id: "AA1234",
-    dateTime: "2024-07-20 10:00 AM",
-    route: "JFK - LAX",
-    planeType: "Boeing 737",
-    vehicleType: "Boeing 737",
-    origin: "JFK",
-    destination: "LAX",
-  },
-  {
-    id: "UA5678",
-    dateTime: "2024-07-20 02:30 PM",
-    route: "ORD - SFO",
-    planeType: "Airbus A320",
-    vehicleType: "Airbus A320",
-    origin: "ORD",
-    destination: "SFO",
-  },
-  {
-    id: "DL9012",
-    dateTime: "2024-07-21 08:00 AM",
-    route: "ATL - MIA",
-    planeType: "Boeing 787",
-    vehicleType: "Boeing 787",
-    origin: "ATL",
-    destination: "MIA",
-  },
-  {
-    id: "SW3456",
-    dateTime: "2024-07-21 11:45 AM",
-    route: "DEN - PHX",
-    planeType: "Boeing 737",
-    vehicleType: "Boeing 737",
-    origin: "DEN",
-    destination: "PHX",
-  },
-];
+const API_BASE = "http://localhost:3000";
+
+// Helper: format DB timestamp to "YYYY/MM/DD HH:MM"
+function formatFlightDateTime(isoString) {
+  if (!isoString) return "-";
+  const d = new Date(isoString);
+  if (Number.isNaN(d.getTime())) return isoString;
+
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const min = String(d.getMinutes()).padStart(2, "0");
+
+  return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
+}
+
+// Helper: check if flight_date matches the filter date (YYYY-MM-DD from input)
+function matchesDateFilter(flightDate, filterDate) {
+  if (!filterDate) return true;
+  if (!flightDate) return false;
+
+  const d = new Date(flightDate);
+  if (Number.isNaN(d.getTime())) return true;
+
+  const isoDate = d.toISOString().slice(0, 10); // "YYYY-MM-DD"
+  return isoDate === filterDate;
+}
 
 export default function FlightSelectionPage() {
+  const navigate = useNavigate();
+
   const [filters, setFilters] = useState({
     flightNumber: "",
     origin: "",
@@ -48,37 +42,102 @@ export default function FlightSelectionPage() {
     vehicleType: "",
   });
 
+  const [flights, setFlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch flights from backend on mount
+  useEffect(() => {
+    const fetchFlights = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const res = await fetch(`${API_BASE}/api/flights`);
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Failed to fetch flights (${res.status}): ${text}`);
+        }
+
+        const json = await res.json();
+        if (!json.success) {
+          throw new Error(json.message || "Unknown error from flight API");
+        }
+
+        setFlights(json.data || []);
+      } catch (err) {
+        console.error("Error loading flights:", err);
+        setError(err.message || "Failed to load flights");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFlights();
+  }, []);
+
   const handleChange = (field) => (e) => {
     setFilters((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const filteredFlights = useMemo(() => {
-    return DUMMY_FLIGHTS.filter((f) => {
+    return flights.filter((f) => {
       const fn = filters.flightNumber.trim().toLowerCase();
       const origin = filters.origin.trim().toLowerCase();
       const dest = filters.destination.trim().toLowerCase();
       const veh = filters.vehicleType.trim().toLowerCase();
+      const date = filters.date; // YYYY-MM-DD
 
-      if (fn && !f.id.toLowerCase().includes(fn)) return false;
-      if (origin && !f.origin.toLowerCase().includes(origin)) return false;
-      if (dest && !f.destination.toLowerCase().includes(dest)) return false;
-      if (veh && !f.vehicleType.toLowerCase().includes(veh)) return false;
+      const flightNumber = (f.flight_number || "").toLowerCase();
 
-      // date filter is skipped here; you can implement when you have real dates
+      const originCode = (f.source?.airport_code || "").toLowerCase();
+      const originCity = (f.source?.city || "").toLowerCase();
+
+      const destCode = (f.destination?.airport_code || "").toLowerCase();
+      const destCity = (f.destination?.city || "").toLowerCase();
+
+      const vehicleName = (f.vehicle_type?.type_name || "").toLowerCase();
+
+      if (fn && !flightNumber.includes(fn)) return false;
+
+      if (
+        origin &&
+        !(
+          originCode.includes(origin) ||
+          originCity.includes(origin)
+        )
+      ) {
+        return false;
+      }
+
+      if (
+        dest &&
+        !(
+          destCode.includes(dest) ||
+          destCity.includes(dest)
+        )
+      ) {
+        return false;
+      }
+
+      if (veh && !vehicleName.includes(veh)) return false;
+
+      if (!matchesDateFilter(f.flight_date, date)) return false;
+
       return true;
     });
-  }, [filters]);
+  }, [filters, flights]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    // Right now filtering happens live; you could trigger API call here later.
+    // Filtering is live; no extra action needed now.
   };
 
   return (
     <div className="space-y-6">
       {/* Page title */}
       <h2 className="text-2xl font-semibold text-slate-900">
-        Flight Selection Page
+        Flight Selection
       </h2>
 
       {/* Search + filters */}
@@ -94,7 +153,7 @@ export default function FlightSelectionPage() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               type="text"
-              placeholder="e.g., AA1234"
+              placeholder="e.g., AA1001"
               className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={filters.flightNumber}
               onChange={handleChange("flightNumber")}
@@ -116,7 +175,7 @@ export default function FlightSelectionPage() {
             </label>
             <input
               type="text"
-              placeholder="Origin"
+              placeholder="Code or city (e.g. IST)"
               className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={filters.origin}
               onChange={handleChange("origin")}
@@ -129,7 +188,7 @@ export default function FlightSelectionPage() {
             </label>
             <input
               type="text"
-              placeholder="Destination"
+              placeholder="Code or city (e.g. FRA)"
               className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={filters.destination}
               onChange={handleChange("destination")}
@@ -165,75 +224,141 @@ export default function FlightSelectionPage() {
 
       {/* Available flights */}
       <section className="bg-slate-50 rounded-xl border border-slate-200 p-5 space-y-4">
-        <h3 className="text-base font-semibold text-slate-900">
-          Available Flights
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-semibold text-slate-900">
+            Available Flights
+          </h3>
+          {loading && (
+            <p className="text-xs text-slate-500">Loading flights…</p>
+          )}
+        </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {filteredFlights.map((flight) => (
-            <div
-              key={flight.id}
-              className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between"
-            >
-              {/* Header: flight id + share icon */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="text-lg font-semibold text-slate-900">
-                  {flight.id}
-                </div>
-                <button
-                  type="button"
-                  className="text-slate-400 hover:text-slate-600"
-                  aria-label="Share"
+        {error && (
+          <p className="text-sm text-red-600">
+            {error}
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {!loading &&
+            filteredFlights.map((flight) => {
+              const routeLabel = `${flight.source?.airport_code || "??"} → ${
+                flight.destination?.airport_code || "??"
+              }`;
+              const dateTimeLabel = formatFlightDateTime(
+                flight.flight_date
+              );
+              const vehicleName =
+                flight.vehicle_type?.type_name || "N/A";
+
+              return (
+                <div
+                  key={flight.id || flight.flight_number}
+                  className="bg-white rounded-lg border border-slate-200 shadow-sm p-4 flex flex-col justify-between"
                 >
-                  {/* simple share icon */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="18" cy="5" r="3" />
-                    <circle cx="6" cy="12" r="3" />
-                    <circle cx="18" cy="19" r="3" />
-                    <path d="M8.59 13.51 15.42 17.5" />
-                    <path d="M15.41 6.5 8.59 10.49" />
-                  </svg>
-                </button>
-              </div>
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <div className="text-lg font-semibold text-slate-900">
+                        {flight.flight_number}
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        {routeLabel}
+                      </p>
+                    </div>
+                  </div>
 
-              {/* Details */}
-              <div className="space-y-1 text-sm text-slate-700">
-                <p>
-                  <span className="font-medium">Date/Time:</span>{" "}
-                  {flight.dateTime}
-                </p>
-                <p>
-                  <span className="font-medium">Route:</span>{" "}
-                  {flight.route}
-                </p>
-                <p>
-                  <span className="font-medium">Plane Type:</span>{" "}
-                  {flight.planeType}
-                </p>
-              </div>
+                  {/* Details */}
+                  <div className="space-y-1 text-sm text-slate-700">
+                    <p>
+                      <span className="font-medium">Date/Time:</span>{" "}
+                      {dateTimeLabel}
+                    </p>
+                    <p>
+                      <span className="font-medium">Origin:</span>{" "}
+                      {flight.source?.city} (
+                      {flight.source?.airport_code})
+                    </p>
+                    <p>
+                      <span className="font-medium">
+                        Destination:
+                      </span>{" "}
+                      {flight.destination?.city} (
+                      {flight.destination?.airport_code})
+                    </p>
+                    <p>
+                      <span className="font-medium">Aircraft:</span>{" "}
+                      {vehicleName}
+                    </p>
+                  </div>
 
-              {/* Buttons */}
-              <div className="mt-4 flex gap-2">
-                <button className="flex-1 rounded-md bg-emerald-500 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-600">
-                  Select
-                </button>
-                <button className="flex-1 rounded-md bg-slate-700 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
-                  View Details
-                </button>
-              </div>
-            </div>
-          ))}
+                  {/* Navigation buttons to other pages */}
+                  <div className="mt-4 space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(`/flights/${flight.flight_number}`)
+                        }
+                        className="flex-1 rounded-md bg-slate-800 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-slate-900"
+                      >
+                        Flight Details
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/flights/${flight.flight_number}/crew`
+                          )
+                        }
+                        className="flex-1 rounded-md bg-emerald-500 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-emerald-600"
+                      >
+                        Crew Assignment
+                      </button>
+                    </div>
 
-          {filteredFlights.length === 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/flights/${flight.flight_number}/passengers`
+                          )
+                        }
+                        className="flex-1 rounded-md bg-blue-500 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-blue-600"
+                      >
+                        Passengers & Seats
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            `/flights/${flight.flight_number}/plane`
+                          )
+                        }
+                        className="flex-1 rounded-md bg-indigo-500 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-indigo-600"
+                      >
+                        Seat Map
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/roster/${flight.id}/tabular`
+                        )
+                      }
+                      className="w-full rounded-md bg-slate-100 px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 hover:bg-slate-200"
+                    >
+                      Combined Roster (Tabular)
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+
+          {!loading && !error && filteredFlights.length === 0 && (
             <p className="text-sm text-slate-500 col-span-full">
               No flights match the selected filters.
             </p>
