@@ -63,23 +63,30 @@ app.use("/api/flights", flightsRoutes);
 app.use("/api/vehicle-types", vehicleTypesRoutes);
 
 // =====================
+// Export app for testing
+// =====================
+export default app;
+
+// =====================
 // Server Start
 // =====================
-initAirportsTable()
-  .then(() => initFlightsTable())
-  .then(() => initVehicleTypesTable())
-  .then(async () => {
-    if (process.env.NODE_ENV !== "production") {
-      await seedVehicleTypes();
-      await seedAirports();
-      await seedFlights();
-    }
+if (process.env.NODE_ENV !== "test") {
+  initAirportsTable()
+    .then(() => initFlightsTable())
+    .then(() => initVehicleTypesTable())
+    .then(async () => {
+      if (process.env.NODE_ENV !== "production") {
+        await seedVehicleTypes();
+        await seedAirports();
+        await seedFlights();
+      }
 
-    app.listen(PORT, () => {
-      console.log(`✈️ Flight Service running on port ${PORT}`);
+      app.listen(PORT, () => {
+        console.log(`✈️ Flight Service running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ Failed to start Flight Service:", err);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to start Flight Service:", err);
-    process.exit(1);
-  });
+}

@@ -6,7 +6,7 @@ const router = express.Router();
 router.get('/', getAllFlights);
 router.get('/:flight_number', getFlightByNumber);
 router.post('/', createFlight);
-router.put('/:id', updateFlight);
+router.put('/:flight_number', updateFlight);
 router.delete('/:id', deleteFlight);
 
 export default router;
