@@ -1,0 +1,47 @@
+{
+  "name": "flight-service",
+  "version": "1.0.0",
+  "description": "Flight microservice for flight roster system",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "test": "set NODE_ENV=test && node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaankaragozz/CMPE_331_Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "module",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kaankaragozz/CMPE_331_Project/issues"
+  },
+  "homepage": "https://github.com/kaankaragozz/CMPE_331_Project#readme",
+  "dependencies": {
+    "@arcjet/node": "^1.0.0-beta.15",
+    "@neondatabase/serverless": "^1.0.2",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "mailtrap": "^4.3.2",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
+    "jest-mock": "^30.2.0",
+    "nodemon": "^3.1.11",
+    "supertest": "^7.1.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "transform": {}
+  }
+}
