@@ -13,6 +13,7 @@ import dotenv from "dotenv";
 import airportsRoutes from "./routes/airportsRoutes.js";
 import flightsRoutes from "./routes/flightsRoutes.js";
 import vehicleTypesRoutes from "./routes/vehicle_typesRoutes.js";
+import crewAssignmentsRoutes from "./routes/crew_assignmentsRoutes.js"; // ✅
 
 // =====================
 // DB Init
@@ -61,6 +62,7 @@ app.get("/health", (req, res) => {
 app.use("/api/airports", airportsRoutes);
 app.use("/api/flights", flightsRoutes);
 app.use("/api/vehicle-types", vehicleTypesRoutes);
+app.use("/api/flights", crewAssignmentsRoutes); 
 
 // =====================
 // Export app for testing

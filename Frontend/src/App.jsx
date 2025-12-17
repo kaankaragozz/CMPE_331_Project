@@ -56,7 +56,7 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="/flights" element={<FlightSelectionPage />} />
             <Route
-              path="/flights/:flightId/crew"
+              path="/flights/:flightNumber/crew"
               element={<CrewAssignmentPage />}
             />
             <Route
