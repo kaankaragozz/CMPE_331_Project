@@ -141,7 +141,7 @@ export default function RosterTabularPage() {
   };
 
   const handleGoBackToFlightDetails = () => {
-    navigate(`/flights/${flightNumber}/details`);
+    navigate(`/flights/${flightNumber}`);
   };
 
   const handleGoToCrewAssignment = () => {
@@ -207,7 +207,7 @@ export default function RosterTabularPage() {
             onClick={handleGoBackToFlightDetails}
             className="rounded-md bg-slate-900 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-slate-800"
           >
-            Back to Flight Details
+            Go to Flight Details
           </button>
           <button
             type="button"
