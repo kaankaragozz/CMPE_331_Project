@@ -5,3 +5,5 @@ node_modules/
 .env.*
 #Testing 
 coverage/
+#Eextensions
+.vscode/
