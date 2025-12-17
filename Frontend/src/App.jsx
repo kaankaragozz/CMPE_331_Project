@@ -60,7 +60,7 @@ export default function App() {
               element={<CrewAssignmentPage />}
             />
             <Route
-              path="/flights/:flightId/passengers"
+              path="/flights/:flightNumber/passengers"
               element={<SeatAssignmentPage />}
             />
             <Route
