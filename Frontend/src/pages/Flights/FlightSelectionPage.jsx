@@ -346,7 +346,7 @@ export default function FlightSelectionPage() {
                       type="button"
                       onClick={() =>
                         navigate(
-                          `/roster/${flight.id}/tabular`
+                          `/roster/${flight.flight_number}/roster`
                         )
                       }
                       className="w-full rounded-md bg-slate-100 px-3 py-2 text-xs sm:text-sm font-medium text-slate-800 hover:bg-slate-200"

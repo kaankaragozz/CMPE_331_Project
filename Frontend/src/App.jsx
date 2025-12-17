@@ -73,7 +73,7 @@ export default function App() {
               element={<PlaneSeatMapPage />}
             />
             <Route
-              path="/roster/:flightId/tabular"
+              path="/roster/:flightNumber/roster"
               element={<RosterTabularPage />}
             />
             <Route path="/user/profile" element={<UserProfilePage />} />
