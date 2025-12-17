@@ -65,25 +65,41 @@ app.use("/api/passengers", passengersRoutes);
 // =====================
 // Server Start
 // =====================
-initDB_passengers()
-  .then(() => initDB_flight_passengers_assignments())
-  .then(() => initDB_infant_parent_relationship())
-  .then(() => initDB_seat_type())
-  .then(() => initDB_affiliated_seating())
-  .then(async () => {
-    if (process.env.NODE_ENV !== "production") {
-      await seedPassengers();
-      await seedAffiliations();
-      await seedSeatType();
-      await seedAssignments();
-      await seedInfants();
-    }
 
-    app.listen(PORT, () => {
-      console.log(`🧳 Passenger Service running on port ${PORT}`);
+// Check if we are in a test environment.
+// If NOT in test mode, initialize DB and start the server.
+if (process.env.NODE_ENV !== 'test') {
+  initDB_passengers()
+    .then(() => initDB_flight_passengers_assignments())
+    .then(() => initDB_infant_parent_relationship())
+    .then(() => initDB_seat_type())
+    .then(() => initDB_affiliated_seating())
+    .then(async () => {
+      // Only run seeds if not in production mode
+      if (process.env.NODE_ENV !== "production") {
+        console.log("🌱 Seeding data...");
+        try {
+          await seedPassengers();
+          await seedAffiliations();
+          await seedSeatType();
+          await seedAssignments();
+          await seedInfants();
+          console.log("✅ Seeding completed.");
+        } catch (seedError) {
+          console.error("⚠️ Seeding warning:", seedError);
+          // We don't exit here so the server can still start even if seeding fails (e.g. duplicates)
+        }
+      }
+
+      app.listen(PORT, () => {
+        console.log(`🧳 Passenger Service running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ Failed to start Passenger Service:", err);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to start Passenger Service:", err);
-    process.exit(1);
-  });
+}
+
+// Export app for testing purposes (Supertest uses this)
+export default app;
