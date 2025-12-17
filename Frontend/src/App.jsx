@@ -69,7 +69,7 @@ export default function App() {
               element={<FlightDetailsPage />}
             />
             <Route
-              path="/roster/:flightId/plane"
+              path="/flights/:flightNumber/plane"
               element={<PlaneSeatMapPage />}
             />
             <Route
