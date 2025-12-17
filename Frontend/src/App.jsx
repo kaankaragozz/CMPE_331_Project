@@ -5,6 +5,7 @@ import AppLayout from "../components/layout/AppLayout.jsx";
 // Pages
 import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
 import FlightSelectionPage from "./pages/Flights/FlightSelectionPage.jsx";
+import FlightDetailsPage from "./pages/Flights/FlightDetailsPage.jsx";
 import CrewAssignmentPage from "./pages/Flights/CrewAssignmentPage.jsx";
 import SeatAssignmentPage from "./pages/Passengers/SeatAssignmentPage.jsx";
 import PlaneSeatMapPage from "./pages/Roster/PlaneSeatMapPage.jsx";
@@ -62,6 +63,10 @@ export default function App() {
             <Route
               path="/flights/:flightNumber/passengers"
               element={<SeatAssignmentPage />}
+            />
+            <Route
+              path="/flights/:flightNumber"
+              element={<FlightDetailsPage />}
             />
             <Route
               path="/roster/:flightId/plane"
