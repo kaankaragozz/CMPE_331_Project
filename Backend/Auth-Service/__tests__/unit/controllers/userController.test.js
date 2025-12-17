@@ -1,11 +1,15 @@
 import { jest } from "@jest/globals";
 
 /* =====================
+   WHITE BOX (UNIT TEST)
+===================== */
+
+/* =====================
    MOCK sql (ESM)
 ===================== */
 const sqlMock = jest.fn();
 
-jest.unstable_mockModule("../../config/db.js", () => ({
+jest.unstable_mockModule("../../../config/db.js", () => ({
   sql: (...args) => sqlMock(...args),
 }));
 
@@ -28,7 +32,7 @@ const {
   getUser,
   createUser,
   deleteUser,
-} = await import("../../controllers/userController.js");
+} = await import("../../../controllers/userController.js");
 
 describe("User Controller", () => {
   let req, res;
