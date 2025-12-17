@@ -1,23 +1,21 @@
 // src/pages/Roster/PlaneSeatMapPage.jsx
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const ROW_COUNT = 15;
 const SEAT_LETTERS = ["A", "B", "C", "D"];
 
+const PASSENGER_API_BASE = "http://localhost:3004";
+
 // basic layout: rows 1–3 business, 4–15 economy
-// some seats are crew, some passengers, some infants, some empty
-function buildInitialSeatMap() {
+// some seats are crew (static demo), passengers/infants come from DB
+function buildBaseSeatMap() {
   const specialSeats = {
     "1A": { occupantType: "crew" },
     "1B": { occupantType: "crew" },
     "1C": { occupantType: "crew" },
     "1D": { occupantType: "crew" },
-    "3C": { occupantType: "infant" },
-    "4D": { occupantType: "infant" },
-    "5A": { occupantType: "passenger" },
-    "5B": { occupantType: "passenger" },
-    "6C": { occupantType: "passenger" },
-    "7D": { occupantType: "passenger" },
   };
 
   const rows = [];
@@ -39,15 +37,83 @@ function buildInitialSeatMap() {
   return rows;
 }
 
-const INITIAL_SEAT_MAP = buildInitialSeatMap();
-
 export default function PlaneSeatMapPage() {
+  const { flightNumber } = useParams(); // /flights/:flightNumber/seat-map
+  const navigate = useNavigate();
+
   const [filter, setFilter] = useState("all"); // all | crew | passengers
+  const [passengers, setPassengers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const baseSeatMap = useMemo(() => buildBaseSeatMap(), []);
+
+  // ---------- Fetch passenger seat data from Passenger-Service ----------
+  useEffect(() => {
+    if (!flightNumber) return;
+
+    const fetchPassengers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await axios.get(
+          `${PASSENGER_API_BASE}/api/passengers/flight/${flightNumber}`
+        );
+        const payload = res.data?.data || [];
+        setPassengers(payload);
+      } catch (err) {
+        console.error("PlaneSeatMapPage: error fetching seat map data", err);
+        setError(
+          err.response?.data?.message || "Failed to load seat map data."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPassengers();
+  }, [flightNumber]);
+
+  // ---------- Build seat map with DB overlay ----------
+  const seatMap = useMemo(() => {
+    // deep-clone base map so we can mutate it safely
+    const rows = baseSeatMap.map((row) => ({
+      ...row,
+      seats: row.seats.map((seat) => ({ ...seat })),
+    }));
+
+    const seatIndex = new Map();
+    rows.forEach((row) =>
+      row.seats.forEach((seat) => {
+        seatIndex.set(seat.id, seat);
+      })
+    );
+
+    // Overlay passengers from DB
+    passengers.forEach((p) => {
+      if (!p.seat_number) return; // unassigned passenger
+      const seatKey = p.seat_number; // e.g. "5A"
+      const seat = seatIndex.get(seatKey);
+      if (!seat) return; // seat not in our simple layout
+
+      seat.occupantType = p.is_infant ? "infant" : "passenger";
+
+      if (p.seat_class) {
+        const cls = p.seat_class.toLowerCase();
+        if (cls.includes("business")) seat.cabinClass = "business";
+        else if (cls.includes("economy")) seat.cabinClass = "economy";
+      }
+    });
+
+    return rows;
+  }, [baseSeatMap, passengers]);
+
+  // ---------- Filtering ----------
   const filteredSeatMap = useMemo(() => {
-    if (filter === "all") return INITIAL_SEAT_MAP;
+    if (filter === "all") return seatMap;
 
-    return INITIAL_SEAT_MAP.map((row) => ({
+    return seatMap.map((row) => ({
       ...row,
       seats: row.seats.filter((seat) => {
         if (!seat.occupantType) return false; // hide empty when filtering
@@ -60,15 +126,85 @@ export default function PlaneSeatMapPage() {
         return true;
       }),
     }));
-  }, [filter]);
+  }, [filter, seatMap]);
 
   const handleFilterChange = (e) => setFilter(e.target.value);
 
+  // ---------- Navigation handlers ----------
+  const goDashboard = () => navigate("/");
+  const goFlights = () => navigate("/flights");
+  const goFlightDetails = () =>
+    navigate(`/flights/${flightNumber}`);
+  const goSeatAssignment = () =>
+    navigate(`/flights/${flightNumber}/passengers`);
+
+  // ---------- Render ----------
+  if (loading) {
+    return (
+      <div className="p-4 text-sm text-slate-600">
+        Loading seat map for{" "}
+        <span className="font-mono">{flightNumber}</span>...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+        <button
+          onClick={goFlights}
+          className="inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        >
+          Back to flights
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-slate-900">
-        Aircraft Seat Map
-      </h2>
+      {/* Header + nav buttons */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            Aircraft Seat Map – Flight {flightNumber}
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">
+            Visual map of occupied and empty seats based on passenger assignments
+            in the database.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={goDashboard}
+            className="inline-flex items-center rounded-md border border-slate-300 px-3 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50"
+          >
+            Back to dashboard
+          </button>
+          <button
+            onClick={goFlights}
+            className="inline-flex items-center rounded-md border border-slate-300 px-3 py-2 text-xs sm:text-sm text-slate-700 hover:bg-slate-50"
+          >
+            Back to flights
+          </button>
+          <button
+            onClick={goFlightDetails}
+            className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Flight details
+          </button>
+          <button
+            onClick={goSeatAssignment}
+            className="inline-flex items-center rounded-md bg-emerald-600 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Seat assignment
+          </button>
+        </div>
+      </div>
 
       <div className="bg-white border border-slate-200 rounded-xl p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Left column: filters + legend */}
@@ -110,7 +246,7 @@ export default function PlaneSeatMapPage() {
                   checked={filter === "passengers"}
                   onChange={handleFilterChange}
                 />
-                <span>Show Passengers</span>
+                <span>Show Passengers & Infants</span>
               </label>
             </div>
           </div>
@@ -122,8 +258,8 @@ export default function PlaneSeatMapPage() {
             </h3>
             <div className="space-y-2 text-sm text-slate-700">
               <LegendItem colorClass="bg-blue-500" label="Crew" />
-              <LegendItem colorClass="bg-cyan-500" label="Business Class" />
-              <LegendItem colorClass="bg-green-500" label="Economy Class" />
+              <LegendItem colorClass="bg-cyan-500" label="Business Passenger" />
+              <LegendItem colorClass="bg-green-500" label="Economy Passenger" />
               <LegendItem colorClass="bg-red-400" label="Infant" />
               <LegendItem
                 colorClass="bg-slate-300 border border-slate-400 text-slate-700"
@@ -209,9 +345,7 @@ function SeatColumnBlock({ side, seatMap }) {
                     <div key={letter} className="w-8 h-10" />
                   );
                 }
-                return (
-                  <Seat key={seat.id} seat={seat} />
-                );
+                return <Seat key={seat.id} seat={seat} />;
               })}
             </div>
           </div>

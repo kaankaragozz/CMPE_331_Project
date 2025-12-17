@@ -5,6 +5,7 @@ import AppLayout from "../components/layout/AppLayout.jsx";
 // Pages
 import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
 import FlightSelectionPage from "./pages/Flights/FlightSelectionPage.jsx";
+import FlightDetailsPage from "./pages/Flights/FlightDetailsPage.jsx";
 import CrewAssignmentPage from "./pages/Flights/CrewAssignmentPage.jsx";
 import SeatAssignmentPage from "./pages/Passengers/SeatAssignmentPage.jsx";
 import PlaneSeatMapPage from "./pages/Roster/PlaneSeatMapPage.jsx";
@@ -56,19 +57,23 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="/flights" element={<FlightSelectionPage />} />
             <Route
-              path="/flights/:flightId/crew"
+              path="/flights/:flightNumber/crew"
               element={<CrewAssignmentPage />}
             />
             <Route
-              path="/flights/:flightId/passengers"
+              path="/flights/:flightNumber/passengers"
               element={<SeatAssignmentPage />}
             />
             <Route
-              path="/roster/:flightId/plane"
+              path="/flights/:flightNumber"
+              element={<FlightDetailsPage />}
+            />
+            <Route
+              path="/flights/:flightNumber/plane"
               element={<PlaneSeatMapPage />}
             />
             <Route
-              path="/roster/:flightId/tabular"
+              path="/roster/:flightNumber/roster"
               element={<RosterTabularPage />}
             />
             <Route path="/user/profile" element={<UserProfilePage />} />

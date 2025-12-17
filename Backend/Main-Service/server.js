@@ -140,6 +140,7 @@ const crewServiceRoutes = [
   "/api/dish-recipes",
   "/api/pilots",
   "/api/pilots-languages",
+  "/api/crew-assignments",
 ];
 
 crewServiceRoutes.forEach((route) => {

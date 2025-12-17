@@ -1,7 +1,12 @@
 // src/pages/Roster/RosterTabularPage.jsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const INITIAL_ROSTER = [
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+// Static demo crew – real passengers come from DB
+const STATIC_CREW_ROSTER = [
   {
     type: "Pilot",
     name: "John Doe",
@@ -9,30 +14,6 @@ const INITIAL_ROSTER = [
     seatNo: "Cockpit",
     nationality: "American",
     role: "Captain",
-  },
-  {
-    type: "Cabin Crew",
-    name: "Jane Smith",
-    id: "CC201",
-    seatNo: "A1",
-    nationality: "British",
-    role: "Flight Attendant",
-  },
-  {
-    type: "Passenger",
-    name: "Alice Johnson",
-    id: "PA301",
-    seatNo: "12A",
-    nationality: "Canadian",
-    role: "N/A",
-  },
-  {
-    type: "Passenger",
-    name: "Bob Williams",
-    id: "PA302",
-    seatNo: "12B",
-    nationality: "German",
-    role: "N/A",
   },
   {
     type: "Pilot",
@@ -44,38 +25,86 @@ const INITIAL_ROSTER = [
   },
   {
     type: "Cabin Crew",
+    name: "Jane Smith",
+    id: "CC201",
+    seatNo: "A1",
+    nationality: "British",
+    role: "Flight Attendant",
+  },
+  {
+    type: "Cabin Crew",
     name: "Michael Davis",
     id: "CC202",
     seatNo: "A2",
     nationality: "Australian",
     role: "Flight Attendant",
   },
-  {
-    type: "Passenger",
-    name: "Sarah Miller",
-    id: "PA303",
-    seatNo: "14C",
-    nationality: "Japanese",
-    role: "N/A",
-  },
 ];
 
 export default function RosterTabularPage() {
+  const { flightNumber } = useParams();
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [dbPassengers, setDbPassengers] = useState([]);
+
   const [search, setSearch] = useState("");
-  const [sortKey, setSortKey] = useState("name"); // name | type | seatNo
+  const [sortKey, setSortKey] = useState("name"); // name | role | seatNo | nationality
+
+  // Fetch passengers for this flight from Passenger-Service
+  useEffect(() => {
+    async function fetchRoster() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await axios.get(
+          `${API_BASE}/api/passengers/flight/${flightNumber}`
+        );
+
+        const passengers = res.data?.data || [];
+        setDbPassengers(passengers);
+      } catch (err) {
+        console.error("Error loading roster data:", err);
+        setError("Failed to load roster data from database.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (flightNumber) {
+      fetchRoster();
+    }
+  }, [flightNumber]);
+
+  // Map DB passengers into unified roster entries
+  const combinedRoster = useMemo(() => {
+    const passengerEntries = dbPassengers.map((p) => ({
+      type: p.is_infant ? "Infant" : "Passenger",
+      name: p.name,
+      id: `PA${p.passenger_id}`,
+      seatNo: p.seat_number || "-",
+      nationality: p.nationality || "",
+      role: p.is_infant
+        ? "Infant"
+        : p.seat_class || "Passenger", // e.g. Business / Economy / Passenger
+    }));
+
+    return [...STATIC_CREW_ROSTER, ...passengerEntries];
+  }, [dbPassengers]);
 
   const filteredAndSortedRoster = useMemo(() => {
     const lower = search.trim().toLowerCase();
 
-    let data = INITIAL_ROSTER.filter((item) => {
+    let data = combinedRoster.filter((item) => {
       if (!lower) return true;
       return (
         item.type.toLowerCase().includes(lower) ||
         item.name.toLowerCase().includes(lower) ||
         item.id.toLowerCase().includes(lower) ||
-        item.seatNo.toLowerCase().includes(lower) ||
-        item.nationality.toLowerCase().includes(lower) ||
-        item.role.toLowerCase().includes(lower)
+        (item.seatNo || "").toLowerCase().includes(lower) ||
+        (item.nationality || "").toLowerCase().includes(lower) ||
+        (item.role || "").toLowerCase().includes(lower)
       );
     });
 
@@ -88,41 +117,128 @@ export default function RosterTabularPage() {
     });
 
     return data;
-  }, [search, sortKey]);
+  }, [combinedRoster, search, sortKey]);
 
   const handleExportJSON = () => {
-    const blob = new Blob(
-      [JSON.stringify(filteredAndSortedRoster, null, 2)],
-      { type: "application/json" }
-    );
+    const blob = new Blob([JSON.stringify(filteredAndSortedRoster, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "roster.json";
+    link.download = `roster_${flightNumber || "flight"}.json`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
   };
 
+  // This page is read-only – data is already in DB from seat / crew assignment pages.
   const handleSaveToDatabase = () => {
-    // later: replace with real API call
-    console.log("Saving to database:", filteredAndSortedRoster);
-    alert("Roster would be saved to database (see console for payload).");
+    alert(
+      "This roster is derived from live database data (crew + passengers). There are no editable changes to save from this page."
+    );
   };
+
+  const handleGoBackToFlightDetails = () => {
+    navigate(`/flights/${flightNumber}`);
+  };
+
+  const handleGoToCrewAssignment = () => {
+    navigate(`/flights/${flightNumber}/crew`);
+  };
+
+  const handleGoToSeatAssignment = () => {
+    navigate(`/flights/${flightNumber}/passenger-seats`);
+  };
+
+  const handleGoToSeatMap = () => {
+    navigate(`/flights/${flightNumber}/seat-map`);
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-slate-900">
+          Combined Roster
+        </h2>
+        <p className="text-sm text-slate-500">
+          Loading roster data for flight <span className="font-mono">{flightNumber}</span>...
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-semibold text-slate-900">
+          Combined Roster
+        </h2>
+        <p className="text-sm text-red-600">{error}</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold text-slate-900">
-        Combined Roster
-      </h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold text-slate-900">
+            Combined Roster
+          </h2>
+          <p className="text-sm text-slate-500 mt-1">
+            Flight: <span className="font-mono">{flightNumber}</span> • Crew +
+            passengers loaded from database.
+          </p>
+        </div>
+
+        {/* Navigation buttons */}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleGoBackToFlightDetails}
+            className="rounded-md bg-slate-900 px-3 py-2 text-xs sm:text-sm font-medium text-white hover:bg-slate-800"
+          >
+            Go to Flight Details
+          </button>
+          <button
+            type="button"
+            onClick={handleGoToCrewAssignment}
+            className="rounded-md border border-slate-300 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Crew Assignment
+          </button>
+          <button
+            type="button"
+            onClick={handleGoToSeatAssignment}
+            className="rounded-md border border-slate-300 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Passenger Seat Assignment
+          </button>
+          <button
+            type="button"
+            onClick={handleGoToSeatMap}
+            className="rounded-md border border-slate-300 px-3 py-2 text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Seat Map
+          </button>
+        </div>
+      </div>
 
       {/* Search + sort + buttons */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 flex-col gap-3 sm:flex-row">
           <input
             type="text"
-            placeholder="Search..."
+            placeholder="Search by name, ID, seat, nationality..."
             className="w-full sm:max-w-xs rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -135,7 +251,7 @@ export default function RosterTabularPage() {
               onChange={(e) => setSortKey(e.target.value)}
             >
               <option value="name">Sort by: Name</option>
-              <option value="type">Sort by: Type</option>
+              <option value="role">Sort by: Role</option>
               <option value="seatNo">Sort by: Seat No.</option>
               <option value="nationality">Sort by: Nationality</option>
             </select>
