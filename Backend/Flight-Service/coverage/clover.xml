@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1766002379288" clover="3.2.0">
-  <project timestamp="1766002379288" name="All files">
-    <metrics statements="345" coveredstatements="230" conditionals="192" coveredconditionals="146" methods="31" coveredmethods="16" elements="568" coveredelements="392" complexity="0" loc="345" ncloc="345" packages="6" files="14" classes="14"/>
+<coverage generated="1766057571322" clover="3.2.0">
+  <project timestamp="1766057571322" name="All files">
+    <metrics statements="380" coveredstatements="236" conditionals="206" coveredconditionals="146" methods="33" coveredmethods="16" elements="619" coveredelements="398" complexity="0" loc="380" ncloc="380" packages="6" files="16" classes="16"/>
     <package name="Flight-Service">
-      <metrics statements="24" coveredstatements="13" conditionals="6" coveredconditionals="2" methods="6" coveredmethods="1"/>
+      <metrics statements="25" coveredstatements="14" conditionals="6" coveredconditionals="2" methods="6" coveredmethods="1"/>
       <file name="server.js" path="/Users/kaankaragoz/Documents/GitHub/CMPE_331_Project/Backend/Flight-Service/server.js">
-        <metrics statements="24" coveredstatements="13" conditionals="6" coveredconditionals="2" methods="6" coveredmethods="1"/>
-        <line num="34" count="9" type="stmt"/>
-        <line num="36" count="9" type="stmt"/>
-        <line num="37" count="9" type="cond" truecount="1" falsecount="1"/>
-        <line num="42" count="9" type="stmt"/>
+        <metrics statements="25" coveredstatements="14" conditionals="6" coveredconditionals="2" methods="6" coveredmethods="1"/>
+        <line num="35" count="9" type="stmt"/>
+        <line num="37" count="9" type="stmt"/>
+        <line num="38" count="9" type="cond" truecount="1" falsecount="1"/>
         <line num="43" count="9" type="stmt"/>
         <line num="44" count="9" type="stmt"/>
         <line num="45" count="9" type="stmt"/>
-        <line num="50" count="9" type="stmt"/>
-        <line num="51" count="53" type="stmt"/>
-        <line num="61" count="9" type="stmt"/>
+        <line num="46" count="9" type="stmt"/>
+        <line num="51" count="9" type="stmt"/>
+        <line num="52" count="53" type="stmt"/>
         <line num="62" count="9" type="stmt"/>
         <line num="63" count="9" type="stmt"/>
-        <line num="73" count="9" type="cond" truecount="1" falsecount="1"/>
-        <line num="74" count="0" type="stmt"/>
-        <line num="75" count="0" type="stmt"/>
+        <line num="64" count="9" type="stmt"/>
+        <line num="65" count="9" type="stmt"/>
+        <line num="75" count="9" type="cond" truecount="1" falsecount="1"/>
         <line num="76" count="0" type="stmt"/>
-        <line num="78" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="79" count="0" type="stmt"/>
-        <line num="80" count="0" type="stmt"/>
+        <line num="77" count="0" type="stmt"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="80" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="81" count="0" type="stmt"/>
-        <line num="84" count="0" type="stmt"/>
-        <line num="85" count="0" type="stmt"/>
-        <line num="89" count="0" type="stmt"/>
-        <line num="90" count="0" type="stmt"/>
+        <line num="82" count="0" type="stmt"/>
+        <line num="83" count="0" type="stmt"/>
+        <line num="86" count="0" type="stmt"/>
+        <line num="87" count="0" type="stmt"/>
+        <line num="91" count="0" type="stmt"/>
+        <line num="92" count="0" type="stmt"/>
       </file>
     </package>
     <package name="Flight-Service.config">
@@ -42,7 +43,7 @@
       </file>
     </package>
     <package name="Flight-Service.controllers">
-      <metrics statements="241" coveredstatements="196" conditionals="178" coveredconditionals="144" methods="15" coveredmethods="15"/>
+      <metrics statements="272" coveredstatements="198" conditionals="192" coveredconditionals="144" methods="17" coveredmethods="15"/>
       <file name="airportsController.js" path="/Users/kaankaragoz/Documents/GitHub/CMPE_331_Project/Backend/Flight-Service/controllers/airportsController.js">
         <metrics statements="68" coveredstatements="58" conditionals="53" coveredconditionals="46" methods="5" coveredmethods="5"/>
         <line num="4" count="10" type="stmt"/>
@@ -113,6 +114,40 @@
         <line num="239" count="3" type="stmt"/>
         <line num="245" count="1" type="stmt"/>
         <line num="246" count="1" type="stmt"/>
+      </file>
+      <file name="crew_assignmentsController.js" path="/Users/kaankaragoz/Documents/GitHub/CMPE_331_Project/Backend/Flight-Service/controllers/crew_assignmentsController.js">
+        <metrics statements="31" coveredstatements="2" conditionals="14" coveredconditionals="0" methods="2" coveredmethods="0"/>
+        <line num="4" count="9" type="stmt"/>
+        <line num="5" count="0" type="stmt"/>
+        <line num="7" count="0" type="stmt"/>
+        <line num="9" count="0" type="stmt"/>
+        <line num="15" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="16" count="0" type="stmt"/>
+        <line num="22" count="0" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+        <line num="37" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="38" count="0" type="stmt"/>
+        <line num="44" count="0" type="stmt"/>
+        <line num="49" count="0" type="stmt"/>
+        <line num="50" count="0" type="stmt"/>
+        <line num="59" count="9" type="stmt"/>
+        <line num="60" count="0" type="stmt"/>
+        <line num="61" count="0" type="stmt"/>
+        <line num="64" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="65" count="0" type="stmt"/>
+        <line num="71" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="72" count="0" type="stmt"/>
+        <line num="78" count="0" type="stmt"/>
+        <line num="80" count="0" type="stmt"/>
+        <line num="86" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="87" count="0" type="stmt"/>
+        <line num="93" count="0" type="stmt"/>
+        <line num="96" count="0" type="stmt"/>
+        <line num="97" count="0" type="stmt"/>
+        <line num="100" count="0" type="stmt"/>
+        <line num="118" count="0" type="stmt"/>
+        <line num="124" count="0" type="stmt"/>
+        <line num="125" count="0" type="stmt"/>
       </file>
       <file name="flightsController.js" path="/Users/kaankaragoz/Documents/GitHub/CMPE_331_Project/Backend/Flight-Service/controllers/flightsController.js">
         <metrics statements="103" coveredstatements="77" conditionals="74" coveredconditionals="53" methods="5" coveredmethods="5"/>
@@ -349,7 +384,7 @@
       </file>
     </package>
     <package name="Flight-Service.routes">
-      <metrics statements="18" coveredstatements="18" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="21" coveredstatements="21" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="airportsRoutes.js" path="/Users/kaankaragoz/Documents/GitHub/CMPE_331_Project/Backend/Flight-Service/routes/airportsRoutes.js">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="4" count="9" type="stmt"/>
@@ -358,6 +393,12 @@
         <line num="8" count="9" type="stmt"/>
         <line num="9" count="9" type="stmt"/>
         <line num="10" count="9" type="stmt"/>
+      </file>
+      <file name="crew_assignmentsRoutes.js" path="/Users/kaankaragoz/Documents/GitHub/CMPE_331_Project/Backend/Flight-Service/routes/crew_assignmentsRoutes.js">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="7" count="9" type="stmt"/>
+        <line num="10" count="9" type="stmt"/>
+        <line num="13" count="9" type="stmt"/>
       </file>
       <file name="flightsRoutes.js" path="/Users/kaankaragoz/Documents/GitHub/CMPE_331_Project/Backend/Flight-Service/routes/flightsRoutes.js">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
