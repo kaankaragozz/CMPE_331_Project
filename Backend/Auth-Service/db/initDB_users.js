@@ -2,6 +2,7 @@ import { sql } from "../config/db.js";
 
 export async function initDB_users() {
   try {
+    // Create table if it doesn't exist yet
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -9,12 +10,20 @@ export async function initDB_users() {
         password VARCHAR(255) NOT NULL,
         role VARCHAR(20) NOT NULL DEFAULT 'Passenger',
 
+        pilot_id INTEGER NULL,  -- optional link to pilots table
+
         last_login TIMESTAMP NULL,
         is_verified BOOLEAN DEFAULT FALSE,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `;
+
+    // Ensure pilot_id column exists on older DBs
+    await sql`
+      ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS pilot_id INTEGER
     `;
 
     console.log("✅ Users table ready");

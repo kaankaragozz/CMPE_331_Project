@@ -5,7 +5,6 @@ export const getCrewAssignmentByFlightNumber = async (req, res) => {
   const { flight_number } = req.params;
 
   try {
-    // 1) Find the flight id from flight_number
     const flightRows = await sql`
       SELECT id 
       FROM flights 
@@ -21,7 +20,6 @@ export const getCrewAssignmentByFlightNumber = async (req, res) => {
 
     const flightId = flightRows[0].id;
 
-    // 2) Load assignment
     const assignmentRows = await sql`
       SELECT 
         flight_id,
@@ -60,7 +58,6 @@ export const upsertCrewAssignmentForFlight = async (req, res) => {
   const { flight_number } = req.params;
   const { pilot_ids, cabin_crew_ids } = req.body;
 
-  // Basic validation
   if (!Array.isArray(pilot_ids) || pilot_ids.length === 0) {
     return res.status(400).json({
       success: false,
@@ -76,7 +73,6 @@ export const upsertCrewAssignmentForFlight = async (req, res) => {
   }
 
   try {
-    // 1) Find the flight id
     const flightRows = await sql`
       SELECT id 
       FROM flights 
@@ -92,11 +88,9 @@ export const upsertCrewAssignmentForFlight = async (req, res) => {
 
     const flightId = flightRows[0].id;
 
-    // 2) Convert JS arrays to PostgreSQL int[] literals
     const pilotIdsArray = `{${pilot_ids.join(",")}}`;
     const cabinCrewArray = `{${cabin_crew_ids.join(",")}}`;
 
-    // 3) Insert or update one row per flight
     const result = await sql`
       INSERT INTO flight_crew_assignments (
         flight_id,
@@ -125,6 +119,76 @@ export const upsertCrewAssignmentForFlight = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error saving crew assignment",
+      error: error.message,
+    });
+  }
+};
+
+// 🔥 NEW: GET all flights assigned to a given pilot (by pilot_id)
+export const getFlightsByPilotId = async (req, res) => {
+  const { pilot_id } = req.params;
+
+  if (!pilot_id) {
+    return res.status(400).json({
+      success: false,
+      message: "pilot_id is required",
+    });
+  }
+
+  try {
+    const flights = await sql`
+      SELECT 
+        f.id,
+        f.flight_number,
+        f.flight_date,
+        f.duration_minutes,
+        f.distance_km,
+        f.is_shared,
+        f.shared_flight_number,
+        f.shared_airline_name,
+        f.connecting_flight_info,
+        f.created_at,
+        f.updated_at,
+        json_build_object(
+          'country', sa.country,
+          'city', sa.city,
+          'airport_name', sa.name,
+          'airport_code', sa.code
+        ) as source,
+        json_build_object(
+          'country', da.country,
+          'city', da.city,
+          'airport_name', da.name,
+          'airport_code', da.code
+        ) as destination,
+        json_build_object(
+          'id', vt.id,
+          'type_name', vt.type_name,
+          'total_seats', vt.total_seats,
+          'seating_plan', vt.seating_plan,
+          'max_crew', vt.max_crew,
+          'max_passengers', vt.max_passengers,
+          'menu_description', vt.menu_description
+        ) as vehicle_type
+      FROM flight_crew_assignments fca
+      JOIN flights f ON fca.flight_id = f.id
+      JOIN airports sa ON f.source_airport_id = sa.id
+      JOIN airports da ON f.destination_airport_id = da.id
+      JOIN vehicle_types vt ON f.vehicle_type_id = vt.id
+      WHERE ${pilot_id} = ANY (fca.pilot_ids)
+      ORDER BY f.flight_date ASC
+    `;
+
+    return res.status(200).json({
+      success: true,
+      count: flights.length,
+      data: flights,
+    });
+  } catch (error) {
+    console.error("Error in getFlightsByPilotId:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error loading flights for pilot",
       error: error.message,
     });
   }

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 export const getAllUsers = async (req, res) => {
   try {
     const users = await sql`
-      SELECT id, name, role, created_at 
+      SELECT id, name, role, pilot_id, created_at 
       FROM users
       ORDER BY id DESC
     `;
@@ -23,7 +23,7 @@ export const getUser = async (req, res) => {
 
   try {
     const users = await sql`
-      SELECT id, name, role, created_at 
+      SELECT id, name, role, pilot_id, created_at, last_login
       FROM users
       WHERE id = ${id}
     `;
@@ -41,34 +41,29 @@ export const getUser = async (req, res) => {
 
 // ✅ Create new user
 export const createUser = async (req, res) => {
-  const { name, password, role } = req.body;
+  const { name, password, role, pilot_id } = req.body;
 
   try {
     if (!name || !password) {
       return res.status(400).json({ message: "Name and password required" });
     }
 
-    // Check if user exists
     const existing = await sql`
       SELECT id FROM users WHERE name = ${name}
     `;
-
     if (existing.length > 0) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user
     const newUser = await sql`
-      INSERT INTO users (name, password, role)
-      VALUES (${name}, ${hashedPassword}, ${role || 'Passenger'})
-      RETURNING id, name, role, created_at
+      INSERT INTO users (name, password, role, pilot_id)
+      VALUES (${name}, ${hashedPassword}, ${role || 'Passenger'}, ${pilot_id ?? null})
+      RETURNING id, name, role, pilot_id, created_at
     `;
 
     res.status(201).json(newUser[0]);
-
   } catch (error) {
     console.error("createUser error:", error);
     res.status(500).json({ message: "Server error" });
@@ -97,10 +92,10 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-// ✅ Update user (name, role)
+// ✅ Update user (name, role, pilot_id)
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, role } = req.body;
+  const { name, role, pilot_id } = req.body;
 
   try {
     const updated = await sql`
@@ -108,9 +103,10 @@ export const updateUser = async (req, res) => {
       SET
         name = COALESCE(${name}, name),
         role = COALESCE(${role}, role),
+        pilot_id = COALESCE(${pilot_id}, pilot_id),
         updated_at = NOW()
       WHERE id = ${id}
-      RETURNING id, name, role, created_at, updated_at, last_login
+      RETURNING id, name, role, pilot_id, created_at, updated_at, last_login
     `;
 
     if (updated.length === 0) {

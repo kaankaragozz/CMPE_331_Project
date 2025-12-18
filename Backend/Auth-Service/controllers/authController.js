@@ -9,7 +9,6 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if user exists
     const user = await sql`
       SELECT id FROM users WHERE name = ${name}
     `;
@@ -18,10 +17,8 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user
     await sql`
       INSERT INTO users (name, password)
       VALUES (${name}, ${hashedPassword})
@@ -42,9 +39,8 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Find user (include role)
     const user = await sql`
-      SELECT id, name, password, role
+      SELECT id, name, password, role, pilot_id
       FROM users
       WHERE name = ${name}
     `;
@@ -53,26 +49,23 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
     }
 
-    // Compare password
     const valid = await bcrypt.compare(password, user[0].password);
-
     if (!valid) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // Update last_login
     await sql`
       UPDATE users SET last_login = NOW() WHERE id = ${user[0].id}
     `;
 
-    // ✅ Include role in response
     res.json({
       message: "Login successful",
       user: {
         id: user[0].id,
         name: user[0].name,
-        role: user[0].role
-      }
+        role: user[0].role,
+        pilot_id: user[0].pilot_id, // 🔑 new
+      },
     });
   } catch (error) {
     console.error(error);

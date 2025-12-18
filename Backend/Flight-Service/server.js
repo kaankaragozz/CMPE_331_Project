@@ -21,6 +21,7 @@ import crewAssignmentsRoutes from "./routes/crew_assignmentsRoutes.js"; // ✅
 import { initAirportsTable } from "./db/initDB_airports.js";
 import { initFlightsTable } from "./db/initDB_flights.js";
 import { initVehicleTypesTable } from "./db/initDB_vehicle_types.js";
+import { initDB_pilot_flight_assignments } from "./db/initDB_pilot_flight_assignments.js"; // ✅
 
 // =====================
 // Seeds
@@ -62,7 +63,7 @@ app.get("/health", (req, res) => {
 app.use("/api/airports", airportsRoutes);
 app.use("/api/flights", flightsRoutes);
 app.use("/api/vehicle-types", vehicleTypesRoutes);
-app.use("/api/flights", crewAssignmentsRoutes); 
+app.use("/api/flights", crewAssignmentsRoutes);
 
 // =====================
 // Export app for testing
@@ -73,22 +74,23 @@ export default app;
 // Server Start
 // =====================
 if (process.env.NODE_ENV !== "test") {
-initAirportsTable()
-  .then(() => initFlightsTable())
-  .then(() => initVehicleTypesTable())
-  .then(async () => {
-    if (process.env.NODE_ENV !== "production") {
-      await seedVehicleTypes();
-      await seedAirports();
-      await seedFlights();
-    }
+  initAirportsTable()
+    .then(() => initFlightsTable())
+    .then(() => initVehicleTypesTable())
+    .then(() => initDB_pilot_flight_assignments()) // ✅ ensure table
+    .then(async () => {
+      if (process.env.NODE_ENV !== "production") {
+        await seedVehicleTypes();
+        await seedAirports();
+        await seedFlights();
+      }
 
-    app.listen(PORT, () => {
-      console.log(`✈️ Flight Service running on port ${PORT}`);
+      app.listen(PORT, () => {
+        console.log(`✈️ Flight Service running on port ${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ Failed to start Flight Service:", err);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to start Flight Service:", err);
-    process.exit(1);
-  });
 }

@@ -4,6 +4,7 @@ import AppLayout from "../components/layout/AppLayout.jsx";
 
 // Pages
 import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
+import PilotDashboardPage from "./pages/Dashboard/PilotDashboardPage.jsx";
 import FlightSelectionPage from "./pages/Flights/FlightSelectionPage.jsx";
 import FlightDetailsPage from "./pages/Flights/FlightDetailsPage.jsx";
 import CrewAssignmentPage from "./pages/Flights/CrewAssignmentPage.jsx";
@@ -42,7 +43,7 @@ export default function App() {
             )}
 
             {role === "Pilot" && (
-              <Route path="/pilot" element={<PlaneSeatMapPage />} />
+              <Route path="/pilot" element={<PilotDashboardPage />} />
             )}
 
             {role === "CabinCrew" && (
@@ -53,7 +54,7 @@ export default function App() {
               <Route path="/passenger" element={<SeatAssignmentPage />} />
             )}
 
-            {/* COMMON ROUTES — FIXED USING index */}
+            {/* COMMON ROUTES */}
             <Route index element={<DashboardPage />} />
             <Route path="/flights" element={<FlightSelectionPage />} />
             <Route

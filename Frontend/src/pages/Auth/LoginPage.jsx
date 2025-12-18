@@ -1,4 +1,3 @@
-// src/pages/Auth/LoginPage.jsx
 import { useState } from "react";
 
 const API_BASE = "http://localhost:3000";
@@ -37,13 +36,18 @@ export default function LoginPage() {
         return;
       }
 
-      const user = data.user; // { id, name, role }
+      const user = data.user; // { id, name, role, pilot_id? }
 
-      // We treat userId as our "token" for now
       localStorage.setItem("token", String(user.id));
       localStorage.setItem("userId", String(user.id));
       localStorage.setItem("userRole", user.role);
       localStorage.setItem("userName", user.name);
+
+      if (user.pilot_id) {
+        localStorage.setItem("pilotId", String(user.pilot_id));
+      } else {
+        localStorage.removeItem("pilotId");
+      }
 
       // Role-based redirect
       if (user.role === "Admin") {
@@ -64,12 +68,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        {/* Title */}
         <h1 className="text-xl font-semibold text-slate-900 mb-6 text-center">
           Flight Roster Management System
         </h1>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1">
