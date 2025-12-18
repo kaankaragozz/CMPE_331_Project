@@ -96,3 +96,30 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// ✅ Update user (name, role)
+export const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { name, role } = req.body;
+
+  try {
+    const updated = await sql`
+      UPDATE users
+      SET
+        name = COALESCE(${name}, name),
+        role = COALESCE(${role}, role),
+        updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING id, name, role, created_at, updated_at, last_login
+    `;
+
+    if (updated.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(updated[0]);
+  } catch (error) {
+    console.error("updateUser error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

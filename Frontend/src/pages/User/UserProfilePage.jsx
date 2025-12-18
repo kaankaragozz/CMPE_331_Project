@@ -1,28 +1,118 @@
-// src/pages/Users/UserProfilePage.jsx
-import { useState } from "react";
+// src/pages/User/UserProfilePage.jsx (or Users/UserProfilePage.jsx)
+import { useEffect, useState } from "react";
+
+const API_BASE = "http://localhost:3000";
 
 export default function UserProfilePage() {
   const [profile, setProfile] = useState({
-    name: "John Doe",
-    role: "Roster Manager",
-    email: "john.doe@example.com",
+    id: null,
+    name: "",
+    role: "",
+    email: "", // local-only
+    created_at: null,
+    last_login: null,
   });
-
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [language, setLanguage] = useState("en");
-  const [theme, setTheme] = useState("dark"); // light | dark
+  const [theme, setTheme] = useState("dark");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const userId = localStorage.getItem("userId");
+  const userRole = localStorage.getItem("userRole");
+  const storedEmail = localStorage.getItem("userEmail");
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        setLoading(true);
+        setError("");
+
+        if (!userId) {
+          setError("Missing user id in local storage.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(`${API_BASE}/api/users/${userId}`);
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || "Failed to load user profile.");
+        }
+        const data = await res.json();
+
+        setProfile((prev) => ({
+          ...prev,
+          id: data.id,
+          name: data.name,
+          role: data.role,
+          email: storedEmail || prev.email,
+          created_at: data.created_at,
+          last_login: data.last_login || null,
+        }));
+      } catch (err) {
+        console.error("Error loading profile:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProfile();
+  }, [userId, storedEmail]);
 
   const handleChange = (field) => (e) => {
     setProfile((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
-  const handleSaveProfile = () => {
-    console.log("Saving profile:", profile);
-    alert("Profile saved (check console for payload).");
+  const handleSaveProfile = async () => {
+    if (!profile.id) return;
+    try {
+      setSaving(true);
+      setError("");
+
+      const res = await fetch(`${API_BASE}/api/users/${profile.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: profile.name,
+          role: profile.role,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to save profile.");
+      }
+
+      const updated = await res.json();
+
+      localStorage.setItem("userName", updated.name);
+      localStorage.setItem("userRole", updated.role);
+      if (profile.email) {
+        localStorage.setItem("userEmail", profile.email);
+      }
+
+      setProfile((prev) => ({
+        ...prev,
+        name: updated.name,
+        role: updated.role,
+        created_at: updated.created_at,
+        last_login: updated.last_login || prev.last_login,
+      }));
+
+      alert("Profile saved successfully.");
+    } catch (err) {
+      console.error("Error saving profile:", err);
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleChangePassword = () => {
-    alert("Change password flow would open here.");
+    alert("Change password flow would open here (not implemented).");
   };
 
   const toggleTwoFactor = () => {
@@ -31,7 +121,6 @@ export default function UserProfilePage() {
 
   const handleThemeChange = (value) => {
     setTheme(value);
-    // later: hook into global theme context
   };
 
   return (
@@ -39,6 +128,11 @@ export default function UserProfilePage() {
       <h2 className="text-2xl font-semibold text-slate-900">
         User Profile / Settings
       </h2>
+
+      {loading && (
+        <p className="text-sm text-slate-500">Loading profile…</p>
+      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
       {/* Profile info */}
       <section className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
@@ -67,13 +161,19 @@ export default function UserProfilePage() {
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={profile.role}
               onChange={handleChange("role")}
+              disabled={userRole !== "Admin"}
             />
+            {userRole !== "Admin" && (
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Only admins can change roles.
+              </p>
+            )}
           </div>
         </div>
 
         <div className="space-y-1">
           <label className="text-sm font-medium text-slate-700">
-            Email
+            Email (local preference)
           </label>
           <input
             type="email"
@@ -81,14 +181,35 @@ export default function UserProfilePage() {
             value={profile.email}
             onChange={handleChange("email")}
           />
+          <p className="text-[11px] text-slate-400">
+            Email is not stored in the backend yet; it is saved only in your
+            browser.
+          </p>
+        </div>
+
+        {/* Metadata */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-500 mt-2">
+          <p>
+            <span className="font-medium text-slate-700">
+              Created at:
+            </span>{" "}
+            {formatDate(profile.created_at)}
+          </p>
+          <p>
+            <span className="font-medium text-slate-700">
+              Last login:
+            </span>{" "}
+            {formatDate(profile.last_login)}
+          </p>
         </div>
 
         <button
           type="button"
           onClick={handleSaveProfile}
-          className="mt-2 inline-flex items-center rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+          disabled={saving}
+          className="mt-3 inline-flex items-center rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-60"
         >
-          Save Profile
+          {saving ? "Saving…" : "Save Profile"}
         </button>
       </section>
 
@@ -99,7 +220,7 @@ export default function UserProfilePage() {
         </h3>
 
         <div className="flex flex-col gap-6">
-          {/* Change password row */}
+          {/* Change password */}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-800">
@@ -118,7 +239,7 @@ export default function UserProfilePage() {
             </button>
           </div>
 
-          {/* 2FA row */}
+          {/* 2FA */}
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-800">
@@ -205,4 +326,11 @@ export default function UserProfilePage() {
       </section>
     </div>
   );
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleString();
 }

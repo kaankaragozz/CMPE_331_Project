@@ -1,4 +1,7 @@
+// src/pages/Auth/LoginPage.jsx
 import { useState } from "react";
+
+const API_BASE = "http://localhost:3000";
 
 export default function LoginPage() {
   const [form, setForm] = useState({
@@ -9,8 +12,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   const handleChange = (field) => (e) => {
-    const value =
-      field === "remember" ? e.target.checked : e.target.value;
+    const value = field === "remember" ? e.target.checked : e.target.value;
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -19,7 +21,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
+      const res = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -31,33 +33,30 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Login failed");
+        setError(data.message || "Login failed");
         return;
       }
 
-      // Save token
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("userRole", data.user.role);
+      const user = data.user; // { id, name, role }
 
-      console.log("Logged in:", data);
+      // We treat userId as our "token" for now
+      localStorage.setItem("token", String(user.id));
+      localStorage.setItem("userId", String(user.id));
+      localStorage.setItem("userRole", user.role);
+      localStorage.setItem("userName", user.name);
 
-      // Redirect by role
-      if (data.user.role === "Admin") {
-        window.location.href = "/";  //Admin Page
-        window.location.reload();
-      } else if (data.user.role === "Pilot") {
+      // Role-based redirect
+      if (user.role === "Admin") {
+        window.location.href = "/";
+      } else if (user.role === "Pilot") {
         window.location.href = "/pilot";
-        window.location.reload();
-      } else if (data.user.role === "CabinCrew") {
+      } else if (user.role === "CabinCrew") {
         window.location.href = "/cabincrew";
-        window.location.reload();
       } else {
         window.location.href = "/passenger";
-        window.location.reload();
       }
-
     } catch (err) {
-      console.error(err)
+      console.error(err);
       setError("Server error");
     }
   };
@@ -65,11 +64,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-        {/* Logo placeholder */}
-        <div className="w-16 h-10 mx-auto mb-4 border border-slate-300 rounded-md flex items-center justify-center text-[10px] text-slate-400">
-          Logo
-        </div>
-
         {/* Title */}
         <h1 className="text-xl font-semibold text-slate-900 mb-6 text-center">
           Flight Roster Management System
@@ -101,11 +95,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && (
-            <p className="text-xs text-red-500">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-xs text-red-500">{error}</p>}
 
           <div className="flex items-center justify-between text-xs mt-1">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -117,12 +107,6 @@ export default function LoginPage() {
               />
               <span className="text-slate-700">Remember me</span>
             </label>
-            <button
-              type="button"
-              className="text-blue-500 hover:underline"
-            >
-              Forgot Password?
-            </button>
           </div>
 
           <button
