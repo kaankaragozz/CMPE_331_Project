@@ -3,19 +3,19 @@ import axios from "axios";
 
 const API_BASE = "http://localhost:3000";
 
-export default function PilotDashboardPage() {
+export default function CabinCrewDashboardPage() {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const userName = localStorage.getItem("userName") || "Pilot";
-  const pilotId = localStorage.getItem("pilotId");
+  const userName = localStorage.getItem("userName") || "CabinCrew";
+  const cabincrewId = localStorage.getItem("cabincrewId");
 
   useEffect(() => {
     const loadFlights = async () => {
-      if (!pilotId) {
+      if (!cabincrewId) {
         setError(
-          "Bu kullanıcıya bağlı bir pilot profili bulunamadı. Lütfen admin ile görüşün."
+          "Bu kullanıcıya bağlı bir crew profili bulunamadı. Lütfen admin ile görüşün."
         );
         setLoading(false);
         return;
@@ -25,8 +25,9 @@ export default function PilotDashboardPage() {
         setLoading(true);
         setError("");
 
+        // Adjust API endpoint for crew
         const res = await axios.get(
-          `${API_BASE}/api/flights/by-pilot/${pilotId}`
+          `${API_BASE}/api/flights/by-crew/${cabincrewId}`
         );
 
         if (!res.data.success) {
@@ -35,7 +36,7 @@ export default function PilotDashboardPage() {
 
         setFlights(res.data.data || []);
       } catch (err) {
-        console.error("Error loading pilot flights:", err);
+        console.error("Error loading crew flights:", err);
         setError(
           err.response?.data?.message ||
           err.message ||
@@ -47,7 +48,7 @@ export default function PilotDashboardPage() {
     };
 
     loadFlights();
-  }, [pilotId]);
+  }, [cabincrewId]);
 
   return (
     <div className="space-y-6">

@@ -30,13 +30,15 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
+      console.log("Login response:", data);
+      console.log("Cabin Crew ID:", data.user.cabincrewId);
 
       if (!res.ok) {
         setError(data.message || "Login failed");
         return;
       }
 
-      const user = data.user; // { id, name, role, pilot_id? }
+      const user = data.user; // { id, name, role, pilot_id?, cabincrewId? }
 
       localStorage.setItem("token", String(user.id));
       localStorage.setItem("userId", String(user.id));
@@ -47,6 +49,12 @@ export default function LoginPage() {
         localStorage.setItem("pilotId", String(user.pilot_id));
       } else {
         localStorage.removeItem("pilotId");
+      }
+
+      if (user.cabin_crew_id) {
+        localStorage.setItem("cabincrewId", String(user.cabin_crew_id));
+      } else {
+        localStorage.removeItem("cabincrewId");
       }
 
       // Role-based redirect

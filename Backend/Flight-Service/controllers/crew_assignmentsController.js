@@ -193,3 +193,72 @@ export const getFlightsByPilotId = async (req, res) => {
     });
   }
 };
+
+export const getFlightsByCrewId = async (req, res) => {
+  const { crew_id } = req.params; // <-- match your route
+
+  if (!crew_id) {
+    return res.status(400).json({
+      success: false,
+      message: "crew_id is required",
+    });
+  }
+
+  try {
+    const flights = await sql`
+      SELECT 
+        f.id,
+        f.flight_number,
+        f.flight_date,
+        f.duration_minutes,
+        f.distance_km,
+        f.is_shared,
+        f.shared_flight_number,
+        f.shared_airline_name,
+        f.connecting_flight_info,
+        f.created_at,
+        f.updated_at,
+        json_build_object(
+          'country', sa.country,
+          'city', sa.city,
+          'airport_name', sa.name,
+          'airport_code', sa.code
+        ) as source,
+        json_build_object(
+          'country', da.country,
+          'city', da.city,
+          'airport_name', da.name,
+          'airport_code', da.code
+        ) as destination,
+        json_build_object(
+          'id', vt.id,
+          'type_name', vt.type_name,
+          'total_seats', vt.total_seats,
+          'seating_plan', vt.seating_plan,
+          'max_crew', vt.max_crew,
+          'max_passengers', vt.max_passengers,
+          'menu_description', vt.menu_description
+        ) as vehicle_type
+      FROM flight_crew_assignments fca
+      JOIN flights f ON fca.flight_id = f.id
+      JOIN airports sa ON f.source_airport_id = sa.id
+      JOIN airports da ON f.destination_airport_id = da.id
+      JOIN vehicle_types vt ON f.vehicle_type_id = vt.id
+      WHERE ${crew_id} = ANY (fca.cabin_crew_ids)
+      ORDER BY f.flight_date ASC
+    `;
+
+    return res.status(200).json({
+      success: true,
+      count: flights.length,
+      data: flights,
+    });
+  } catch (error) {
+    console.error("Error in getFlightsByCrewId:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error loading flights for cabin crew",
+      error: error.message,
+    });
+  }
+};

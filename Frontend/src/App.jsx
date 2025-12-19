@@ -5,6 +5,10 @@ import AppLayout from "../components/layout/AppLayout.jsx";
 // Pages
 import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
 import PilotDashboardPage from "./pages/Dashboard/PilotDashboardPage.jsx";
+
+import CabinCrewDashboardPage from "./pages/Dashboard/CabinCrewDashBoardPage.jsx";
+
+
 import FlightSelectionPage from "./pages/Flights/FlightSelectionPage.jsx";
 import FlightDetailsPage from "./pages/Flights/FlightDetailsPage.jsx";
 import CrewAssignmentPage from "./pages/Flights/CrewAssignmentPage.jsx";
@@ -47,7 +51,7 @@ export default function App() {
             )}
 
             {role === "CabinCrew" && (
-              <Route path="/cabincrew" element={<FlightSelectionPage />} />
+              <Route path="/cabincrew" element={<CabinCrewDashboardPage />} />
             )}
 
             {role === "Passenger" && (

@@ -11,6 +11,7 @@ export async function initDB_users() {
         role VARCHAR(20) NOT NULL DEFAULT 'Passenger',
 
         pilot_id INTEGER NULL,  -- optional link to pilots table
+        cabin_crew_id INTEGER NULL,  -- optional link to cabincrew table
 
         last_login TIMESTAMP NULL,
         is_verified BOOLEAN DEFAULT FALSE,

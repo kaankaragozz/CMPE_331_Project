@@ -2,10 +2,10 @@ import { sql } from "../config/db.js";
 import bcrypt from "bcryptjs";
 
 const SAMPLE_USERS = [
-  { name: "admin",     password: "admin123",     role: "Admin" },
-  { name: "pilot1",    password: "pilot123",     role: "Pilot",    pilot_id: 4 }, // Emily Davis
-  { name: "cabincrew1",password: "cabincrew123", role: "CabinCrew" },
-  { name: "passenger1",password: "passenger123", role: "Passenger" },
+  { name: "admin", password: "admin123", role: "Admin" },
+  { name: "pilot1", password: "pilot123", role: "Pilot", pilot_id: 4 }, // Emily Davis
+  { name: "cabincrew1", password: "cabincrew123", role: "CabinCrew", cabin_crew_id: 2 }, // Oliver Smith
+  { name: "passenger1", password: "passenger123", role: "Passenger" },
 ];
 
 export async function seedUsers() {
@@ -17,8 +17,8 @@ export async function seedUsers() {
     for (const user of SAMPLE_USERS) {
       const hashedPassword = await bcrypt.hash(user.password, 10);
       await sql`
-        INSERT INTO users (name, password, role, pilot_id)
-        VALUES (${user.name}, ${hashedPassword}, ${user.role}, ${user.pilot_id ?? null})
+        INSERT INTO users (name, password, role, pilot_id, cabin_crew_id)
+        VALUES (${user.name}, ${hashedPassword}, ${user.role}, ${user.pilot_id ?? null}, ${user.cabin_crew_id ?? null})
       `;
       console.log("Seeded user:", user.name);
     }

@@ -40,7 +40,7 @@ export const login = async (req, res) => {
     }
 
     const user = await sql`
-      SELECT id, name, password, role, pilot_id
+      SELECT id, name, password, role, pilot_id, cabin_crew_id
       FROM users
       WHERE name = ${name}
     `;
@@ -65,6 +65,7 @@ export const login = async (req, res) => {
         name: user[0].name,
         role: user[0].role,
         pilot_id: user[0].pilot_id, // 🔑 new
+        cabin_crew_id: user[0].cabin_crew_id, // 🔑 new
       },
     });
   } catch (error) {
