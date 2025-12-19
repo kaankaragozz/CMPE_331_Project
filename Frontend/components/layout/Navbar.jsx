@@ -10,10 +10,10 @@ export default function Navbar() {
     role === "Pilot"
       ? "/pilot"
       : role === "CabinCrew"
-      ? "/cabincrew"
-      : role === "Passenger"
-      ? "/passenger"
-      : "/";
+        ? "/cabincrew"
+        : role === "Passenger"
+          ? "/passenger"
+          : "/";
 
   return (
     <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200">
@@ -37,10 +37,10 @@ export default function Navbar() {
               {role === "Pilot"
                 ? "Pilot dashboard"
                 : role === "CabinCrew"
-                ? "Cabin crew console"
-                : role === "Passenger"
-                ? "Passenger portal"
-                : "Operations dashboard"}
+                  ? "Cabin crew console"
+                  : role === "Passenger"
+                    ? "Passenger portal"
+                    : "Operations dashboard"}
             </p>
           </div>
         </button>
@@ -50,10 +50,9 @@ export default function Navbar() {
           <NavLink
             to={homePath}
             className={({ isActive }) =>
-              `px-3 py-1.5 rounded-lg font-medium ${
-                isActive
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-100"
+              `px-3 py-1.5 rounded-lg font-medium ${isActive
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:bg-slate-100"
               }`
             }
           >
@@ -63,10 +62,9 @@ export default function Navbar() {
           <NavLink
             to="/flights"
             className={({ isActive }) =>
-              `px-3 py-1.5 rounded-lg font-medium ${
-                isActive
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-100"
+              `px-3 py-1.5 rounded-lg font-medium ${isActive
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:bg-slate-100"
               }`
             }
           >
@@ -76,10 +74,9 @@ export default function Navbar() {
           <NavLink
             to="/user/profile"
             className={({ isActive }) =>
-              `px-3 py-1.5 rounded-lg font-medium ${
-                isActive
-                  ? "bg-slate-900 text-white"
-                  : "text-slate-600 hover:bg-slate-100"
+              `px-3 py-1.5 rounded-lg font-medium ${isActive
+                ? "bg-slate-900 text-white"
+                : "text-slate-600 hover:bg-slate-100"
               }`
             }
           >
@@ -109,6 +106,10 @@ export default function Navbar() {
             localStorage.removeItem("userId");
             localStorage.removeItem("userName");
             localStorage.removeItem("userEmail");
+            localStorage.removeItem("pilotId");
+            localStorage.removeItem("cabincrewId");
+            localStorage.removeItem("passengerId");
+
             window.location.href = "/login";
           }}
           className="text-xs text-slate-500 hover:text-red-500"

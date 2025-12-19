@@ -396,3 +396,67 @@ export const deleteInfantRelationship = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+
+//HAKAN 
+
+export async function getFlightsByPassengerId(req, res) {
+  const { passengerId } = req.params;
+
+  try {
+    const result = await sql`
+      SELECT
+        f.flight_number,
+        f.flight_date,
+        f.duration_minutes,
+        f.distance_km,
+        f.source_airport_id,
+        f.destination_airport_id,
+        f.vehicle_type_id,
+        f.is_shared,
+        fpa.seat_number,
+        fpa.seat_type_id,
+        fpa.is_infant
+      FROM flight_passenger_assignments fpa
+      JOIN flights f
+        ON f.flight_number = fpa.flight_number
+      WHERE fpa.passenger_id = ${passengerId};
+    `;
+
+    res.status(200).json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error("Error fetching flights by passengerId:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch flights for passenger"
+    });
+  }
+};
+
+
+export const getAllSeatTypes = async (req, res) => {
+  try {
+    const result = await sql`
+      SELECT
+        seat_type_id,
+        type_name
+      FROM seat_type
+      ORDER BY seat_type_id;
+    `;
+
+    res.status(200).json({
+      success: true,
+      count: result.length,
+      data: result
+    });
+  } catch (error) {
+    console.error("Error fetching seat types:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch seat types"
+    });
+  }
+};

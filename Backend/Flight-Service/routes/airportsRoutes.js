@@ -4,7 +4,9 @@ import { getAllAirports, getAirportByCode, createAirport, updateAirport, deleteA
 const router = express.Router();
 
 router.get('/', getAllAirports);
+
 router.get('/:code', getAirportByCode);
+
 router.post('/', createAirport);
 router.put('/:code', updateAirport);
 router.delete('/:code', deleteAirport);

@@ -6,7 +6,9 @@ import AppLayout from "../components/layout/AppLayout.jsx";
 import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
 import PilotDashboardPage from "./pages/Dashboard/PilotDashboardPage.jsx";
 
+//Hakan
 import CabinCrewDashboardPage from "./pages/Dashboard/CabinCrewDashBoardPage.jsx";
+import PassengerDashboardPage from "./pages/Dashboard/PassengerDashBoardPage.jsx";
 
 
 import FlightSelectionPage from "./pages/Flights/FlightSelectionPage.jsx";
@@ -19,6 +21,7 @@ import UserProfilePage from "./pages/User/UserProfilePage.jsx";
 
 // Auth
 import LoginPage from "./pages/Auth/LoginPage.jsx";
+
 
 export default function App() {
   const token = localStorage.getItem("token");
@@ -55,7 +58,7 @@ export default function App() {
             )}
 
             {role === "Passenger" && (
-              <Route path="/passenger" element={<SeatAssignmentPage />} />
+              <Route path="/passenger" element={<PassengerDashboardPage />} />
             )}
 
             {/* COMMON ROUTES */}

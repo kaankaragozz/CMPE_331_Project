@@ -24,9 +24,15 @@ import {
   addInfantRelationship,
   deleteInfantRelationship,
 
+  getFlightsByPassengerId,
+  getAllSeatTypes
+
 } from '../controllers/passengersController.js';
 
 const router = express.Router();
+
+//Static Route must come before /:id cases
+router.get("/seat-types", getAllSeatTypes);
 
 router.get('/', getAllPassengers);
 router.get('/:id', getPassengerById);
@@ -39,11 +45,18 @@ router.post('/flight-assignment', addPassengerToFlight);
 router.delete('/flight/:flight_number/:passenger_id', removePassengerFromFlight);
 router.post('/flight/:flight_number/assign-seats', autoAssignSeats);
 router.put('/flight/:flight_number/manual-assign', assignSeatManually);
+
 router.get('/flight/:flight_number/affiliations', getAffiliatedPassengers);
 router.post('/affiliations', addAffiliation);
 router.delete('/affiliations/:id', deleteAffiliation);
 router.get('/flight/:flight_number/infants', getInfantRelationships);
+
 router.post('/infants', addInfantRelationship);
 router.delete('/infants/:id', deleteInfantRelationship);
+
+// GET flights by passengerId
+router.get("/:passengerId/:flight_number", getFlightsByPassengerId);
+
+
 
 export default router;

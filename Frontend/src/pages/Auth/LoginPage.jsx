@@ -38,7 +38,7 @@ export default function LoginPage() {
         return;
       }
 
-      const user = data.user; // { id, name, role, pilot_id?, cabincrewId? }
+      const user = data.user; // { id, name, role, pilot_id?, cabincrewId passengerId? }
 
       localStorage.setItem("token", String(user.id));
       localStorage.setItem("userId", String(user.id));
@@ -57,6 +57,12 @@ export default function LoginPage() {
         localStorage.removeItem("cabincrewId");
       }
 
+      if (user.passenger_id) {
+        localStorage.setItem("passengerId", String(user.passenger_id));
+      } else {
+        localStorage.removeItem("passengerId");
+      }
+
       // Role-based redirect
       if (user.role === "Admin") {
         window.location.href = "/";
@@ -64,7 +70,7 @@ export default function LoginPage() {
         window.location.href = "/pilot";
       } else if (user.role === "CabinCrew") {
         window.location.href = "/cabincrew";
-      } else {
+      } else if (user.role === "Passenger") {
         window.location.href = "/passenger";
       }
     } catch (err) {

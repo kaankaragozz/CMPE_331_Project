@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 export const getAllUsers = async (req, res) => {
   try {
     const users = await sql`
-      SELECT id, name, role, pilot_id, created_at 
+      SELECT id, name, role, pilot_id, cabin_crew_id, passenger_id, created_at 
       FROM users
       ORDER BY id DESC
     `;
@@ -23,7 +23,7 @@ export const getUser = async (req, res) => {
 
   try {
     const users = await sql`
-      SELECT id, name, role, pilot_id, created_at, last_login
+      SELECT id, name, role, pilot_id, cabin_crew_id, passenger_id, created_at, last_login
       FROM users
       WHERE id = ${id}
     `;
@@ -41,7 +41,7 @@ export const getUser = async (req, res) => {
 
 // ✅ Create new user
 export const createUser = async (req, res) => {
-  const { name, password, role, pilot_id } = req.body;
+  const { name, password, role, pilot_id, cabin_crew_id, passenger_id } = req.body;
 
   try {
     if (!name || !password) {
@@ -58,9 +58,9 @@ export const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await sql`
-      INSERT INTO users (name, password, role, pilot_id)
-      VALUES (${name}, ${hashedPassword}, ${role || 'Passenger'}, ${pilot_id ?? null})
-      RETURNING id, name, role, pilot_id, created_at
+      INSERT INTO users (name, password, role, pilot_id, cabin_crew_id, passenger_id)
+      VALUES (${name}, ${hashedPassword}, ${role || 'Passenger'}, ${pilot_id ?? null}, ${cabin_crew_id ?? null}, ${passenger_id ?? null})
+      RETURNING id, name, role, pilot_id, cabin_crew_id, passenger_id, created_at
     `;
 
     res.status(201).json(newUser[0]);
@@ -119,3 +119,4 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+

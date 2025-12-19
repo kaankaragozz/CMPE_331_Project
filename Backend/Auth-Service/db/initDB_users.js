@@ -12,6 +12,7 @@ export async function initDB_users() {
 
         pilot_id INTEGER NULL,  -- optional link to pilots table
         cabin_crew_id INTEGER NULL,  -- optional link to cabincrew table
+        passenger_id INTEGER NULL,  -- optional link to passenger table
 
         last_login TIMESTAMP NULL,
         is_verified BOOLEAN DEFAULT FALSE,
