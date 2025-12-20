@@ -15,6 +15,8 @@ import flightsRoutes from "./routes/flightsRoutes.js";
 import vehicleTypesRoutes from "./routes/vehicle_typesRoutes.js";
 import crewAssignmentsRoutes from "./routes/crew_assignmentsRoutes.js"; // ✅
 
+import flight_recipeRoutes from "./routes/flight_recipeRoutes.js";
+
 // =====================
 // DB Init
 // =====================
@@ -23,12 +25,16 @@ import { initFlightsTable } from "./db/initDB_flights.js";
 import { initVehicleTypesTable } from "./db/initDB_vehicle_types.js";
 import { initDB_pilot_flight_assignments } from "./db/initDB_pilot_flight_assignments.js"; // ✅
 
+import { initDB_Flight_Recipe } from "./db/initDB_flight_recipe.js"
+
 // =====================
 // Seeds
 // =====================
 import { seedAirports } from "./seeds/airports.js";
 import { seedFlights } from "./seeds/flights.js";
 import { seedVehicleTypes } from "./seeds/vehicle_types.js";
+
+
 
 // =====================
 // Environment
@@ -64,6 +70,7 @@ app.use("/api/airports", airportsRoutes);
 app.use("/api/flights", flightsRoutes);
 app.use("/api/vehicle-types", vehicleTypesRoutes);
 app.use("/api/flights", crewAssignmentsRoutes);
+app.use("/api/flight_recipes", flight_recipeRoutes)
 
 // =====================
 // Export app for testing
@@ -78,6 +85,7 @@ if (process.env.NODE_ENV !== "test") {
     .then(() => initFlightsTable())
     .then(() => initVehicleTypesTable())
     .then(() => initDB_pilot_flight_assignments()) // ✅ ensure table
+    .then(() => initDB_Flight_Recipe())
     .then(async () => {
       if (process.env.NODE_ENV !== "production") {
         await seedVehicleTypes();

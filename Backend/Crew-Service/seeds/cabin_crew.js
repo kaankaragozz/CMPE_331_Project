@@ -2,25 +2,26 @@ import { sql } from "../config/db.js";
 
 export const SAMPLE_CABIN_CREW = [
   //Hakan
-  // Chiefs
+  // Chiefs : attendant_Types : 1 
   { first_name: 'Noah', last_name: 'Wilson', age: 38, gender: 'Male', nationality: 'Australian', known_languages: ['English'], attendant_type_name: 'chief' },
   { first_name: 'Emma', last_name: 'Smith', age: 42, gender: 'Female', nationality: 'British', known_languages: ['English', 'French'], attendant_type_name: 'chief' },
 
-  // Senior flight attendants
+  // Senior flight attendants attendant_Types : 2
   { first_name: 'Liam', last_name: 'Johnson', age: 35, gender: 'Male', nationality: 'Canadian', known_languages: ['English', 'Spanish'], attendant_type_name: 'senior_flight_attendant' },
   { first_name: 'Olivia', last_name: 'Brown', age: 33, gender: 'Female', nationality: 'American', known_languages: ['English'], attendant_type_name: 'senior_flight_attendant' },
 
-  // Junior flight attendants (4-16)
+  // Junior flight attendants (4-16) : attendant_Types : 3 
   { first_name: 'Mia', last_name: 'Anderson', age: 27, gender: 'Female', nationality: 'American', known_languages: ['English'], attendant_type_name: 'junior_flight_attendant' },
   { first_name: 'Ethan', last_name: 'Davis', age: 25, gender: 'Male', nationality: 'Australian', known_languages: ['English'], attendant_type_name: 'junior_flight_attendant' },
   { first_name: 'Sophia', last_name: 'Martinez', age: 29, gender: 'Female', nationality: 'Spanish', known_languages: ['Spanish', 'English'], attendant_type_name: 'junior_flight_attendant' },
   { first_name: 'James', last_name: 'Miller', age: 28, gender: 'Male', nationality: 'Canadian', known_languages: ['English', 'French'], attendant_type_name: 'junior_flight_attendant' },
+
   { first_name: 'Ava', last_name: 'Wilson', age: 26, gender: 'Female', nationality: 'British', known_languages: ['English'], attendant_type_name: 'junior_flight_attendant' },
   { first_name: 'Lucas', last_name: 'Taylor', age: 24, gender: 'Male', nationality: 'American', known_languages: ['English'], attendant_type_name: 'junior_flight_attendant' },
   { first_name: 'Charlotte', last_name: 'Harris', age: 27, gender: 'Female', nationality: 'Canadian', known_languages: ['English', 'French'], attendant_type_name: 'junior_flight_attendant' },
   { first_name: 'Benjamin', last_name: 'Clark', age: 29, gender: 'Male', nationality: 'Australian', known_languages: ['English'], attendant_type_name: 'junior_flight_attendant' },
 
-  // Chefs
+  // Chefs : attendant_Types : 4
   { first_name: 'Isabella', last_name: 'Garcia', age: 34, gender: 'Female', nationality: 'Mexican', known_languages: ['Spanish', 'English'], attendant_type_name: 'chef', recipes: ['Tacos', 'Enchiladas', 'Guacamole'] },
   { first_name: 'Alexander', last_name: 'Lee', age: 39, gender: 'Male', nationality: 'Korean', known_languages: ['Korean', 'English'], attendant_type_name: 'chef', recipes: ['Bibimbap', 'Kimchi', 'Bulgogi', 'Japchae'] }
 ];

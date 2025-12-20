@@ -30,18 +30,30 @@ const SAMPLE_USERS = [
 
 
   //---------Cabin_Crew--------------
-  //attendant_type: 1 , flight_attendant
-  { name: "emma1", password: "emma123", role: "CabinCrew", cabin_crew_id: 1 }, //Emma Johnson from cabin_crew table
-  { name: "oliver1", password: "oliver123", role: "CabinCrew", cabin_crew_id: 2 }, //Oliver Smith from cabin_crew table 
-  { name: "liam1", password: "liam123", role: "CabinCrew", cabin_crew_id: 4 }, //Liam Brown from cabin_crew table
-  { name: "mia1", password: "mia123", role: "CabinCrew", cabin_crew_id: 7 }, //Mia Anderson from cabin_crew table
-  { name: "ethan1", password: "ethan123", role: "CabinCrew", cabin_crew_id: 8 }, //Ethan Taylor from cabin_crew table
+  //attendant_type: 1 , chiefs
+  { name: "noah1", password: "noah123", role: "CabinCrew", cabin_crew_id: 1 }, //Noah from cabin_crew table
+  { name: "emma1", password: "emma123", role: "CabinCrew", cabin_crew_id: 2 }, //Emma Smith from cabin_crew table
+
   //attendant_type: 2 , senior_flight_attendant
-  { name: "sophia1", password: "sophia123", role: "CabinCrew", cabin_crew_id: 3 }, //Sophia Garcia from cabin_crew table
+  { name: "liam1", password: "liam123", role: "CabinCrew", cabin_crew_id: 3 }, //Liam Johnson from cabin_crew table
+  { name: "olivia1", password: "olivia123", role: "CabinCrew", cabin_crew_id: 4 }, //Olivia Brown from cabin_crew table
+
+  //attendant_type: 3 , junior_flight_attendant
+  { name: "mia1", password: "mia123", role: "CabinCrew", cabin_crew_id: 5 }, //Mia Anderson from cabin_crew table
+  { name: "ethan1", password: "ethan123", role: "CabinCrew", cabin_crew_id: 6 }, //Ethan Davis from cabin_crew table
+  { name: "sophia1", password: "sophia123", role: "CabinCrew", cabin_crew_id: 7 }, //Sophia Martinez from cabin_crew table
+  { name: "james2", password: "james123", role: "CabinCrew", cabin_crew_id: 8 }, //James Miller from cabin_crew table // James already exists as a pilot 
+
+  { name: "ava1", password: "ava123", role: "CabinCrew", cabin_crew_id: 9 }, //Ava Milson from cabin_crew table
+  { name: "lucas1", password: "lucas123", role: "CabinCrew", cabin_crew_id: 10 }, //Lucas Taylor from cabin_crew table
+  { name: "charlotte1", password: "charlotte123", role: "CabinCrew", cabin_crew_id: 11 }, //Charlotte Harris from cabin_crew table
+  { name: "benjamin1", password: "benjamin123", role: "CabinCrew", cabin_crew_id: 12 }, //Benjamin Clark from cabin_crew table
+
   //attendant_type: 3 , chef
-  { name: "isabella1", password: "isabella123", role: "CabinCrew", cabin_crew_id: 5 }, //Isabella Martinez from cabin_crew table
-  //attendant_type: 4 , purser
-  { name: "noah1", password: "noah123", role: "CabinCrew", cabin_crew_id: 6 }, //Noah Wilson from cabin_crew table
+  { name: "isabella1", password: "isabella123", role: "CabinCrew", cabin_crew_id: 13 }, //Isabella Martinez from cabin_crew table
+  { name: "alexander1", password: "alexander123", role: "CabinCrew", cabin_crew_id: 14 }, //Alexander Martinez from cabin_crew table
+
+
 
 
   //---------Passenger----------------

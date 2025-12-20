@@ -8,6 +8,8 @@ export default function CabinCrewDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [chefRecipes, setChefRecipes] = useState([]);
+
   const userName = localStorage.getItem("userName") || "CabinCrew";
   const cabincrewId = localStorage.getItem("cabincrewId");
 
@@ -25,16 +27,30 @@ export default function CabinCrewDashboardPage() {
         setLoading(true);
         setError("");
 
-        // Adjust API endpoint for crew
-        const res = await axios.get(
-          `${API_BASE}/api/flights/by-crew/${cabincrewId}`
-        );
-
+        // 1) Fetch assigned flights
+        const res = await axios.get(`${API_BASE}/api/flights/by-crew/${cabincrewId}`);
         if (!res.data.success) {
           throw new Error(res.data.message || "API error");
         }
-
         setFlights(res.data.data || []);
+
+        // 2) Fetch current crew member info to check for chef recipes
+        try {
+          const crewRes = await axios.get(`${API_BASE}/api/cabin-crew/${cabincrewId}`);
+          const crew = crewRes.data?.data;
+
+          // Check if the crew member is a chef
+          if (crew && (crew.attendant_type === "chef" || crew.attendant_type_name === "chef") && crew.recipes?.length) {
+            setChefRecipes(crew.recipes);
+          } else {
+            setChefRecipes([]);
+          }
+
+
+        } catch (err) {
+          console.warn("Could not load crew member info or recipes:", err);
+          setChefRecipes([]);
+        }
       } catch (err) {
         console.error("Error loading crew flights:", err);
         setError(
@@ -77,59 +93,67 @@ export default function CabinCrewDashboardPage() {
       )}
 
       {!loading && !error && flights.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">
-            Upcoming assigned flights
-          </h3>
+        <>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+            <h3 className="text-sm font-semibold text-slate-900 mb-3">
+              Upcoming assigned flights
+            </h3>
+            <div className="space-y-3">
+              {flights.map((f) => {
+                const d = f.flight_date ? new Date(f.flight_date) : null;
+                const dateLabel = d
+                  ? d.toLocaleString([], {
+                    day: "2-digit",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                  : "-";
 
-          <div className="space-y-3">
-            {flights.map((f) => {
-              const d = f.flight_date ? new Date(f.flight_date) : null;
-              const dateLabel = d
-                ? d.toLocaleString([], {
-                  day: "2-digit",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-                : "-";
+                const origin = f.source?.airport_code || f.source?.code || f.source?.city || "???";
+                const dest = f.destination?.airport_code || f.destination?.code || f.destination?.city || "???";
+                const vehicleName = f.vehicle_type?.type_name || "N/A";
 
-              const origin =
-                f.source?.airport_code ||
-                f.source?.code ||
-                f.source?.city ||
-                "???";
-              const dest =
-                f.destination?.airport_code ||
-                f.destination?.code ||
-                f.destination?.city ||
-                "???";
-
-              const vehicleName = f.vehicle_type?.type_name || "N/A";
-
-              return (
-                <div
-                  key={f.id}
-                  className="border border-slate-200 rounded-lg px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {f.flight_number} · {origin} → {dest}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {dateLabel} · {vehicleName}
-                    </p>
+                return (
+                  <div
+                    key={f.id}
+                    className="border border-slate-200 rounded-lg px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {f.flight_number} · {origin} → {dest}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {dateLabel} · {vehicleName}
+                      </p>
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      Duration: {f.duration_minutes} min · Distance: {Number(f.distance_km).toFixed(0)} km
+                    </div>
                   </div>
-                  <div className="text-xs text-slate-500">
-                    Duration: {f.duration_minutes} min · Distance:{" "}
-                    {Number(f.distance_km).toFixed(0)} km
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+
+          {chefRecipes.length > 0 && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mt-6">
+              <h3 className="text-sm font-semibold text-slate-900 mb-3">
+                Your Assigned Recipes
+              </h3>
+              <ul className="list-disc list-inside text-sm text-slate-700">
+                {chefRecipes.map((recipe, idx) => (
+                  <li key={idx}>
+                    <span className="font-semibold">{recipe.recipe_name}:</span> {recipe.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
       )}
+
+
     </div>
   );
 }

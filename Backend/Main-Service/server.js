@@ -96,7 +96,7 @@ const proxyRequest = async (baseUrl, targetPath, req, res, serviceName) => {
     res.status(response.status).json(response.data);
   } catch (err) {
     console.error(`${serviceName} proxy error for ${req.method} ${req.originalUrl}:`, err.message);
-    
+
     // Determine appropriate status code
     let statusCode = 500;
     if (err.response?.status) {
@@ -158,6 +158,8 @@ const flightServiceRoutes = [
   "/api/airports",
   "/api/flights",
   "/api/vehicle-types",
+
+  "/api/flight_recipes"
 ];
 
 flightServiceRoutes.forEach((route) => {
