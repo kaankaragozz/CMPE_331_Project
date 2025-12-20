@@ -33,9 +33,16 @@ export const getCrewAssignmentByFlightNumber = async (req, res) => {
     `;
 
     if (assignmentRows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "No crew assignment found for this flight",
+      // Return empty assignment instead of 404 - this is a valid state
+      return res.status(200).json({
+        success: true,
+        data: {
+          flight_id: flightId,
+          pilot_ids: [],
+          cabin_crew_ids: [],
+          created_at: null,
+          updated_at: null
+        },
       });
     }
 
@@ -88,8 +95,20 @@ export const upsertCrewAssignmentForFlight = async (req, res) => {
 
     const flightId = flightRows[0].id;
 
-    const pilotIdsArray = `{${pilot_ids.join(",")}}`;
-    const cabinCrewArray = `{${cabin_crew_ids.join(",")}}`;
+    // Convert arrays to PostgreSQL array format: {1,2,3}
+    // Ensure all IDs are integers
+    const pilotIdsInt = pilot_ids.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+    const cabinCrewIdsInt = cabin_crew_ids.map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+
+    if (pilotIdsInt.length === 0 || cabinCrewIdsInt.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid IDs provided. All IDs must be valid integers.",
+      });
+    }
+
+    const pilotIdsArray = `{${pilotIdsInt.join(",")}}`;
+    const cabinCrewArray = `{${cabinCrewIdsInt.join(",")}}`;
 
     const result = await sql`
       INSERT INTO flight_crew_assignments (

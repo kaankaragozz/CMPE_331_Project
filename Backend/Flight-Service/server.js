@@ -24,6 +24,7 @@ import { initAirportsTable } from "./db/initDB_airports.js";
 import { initFlightsTable } from "./db/initDB_flights.js";
 import { initVehicleTypesTable } from "./db/initDB_vehicle_types.js";
 import { initDB_pilot_flight_assignments } from "./db/initDB_pilot_flight_assignments.js"; // ✅
+import { initCompaniesTable } from "./db/initDB_companies.js";
 
 import { initDB_Flight_Recipe } from "./db/initDB_flight_recipe.js"
 
@@ -33,6 +34,7 @@ import { initDB_Flight_Recipe } from "./db/initDB_flight_recipe.js"
 import { seedAirports } from "./seeds/airports.js";
 import { seedFlights } from "./seeds/flights.js";
 import { seedVehicleTypes } from "./seeds/vehicle_types.js";
+import { seedCompanies } from "./seeds/companies.js";
 
 
 
@@ -82,12 +84,14 @@ export default app;
 // =====================
 if (process.env.NODE_ENV !== "test") {
   initAirportsTable()
-    .then(() => initFlightsTable())
+    .then(() => initCompaniesTable())
     .then(() => initVehicleTypesTable())
+    .then(() => initFlightsTable())
     .then(() => initDB_pilot_flight_assignments()) // ✅ ensure table
     .then(() => initDB_Flight_Recipe())
     .then(async () => {
       if (process.env.NODE_ENV !== "production") {
+        await seedCompanies();
         await seedVehicleTypes();
         await seedAirports();
         await seedFlights();

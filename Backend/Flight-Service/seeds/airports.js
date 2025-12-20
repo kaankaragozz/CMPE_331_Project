@@ -10,7 +10,8 @@ export async function seedAirports() {
     { code: 'CDG', name: 'Charles de Gaulle Airport', city: 'Paris', country: 'France' },
     { code: 'DXB', name: 'Dubai International Airport', city: 'Dubai', country: 'United Arab Emirates' },
     { code: 'FRA', name: 'Frankfurt Airport', city: 'Frankfurt', country: 'Germany' },
-    { code: 'AMS', name: 'Amsterdam Airport Schiphol', city: 'Amsterdam', country: 'Netherlands' }
+    { code: 'AMS', name: 'Amsterdam Airport Schiphol', city: 'Amsterdam', country: 'Netherlands' },
+    { code: 'DOH', name: 'Hamad International Airport', city: 'Doha', country: 'Qatar' }
   ];
 
   for (const airport of airports) {

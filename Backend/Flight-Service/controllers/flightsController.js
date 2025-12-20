@@ -39,11 +39,19 @@ export const getAllFlights = async (req, res) => {
           'max_crew', vt.max_crew,
           'max_passengers', vt.max_passengers,
           'menu_description', vt.menu_description
-        ) as vehicle_type
+        ) as vehicle_type,
+        -- Company info
+        json_build_object(
+          'id', c.id,
+          'code', c.code,
+          'name', c.name,
+          'country', c.country
+        ) as company
       FROM flights f
       INNER JOIN airports sa ON f.source_airport_id = sa.id
       INNER JOIN airports da ON f.destination_airport_id = da.id
       INNER JOIN vehicle_types vt ON f.vehicle_type_id = vt.id
+      LEFT JOIN companies c ON f.company_id = c.id
       ORDER BY f.flight_date DESC
     `;
 
@@ -112,11 +120,19 @@ export const getFlightByNumber = async (req, res) => {
           'max_crew', vt.max_crew,
           'max_passengers', vt.max_passengers,
           'menu_description', vt.menu_description
-        ) as vehicle_type
+        ) as vehicle_type,
+        -- Company info
+        json_build_object(
+          'id', c.id,
+          'code', c.code,
+          'name', c.name,
+          'country', c.country
+        ) as company
       FROM flights f
       INNER JOIN airports sa ON f.source_airport_id = sa.id
       INNER JOIN airports da ON f.destination_airport_id = da.id
       INNER JOIN vehicle_types vt ON f.vehicle_type_id = vt.id
+      LEFT JOIN companies c ON f.company_id = c.id
       WHERE UPPER(f.flight_number) = UPPER(${flight_number})
     `;
 

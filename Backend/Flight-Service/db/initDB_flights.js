@@ -1,10 +1,12 @@
 import { sql } from '../config/db.js';
 import { initVehicleTypesTable } from './initDB_vehicle_types.js';
+import { initCompaniesTable } from './initDB_companies.js';
 
 export async function initFlightsTable() {
   try {
     console.log('📍 Creating `flights` table...');
     await initVehicleTypesTable();
+    await initCompaniesTable();
 
     await sql`
       CREATE TABLE IF NOT EXISTS flights (
@@ -16,6 +18,7 @@ export async function initFlightsTable() {
         source_airport_id INTEGER NOT NULL REFERENCES airports(id),
         destination_airport_id INTEGER NOT NULL REFERENCES airports(id),
         vehicle_type_id INTEGER NOT NULL REFERENCES vehicle_types(id),
+        company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
         is_shared BOOLEAN DEFAULT FALSE,
         shared_flight_number VARCHAR(6),
         shared_airline_name VARCHAR(255),
@@ -24,6 +27,19 @@ export async function initFlightsTable() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `;
+
+    // Add company_id column if it doesn't exist (for existing tables)
+    try {
+      await sql`
+        ALTER TABLE flights 
+        ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL
+      `;
+    } catch (error) {
+      // Column might already exist, ignore error
+      if (!error.message.includes('already exists') && !error.message.includes('duplicate')) {
+        console.warn('  ⚠️  Could not add company_id column (might already exist):', error.message);
+      }
+    }
 
     // Create indexes
     await sql`CREATE INDEX IF NOT EXISTS idx_flights_flight_number ON flights(flight_number)`;
