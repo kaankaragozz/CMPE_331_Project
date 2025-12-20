@@ -35,6 +35,12 @@ export default function FlightDetailsPage() {
   // Hakan: chef recipes
   const [crewWithRecipes, setCrewWithRecipes] = useState([]);
   const [assignedFlightRecipes, setAssignedFlightRecipes] = useState([]);
+  const [allRecipes, setAllRecipes] = useState([]);
+
+  const recipeMap = {};
+  allRecipes.forEach(r => {
+    recipeMap[`${r.chef_id}-${r.recipe_name}`] = r.id;
+  });
 
   // Fetch all chefs with recipes
   useEffect(() => {
@@ -42,8 +48,23 @@ export default function FlightDetailsPage() {
       try {
         const res = await axios.get(`${API_BASE}/api/cabin-crew`);
         const crewData = res.data?.data || [];
-        const chefs = crewData.filter(c => c.attendant_type === "chef" && c.recipes?.length);
+        const chefs = crewData.filter(
+          (c) => c.attendant_type === "chef" && c.recipes?.length
+        );
+
         setCrewWithRecipes(chefs);
+
+        // Build a recipe map with IDs
+        const recipes = [];
+        chefs.forEach((chef) => {
+          chef.recipes.forEach((r) => {
+            // use real backend ID
+            recipes.push({ ...r, chef_id: chef.id });
+            // r.id is already the backend dish_recipes.id
+          });
+        });
+        setAllRecipes(recipes);
+
       } catch (err) {
         console.error("Failed to load cabin crew recipes", err);
       }
@@ -70,12 +91,19 @@ export default function FlightDetailsPage() {
   // Assign a recipe to flight
   const assignRecipeToFlight = async (crew_id, recipe_id) => {
     try {
-      await axios.post(`${API_BASE}/api/flight_recipes/${flight.flight_number}/assign-recipe`, {
-        crew_id,
-        recipe_id
+      const res = await axios.post(
+        `${API_BASE}/api/flight_recipes/${flight.flight_number}/assign-recipe`,
+        { crew_id, recipe_id }
+      );
+
+      const newAssignment = res.data?.data;
+
+      // Update state locally
+      setAssignedFlightRecipes((prev) => {
+        // Remove any existing assignment for the same chef
+        const filtered = prev.filter(fr => fr.crew_id !== crew_id);
+        return [...filtered, newAssignment];
       });
-      // Refresh assigned recipes
-      fetchAssignedRecipes();
     } catch (err) {
       console.error("Failed to assign recipe:", err);
     }
@@ -486,9 +514,9 @@ export default function FlightDetailsPage() {
           {crewWithRecipes
             .filter(chef => crewAssignment.cabin_crew_ids.includes(chef.id))
             .map(chef => {
+              // Get assigned recipes for this chef from flight_recipe table
               const chefAssignedRecipes = assignedFlightRecipes
-                .filter(fr => fr.crew_id === chef.id)
-                .map(fr => fr.recipe_id);
+                .filter(fr => fr.crew_id === chef.id);
 
               return (
                 <div key={chef.id} className="mb-6">
@@ -497,16 +525,36 @@ export default function FlightDetailsPage() {
                   {/* Recipes list */}
                   <ul className="list-disc list-inside text-sm text-slate-700 mb-3">
                     {chef.recipes.map(recipe => {
-                      const isAssigned = chefAssignedRecipes.includes(recipe.id);
+                      console.log("chef.recipes", recipe); // <--- add this line
+                      const isAssigned = chefAssignedRecipes.some(fr => fr.recipe_id === recipe.id);
                       return (
                         <li key={recipe.id} className="flex justify-between items-center">
                           <div>
                             <span className="font-semibold">{recipe.recipe_name}:</span> {recipe.description}
                           </div>
                           <button
-                            className={`ml-4 text-xs px-2 py-1 rounded ${isAssigned ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                            className={`ml-4 text-xs px-2 py-1 rounded ${isAssigned
+                              ? 'bg-gray-400 text-white cursor-not-allowed'
+                              : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                              }`}
                             disabled={isAssigned}
-                            onClick={() => assignRecipeToFlight(chef.id, recipe.id)}
+                            onClick={async () => {
+                              console.log('Clicked assign button for chef:', chef.id);
+                              console.log('Recipe attempting to assign:', recipe);
+
+                              try {
+                                const recipeIdToSend = recipe.id; // <-- make sure this is backend recipe.id
+                                console.log('Sending recipe_id to backend:', recipeIdToSend);
+
+                                const res = await assignRecipeToFlight(chef.id, recipeIdToSend);
+                                console.log('Assign recipe API response:', res);
+
+                                await fetchAssignedRecipes();
+                                console.log('Assigned recipes updated:', assignedFlightRecipes);
+                              } catch (err) {
+                                console.error('Failed to assign recipe:', err);
+                              }
+                            }}
                           >
                             {isAssigned ? 'Assigned' : 'Assign to flight'}
                           </button>
@@ -515,29 +563,13 @@ export default function FlightDetailsPage() {
                     })}
                   </ul>
 
-                  {/* Assigned recipes table */}
-                  {chefAssignedRecipes.length > 0 && (
-                    <div className="overflow-x-auto mt-2">
-                      <table className="min-w-full text-xs sm:text-sm border-collapse border border-slate-200">
-                        <thead>
-                          <tr className="bg-slate-100 text-slate-700">
-                            <th className="px-3 py-2 text-left font-semibold">Assigned Recipe Name</th>
-                            <th className="px-3 py-2 text-left font-semibold">Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {chef.recipes
-                            .filter(r => chefAssignedRecipes.includes(r.id))
-                            .map(r => (
-                              <tr key={r.id} className="border-t border-slate-100">
-                                <td className="px-3 py-2">{r.recipe_name}</td>
-                                <td className="px-3 py-2">{r.description}</td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                  {/* NEW: Show only recipes assigned to this flight */}
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-md p-2 text-sm text-emerald-800">
+                    <span className="font-semibold">Currently assigned to flight:</span>{" "}
+                    {chefAssignedRecipes.length > 0
+                      ? chefAssignedRecipes.map(r => r.recipe_name).join(", ")
+                      : "No recipes assigned yet."}
+                  </div>
                 </div>
               );
             })}
