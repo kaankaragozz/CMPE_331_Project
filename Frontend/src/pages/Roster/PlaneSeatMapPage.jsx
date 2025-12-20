@@ -11,6 +11,22 @@ const PASSENGER_API_BASE = "http://localhost:3004";
 const TOOLTIP_OFFSET_X = 0;   // left/right
 const TOOLTIP_OFFSET_Y = 14;  // distance ABOVE the cursor (bigger = higher)
 
+// ------------- helpers (infant rules + localStorage mapping) -------------
+
+function isInfantPassenger(p) {
+  if (p?.is_infant === true) return true;
+  const age = Number(p?.age);
+  return Number.isFinite(age) && age >= 0 && age <= 2;
+}
+
+function safeParseJSON(value) {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
 // basic layout: rows 1–3 business, 4–15 economy
 // some seats are crew (static demo), passengers/infants come from DB
 function buildBaseSeatMap() {
@@ -34,6 +50,8 @@ function buildBaseSeatMap() {
         cabinClass,
         occupantType: special.occupantType || null, // crew, passenger, infant, or null
         occupantName: special.occupantName || "",   // name to show on hover
+        occupantId: null,                           // passenger_id if passenger/infant
+        infantInfo: null,                           // { infants: [name...], parentName?: string }
       };
     });
     rows.push({ rowNumber: r, seats });
@@ -93,9 +111,36 @@ export default function PlaneSeatMapPage() {
       })
     );
 
-    // Overlay passengers from DB
+    // Build lookup by passenger_id
+    const passengerById = {};
     passengers.forEach((p) => {
-      if (!p.seat_number) return; // unassigned passenger
+      passengerById[String(p.passenger_id)] = p;
+    });
+
+    // Load infant->parent map from localStorage (created by your seat assignment page)
+    const storageKey = flightNumber
+      ? `infantParentMap_${flightNumber}`
+      : "infantParentMap_unknownFlight";
+
+    const stored = safeParseJSON(localStorage.getItem(storageKey)) || {};
+    // stored: { [infantId]: parentId }
+
+    // Build parentId -> infants[]
+    const parentToInfants = {};
+    passengers.forEach((p) => {
+      if (!isInfantPassenger(p)) return;
+
+      const infantId = String(p.passenger_id);
+      const parentId = stored[infantId] ? String(stored[infantId]) : null;
+      if (!parentId) return;
+
+      if (!parentToInfants[parentId]) parentToInfants[parentId] = [];
+      parentToInfants[parentId].push(p);
+    });
+
+    // Overlay passengers from DB (only if seat_number exists)
+    passengers.forEach((p) => {
+      if (!p.seat_number) return; // unassigned -> won't appear on seat map
       const seatKey = p.seat_number; // e.g. "5A"
       const seat = seatIndex.get(seatKey);
       if (!seat) return;
@@ -103,19 +148,44 @@ export default function PlaneSeatMapPage() {
       // ✅ passengers must NOT overwrite crew seats
       if (seat.occupantType === "crew") return;
 
-      seat.occupantType = p.is_infant ? "infant" : "passenger";
-      seat.occupantName = p.name || (p.is_infant ? "Infant" : "Passenger");
+      const infant = isInfantPassenger(p);
+      seat.occupantType = infant ? "infant" : "passenger";
+      seat.occupantName = p.name || (infant ? "Infant" : "Passenger");
+      seat.occupantId = p.passenger_id;
 
       // keep cabinClass aligned with DB if provided
       if (p.seat_class) {
-        const cls = p.seat_class.toLowerCase();
+        const cls = String(p.seat_class).toLowerCase();
         if (cls.includes("business")) seat.cabinClass = "business";
         else if (cls.includes("economy")) seat.cabinClass = "economy";
+      }
+
+      // Attach infant info to bubble:
+      // - If this seat is a parent passenger seat => show their infant(s)
+      // - If this seat is an infant seat (shouldn't happen ideally) => show parent
+      const pIdStr = String(p.passenger_id);
+
+      if (!infant) {
+        const infants = parentToInfants[pIdStr] || [];
+        if (infants.length > 0) {
+          seat.infantInfo = {
+            infants: infants.map((x) => x.name || "Infant"),
+            parentName: p.name || "Parent",
+          };
+        }
+      } else {
+        const parentId = stored[pIdStr] ? String(stored[pIdStr]) : null;
+        const parentName = parentId ? passengerById[parentId]?.name : null;
+
+        seat.infantInfo = {
+          infants: [p.name || "Infant"],
+          parentName: parentName || "Unknown Parent",
+        };
       }
     });
 
     return rows;
-  }, [baseSeatMap, passengers]);
+  }, [baseSeatMap, passengers, flightNumber]);
 
   // ---------- Filtering ----------
   const filteredSeatMap = useMemo(() => {
@@ -175,7 +245,7 @@ export default function PlaneSeatMapPage() {
             Aircraft Seat Map – Flight {flightNumber}
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Hover a seat to see who is sitting there.
+            Hover a seat to see who is sitting there (including infant-parent info).
           </p>
         </div>
 
@@ -285,7 +355,6 @@ export default function PlaneSeatMapPage() {
           <div className="flex gap-14">
             {/* Left block (A,B) */}
             <SeatColumnBlock side="left" seatMap={filteredSeatMap} />
-
             {/* Right block (C,D) */}
             <SeatColumnBlock side="right" seatMap={filteredSeatMap} />
           </div>
@@ -345,7 +414,7 @@ function Seat({ seat }) {
   const colorClass = getSeatColor(seat);
   const badge = getBadge(seat);
 
-  // Start as null so we never render tooltip at (0,0) -> no corner “fly-in”
+  // Start as null so we never render tooltip at (0,0)
   const [pos, setPos] = useState(null);
 
   const updatePos = (e) => {
@@ -387,7 +456,7 @@ function Seat({ seat }) {
               {badge}
             </div>
 
-            <div className="mt-1 text-sm font-medium text-slate-800 truncate max-w-[220px]">
+            <div className="mt-1 text-sm font-medium text-slate-800 truncate max-w-[240px]">
               {getDisplayName(seat)}
             </div>
 
@@ -398,6 +467,27 @@ function Seat({ seat }) {
                 ? `Class: ${seat.cabinClass}`
                 : "Empty seat"}
             </div>
+
+            {/* ✅ Infant-parent info block */}
+            {seat.infantInfo && (
+              <div className="mt-2 border-t border-slate-100 pt-2 space-y-1">
+                {seat.occupantType === "infant" ? (
+                  <p className="text-xs text-slate-700">
+                    <span className="font-semibold">Parent:</span>{" "}
+                    <span className="text-slate-800">{seat.infantInfo.parentName}</span>
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-xs text-slate-700">
+                      <span className="font-semibold">Traveling with infant:</span>{" "}
+                      <span className="text-slate-800">
+                        {seat.infantInfo.infants.join(", ")}
+                      </span>
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="mx-auto h-2 w-2 rotate-45 bg-white border-b border-r border-slate-200 -mt-1" />
@@ -410,7 +500,8 @@ function Seat({ seat }) {
 function getDisplayName(seat) {
   if (!seat.occupantType) return "Empty";
   if (seat.occupantType === "crew") return seat.occupantName || "Crew";
-  if (seat.occupantType === "infant") return seat.occupantName ? `${seat.occupantName} (Infant)` : "Infant";
+  if (seat.occupantType === "infant")
+    return seat.occupantName ? `${seat.occupantName} (Infant)` : "Infant";
   return seat.occupantName || "Passenger";
 }
 
@@ -421,15 +512,31 @@ function getBadge(seat) {
     "text-[10px] rounded-full border px-2 py-0.5 font-semibold whitespace-nowrap";
 
   if (seat.occupantType === "crew") {
-    return <span className={`${base} border-blue-200 bg-blue-50 text-blue-700`}>Crew</span>;
+    return (
+      <span className={`${base} border-blue-200 bg-blue-50 text-blue-700`}>
+        Crew
+      </span>
+    );
   }
   if (seat.occupantType === "infant") {
-    return <span className={`${base} border-red-200 bg-red-50 text-red-700`}>Infant</span>;
+    return (
+      <span className={`${base} border-red-200 bg-red-50 text-red-700`}>
+        Infant
+      </span>
+    );
   }
   if (seat.cabinClass === "business") {
-    return <span className={`${base} border-cyan-200 bg-cyan-50 text-cyan-700`}>Business</span>;
+    return (
+      <span className={`${base} border-cyan-200 bg-cyan-50 text-cyan-700`}>
+        Business
+      </span>
+    );
   }
-  return <span className={`${base} border-emerald-200 bg-emerald-50 text-emerald-700`}>Economy</span>;
+  return (
+    <span className={`${base} border-emerald-200 bg-emerald-50 text-emerald-700`}>
+      Economy
+    </span>
+  );
 }
 
 function getSeatColor(seat) {

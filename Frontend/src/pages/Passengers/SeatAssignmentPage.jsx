@@ -5,12 +5,47 @@ import axios from "axios";
 
 const API_BASE = "http://localhost:3000";
 
-// Simple seat map configuration
 const ROWS = 15;
 const SEAT_LETTERS = ["A", "B", "C", "D"];
 
-// Crew seats reserved (passengers must NOT sit here)
-const CREW_SEATS = ["1A", "1B", "1C", "1D"];
+// Decide infant using either backend field OR age rule (0–2)
+function isInfantPassenger(raw) {
+  if (raw?.is_infant === true) return true;
+  const age = Number(raw?.age);
+  return Number.isFinite(age) && age >= 0 && age <= 2;
+}
+
+function getLastToken(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : "";
+}
+
+// Demo-only parent picking rule (no backend changes):
+// 1) same last-name + female
+// 2) same last-name anyone
+// 3) first adult
+function pickDefaultParentId(infantName, adults) {
+  const last = getLastToken(infantName).toLowerCase();
+  if (!last) return "";
+
+  const sameLastFemale = adults.find((a) => {
+    const adultLast = getLastToken(a.name).toLowerCase();
+    const gender = String(a.gender || "").toLowerCase();
+    return adultLast === last && gender === "female";
+  });
+  if (sameLastFemale) return String(sameLastFemale.id);
+
+  const sameLastAny = adults.find((a) => {
+    const adultLast = getLastToken(a.name).toLowerCase();
+    return adultLast === last;
+  });
+  if (sameLastAny) return String(sameLastAny.id);
+
+  return adults.length ? String(adults[0].id) : "";
+}
 
 export default function PassengerSeatAssignmentPage() {
   const { flightNumber } = useParams(); // /flights/:flightNumber/passengers
@@ -18,33 +53,39 @@ export default function PassengerSeatAssignmentPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
-  const [info, setInfo] = useState(null);
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
   const [passengers, setPassengers] = useState([]);
   const [originalPassengers, setOriginalPassengers] = useState([]);
 
-  const CREW_SEAT_SET = useMemo(() => new Set(CREW_SEATS), []);
+  // infantPassengerId -> parentPassengerId (locked demo map)
+  const [infantParents, setInfantParents] = useState({});
 
-  // All possible seats EXCLUDING crew seats
+  const storageKey = useMemo(() => {
+    return flightNumber
+      ? `infantParentMap_${flightNumber}`
+      : "infantParentMap_unknownFlight";
+  }, [flightNumber]);
+
+  // All possible seats (1A..15D)
   const ALL_SEATS = useMemo(() => {
     const seats = [];
     for (let row = 1; row <= ROWS; row++) {
       for (const letter of SEAT_LETTERS) {
-        const seat = `${row}${letter}`;
-        if (CREW_SEAT_SET.has(seat)) continue; // remove crew seats
-        seats.push(seat);
+        seats.push(`${row}${letter}`);
       }
     }
     return seats;
-  }, [CREW_SEAT_SET]);
+  }, []);
 
   // ---- LOAD PASSENGERS FOR THIS FLIGHT ----
   const loadPassengers = useCallback(async () => {
     if (!flightNumber) return;
+
     setLoading(true);
-    setError(null);
-    setInfo(null);
+    setError("");
+    setInfo("");
 
     try {
       const res = await axios.get(
@@ -52,61 +93,120 @@ export default function PassengerSeatAssignmentPage() {
       );
       const data = res.data?.data || [];
 
-      const mapped = data.map((p) => ({
-        id: p.passenger_id,
-        name: p.name,
-        age: p.age,
-        gender: p.gender,
-        nationality: p.nationality,
-        seatType: p.seat_class || "N/A",
-        seatNumber: p.seat_number || "",
-        isInfant: p.is_infant || false,
-      }));
+      // Map backend payload -> UI state
+      const mapped = data.map((p) => {
+        const infant = isInfantPassenger(p);
+        return {
+          id: p.passenger_id,
+          name: p.name,
+          age: p.age,
+          gender: p.gender,
+          nationality: p.nationality,
+          seatType: p.seat_class || "N/A",
+          seatNumber: infant ? "" : p.seat_number || "",
+          isInfant: infant,
+        };
+      });
 
       setPassengers(mapped);
       setOriginalPassengers(mapped);
+
+      // Adults list for choosing parents
+      const adults = mapped.filter((x) => !x.isInfant);
+
+      // Load saved parent map (demo persistence)
+      let savedMap = {};
+      try {
+        const raw = localStorage.getItem(storageKey);
+        savedMap = raw ? JSON.parse(raw) || {} : {};
+      } catch {
+        savedMap = {};
+      }
+
+      // Build locked parent mapping:
+      const initParents = {};
+      for (const p of mapped) {
+        if (!p.isInfant) continue;
+
+        const savedParent = savedMap[String(p.id)];
+        initParents[String(p.id)] =
+          savedParent || pickDefaultParentId(p.name, adults) || "";
+      }
+
+      setInfantParents(initParents);
+
+      // Persist immediately so it stays stable and "not changeable"
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(initParents));
+      } catch {
+        // ignore localStorage failures
+      }
     } catch (err) {
       console.error("Error loading passengers:", err);
       setError("Failed to load passengers for this flight.");
     } finally {
       setLoading(false);
     }
-  }, [flightNumber]);
+  }, [flightNumber, storageKey]);
 
   useEffect(() => {
     loadPassengers();
   }, [loadPassengers]);
 
-  // Seats already chosen (by current state)
-  const assignedSeats = useMemo(
-    () => new Set(passengers.map((p) => p.seatNumber).filter(Boolean)),
-    [passengers]
-  );
-
-  const handleSeatChange = (id, seat) => {
-    // If somehow selecting a crew seat, block it
-    if (seat && CREW_SEAT_SET.has(seat)) return;
-
-    setPassengers((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, seatNumber: seat || "" } : p))
+  // Seats taken by non-infant passengers only
+  const assignedSeats = useMemo(() => {
+    return new Set(
+      passengers
+        .filter((p) => !p.isInfant)
+        .map((p) => p.seatNumber)
+        .filter(Boolean)
     );
-  };
+  }, [passengers]);
 
-  // Seat options for a specific passenger:
-  // - All seats that are not currently taken by someone else
-  // - Plus the passenger's current seat (to avoid it disappearing)
+  // Seat options for a passenger:
+  // all seats not taken by someone else + their current seat
   const getSeatOptionsForPassenger = (currentSeat) => {
     return ALL_SEATS.filter(
       (seat) => !assignedSeats.has(seat) || seat === currentSeat
     );
   };
 
+  const handleSeatChange = (id, seat) => {
+    setPassengers((prev) =>
+      prev.map((p) => {
+        if (p.id !== id) return p;
+        if (p.isInfant) return { ...p, seatNumber: "" }; // protect
+        return { ...p, seatNumber: seat || "" };
+      })
+    );
+  };
+
+  // For displaying parent name
+  const passengerNameById = useMemo(() => {
+    const map = {};
+    for (const p of passengers) {
+      map[String(p.id)] = p.name;
+    }
+    return map;
+  }, [passengers]);
+
+  const getInfantParentLabel = (infantId) => {
+    const parentId = infantParents[String(infantId)];
+    if (!parentId) return "Parent: N/A";
+
+    const name = passengerNameById[String(parentId)];
+    if (name) return `Parent: ${name}`;
+
+    return `Parent ID: ${parentId}`;
+  };
+
   // ---- BACKEND AUTO ASSIGN ----
   const handleAutoAssign = async () => {
     if (!flightNumber) return;
+
     setSaving(true);
-    setError(null);
-    setInfo(null);
+    setError("");
+    setInfo("");
 
     try {
       const res = await axios.post(
@@ -114,7 +214,7 @@ export default function PassengerSeatAssignmentPage() {
       );
 
       setInfo(res.data?.message || "Auto-assigned seats successfully.");
-      await loadPassengers(); // reload updated seats from DB
+      await loadPassengers();
     } catch (err) {
       console.error("Error auto-assigning seats:", err);
       const msg =
@@ -126,39 +226,34 @@ export default function PassengerSeatAssignmentPage() {
     }
   };
 
-  // ---- SAVE MANUAL CHANGES ----
+  // ---- SAVE MANUAL CHANGES (adults only) ----
   const handleSave = async () => {
     if (!flightNumber) return;
+
     setSaving(true);
-    setError(null);
-    setInfo(null);
+    setError("");
+    setInfo("");
 
     try {
-      // hard-block if any passenger currently has a crew seat
-      const invalid = passengers.find(
-        (p) => p.seatNumber && CREW_SEAT_SET.has(p.seatNumber)
-      );
-      if (invalid) {
-        setError(
-          `Seat ${invalid.seatNumber} is reserved for crew. Choose another seat for ${invalid.name}.`
-        );
-        setSaving(false);
-        return;
+      // persist locked parent map for demo
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(infantParents));
+      } catch {
+        // ignore
       }
 
       const originalById = {};
-      originalPassengers.forEach((p) => {
+      for (const p of originalPassengers) {
         originalById[p.id] = p.seatNumber || "";
-      });
+      }
 
-      const changed = passengers.filter(
-        (p) => (p.seatNumber || "") !== originalById[p.id]
-      );
-
-      const updates = changed.filter((p) => p.seatNumber);
+      const updates = passengers
+        .filter((p) => !p.isInfant)
+        .filter((p) => (p.seatNumber || "") !== (originalById[p.id] || ""))
+        .filter((p) => p.seatNumber); // must have a seat to update
 
       if (updates.length === 0) {
-        setInfo("No seat changes to save.");
+        setInfo("No adult seat changes to save. Infant parent info is locked.");
         setSaving(false);
         return;
       }
@@ -175,7 +270,7 @@ export default function PassengerSeatAssignmentPage() {
         )
       );
 
-      setInfo("Seat assignments saved successfully.");
+      setInfo("Seat assignments saved. Infant parent info remains locked.");
       await loadPassengers();
     } catch (err) {
       console.error("Error saving seat assignments:", err);
@@ -191,9 +286,7 @@ export default function PassengerSeatAssignmentPage() {
   if (loading) {
     return (
       <div className="p-4">
-        <p className="text-sm text-slate-500">
-          Loading passenger seat data...
-        </p>
+        <p className="text-sm text-slate-500">Loading passenger seat data...</p>
       </div>
     );
   }
@@ -209,12 +302,7 @@ export default function PassengerSeatAssignmentPage() {
           <p className="text-sm text-slate-500 mt-1">
             Flight <span className="font-semibold">{flightNumber}</span>
           </p>
-          <p className="text-xs text-slate-500 mt-1">
-            Reserved crew seats:{" "}
-            <span className="font-mono">{CREW_SEATS.join(", ")}</span>
-          </p>
         </div>
-
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -281,11 +369,15 @@ export default function PassengerSeatAssignmentPage() {
                   <th className="px-4 py-2 text-left font-semibold">
                     Seat Number
                   </th>
+                  <th className="px-4 py-2 text-left font-semibold">
+                    Infant Parent Info
+                  </th>
                 </tr>
               </thead>
+
               <tbody>
                 {passengers.map((p) => {
-                  const missingSeat = !p.seatNumber;
+                  const missingSeat = !p.isInfant && !p.seatNumber;
                   const options = getSeatOptionsForPassenger(p.seatNumber);
 
                   return (
@@ -301,28 +393,47 @@ export default function PassengerSeatAssignmentPage() {
                         {p.name}
                         {p.isInfant && (
                           <span className="ml-2 text-[11px] rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-amber-700">
-                            Infant
+                            Infant (0–2)
                           </span>
                         )}
                       </td>
+
                       <td className="px-4 py-2">{p.age}</td>
                       <td className="px-4 py-2">{p.nationality}</td>
                       <td className="px-4 py-2">{p.seatType}</td>
+
                       <td className="px-4 py-2">
-                        <select
-                          className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={p.seatNumber || ""}
-                          onChange={(e) =>
-                            handleSeatChange(p.id, e.target.value)
-                          }
-                        >
-                          <option value="">-- No seat --</option>
-                          {options.map((seat) => (
-                            <option key={seat} value={seat}>
-                              {seat}
-                            </option>
-                          ))}
-                        </select>
+                        {p.isInfant ? (
+                          <span className="text-xs text-slate-500">
+                            No seat (Infant)
+                          </span>
+                        ) : (
+                          <select
+                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            value={p.seatNumber || ""}
+                            onChange={(e) =>
+                              handleSeatChange(p.id, e.target.value)
+                            }
+                          >
+                            <option value="">-- No seat --</option>
+                            {options.map((seat) => (
+                              <option key={seat} value={seat}>
+                                {seat}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </td>
+
+                      {/* LOCKED parent info (no dropdown) */}
+                      <td className="px-4 py-2">
+                        {p.isInfant ? (
+                          <span className="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700">
+                            {getInfantParentLabel(p.id)}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-400">—</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -331,7 +442,8 @@ export default function PassengerSeatAssignmentPage() {
             </table>
 
             <p className="mt-2 text-xs text-slate-500">
-              * Crew seats are excluded from passenger assignment.
+              * Infants (0–2) cannot have seats. Parent info is auto-selected
+              and locked (stored locally for demo).
             </p>
           </div>
         )}
@@ -345,7 +457,7 @@ export default function PassengerSeatAssignmentPage() {
           disabled={saving}
           className="inline-flex items-center rounded-md bg-emerald-500 px-5 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:opacity-60"
         >
-          {saving ? "Saving..." : "Save Assignments"}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
 
         <div className="flex flex-wrap gap-2 justify-start sm:justify-end">
