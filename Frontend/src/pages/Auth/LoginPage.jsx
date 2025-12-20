@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logo from "../../assets/logo.jpeg";
 
 const API_BASE = "http://localhost:3000";
 
@@ -31,48 +32,36 @@ export default function LoginPage() {
 
       const data = await res.json();
       console.log("Login response:", data);
-      console.log("Cabin Crew ID:", data.user.cabincrewId);
+      console.log("Cabin Crew ID:", data.user?.cabincrewId);
 
       if (!res.ok) {
         setError(data.message || "Login failed");
         return;
       }
 
-      const user = data.user; // { id, name, role, pilot_id?, cabincrewId passengerId? }
+      const user = data.user;
 
       localStorage.setItem("token", String(user.id));
       localStorage.setItem("userId", String(user.id));
       localStorage.setItem("userRole", user.role);
       localStorage.setItem("userName", user.name);
 
-      if (user.pilot_id) {
-        localStorage.setItem("pilotId", String(user.pilot_id));
-      } else {
-        localStorage.removeItem("pilotId");
-      }
+      if (user.pilot_id) localStorage.setItem("pilotId", String(user.pilot_id));
+      else localStorage.removeItem("pilotId");
 
-      if (user.cabin_crew_id) {
+      if (user.cabin_crew_id)
         localStorage.setItem("cabincrewId", String(user.cabin_crew_id));
-      } else {
-        localStorage.removeItem("cabincrewId");
-      }
+      else localStorage.removeItem("cabincrewId");
 
-      if (user.passenger_id) {
+      if (user.passenger_id)
         localStorage.setItem("passengerId", String(user.passenger_id));
-      } else {
-        localStorage.removeItem("passengerId");
-      }
+      else localStorage.removeItem("passengerId");
 
       // Role-based redirect
-      if (user.role === "Admin") {
-        window.location.href = "/";
-      } else if (user.role === "Pilot") {
-        window.location.href = "/pilot";
-      } else if (user.role === "CabinCrew") {
-        window.location.href = "/cabincrew";
-      } else if (user.role === "Passenger") {
-        window.location.href = "/passenger";
-      }
+      if (user.role === "Admin") window.location.href = "/";
+      else if (user.role === "Pilot") window.location.href = "/pilot";
+      else if (user.role === "CabinCrew") window.location.href = "/cabincrew";
+      else if (user.role === "Passenger") window.location.href = "/passenger";
     } catch (err) {
       console.error(err);
       setError("Server error");
@@ -82,6 +71,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        {/* ✅ Logo (reasonable size) */}
+        <div className="flex justify-center mb-3">
+          <div className="h-14 w-14 rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden flex items-center justify-center">
+            <img
+              src={logo}
+              alt="Company Logo"
+              className="h-10 w-10 object-contain"
+              draggable={false}
+            />
+          </div>
+        </div>
+
         <h1 className="text-xl font-semibold text-slate-900 mb-6 text-center">
           Flight Roster Management System
         </h1>
