@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logo from "../../assets/logo.jpeg";
 
 const API_BASE = "http://localhost:3000";
 
@@ -31,6 +32,10 @@ export default function LoginPage() {
 
       const data = await res.json();
       console.log("Login response:", data);
+<<<<<<< HEAD
+=======
+      console.log("Cabin Crew ID:", data.user?.cabincrewId);
+>>>>>>> 1c28b0d62a132e2521b0609577c456d6cb84d908
 
       if (!res.ok) {
         setError(data.message || "Login failed");
@@ -47,10 +52,19 @@ export default function LoginPage() {
       if (user.pilot_id) localStorage.setItem("pilotId", String(user.pilot_id));
       else localStorage.removeItem("pilotId");
 
+<<<<<<< HEAD
       if (user.cabin_crew_id) localStorage.setItem("cabincrewId", String(user.cabin_crew_id));
       else localStorage.removeItem("cabincrewId");
 
       if (user.passenger_id) localStorage.setItem("passengerId", String(user.passenger_id));
+=======
+      if (user.cabin_crew_id)
+        localStorage.setItem("cabincrewId", String(user.cabin_crew_id));
+      else localStorage.removeItem("cabincrewId");
+
+      if (user.passenger_id)
+        localStorage.setItem("passengerId", String(user.passenger_id));
+>>>>>>> 1c28b0d62a132e2521b0609577c456d6cb84d908
       else localStorage.removeItem("passengerId");
 
       // Role-based redirect
@@ -65,6 +79,7 @@ export default function LoginPage() {
   };
 
   return (
+<<<<<<< HEAD
     //Background Image 
     <div className="min-h-screen flex items-center justify-center relative">
       {/* Background image */}
@@ -81,6 +96,22 @@ export default function LoginPage() {
 
       {/* Login form */}
       <div className="relative z-10 w-full max-w-sm bg-white/70 backdrop-blur-md border border-white/50 rounded-xl p-6 shadow-lg">
+=======
+    <div className="min-h-screen flex items-center justify-center bg-slate-100">
+      <div className="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        {/* ✅ Logo (reasonable size) */}
+        <div className="flex justify-center mb-3">
+          <div className="h-14 w-14 rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden flex items-center justify-center">
+            <img
+              src={logo}
+              alt="Company Logo"
+              className="h-10 w-10 object-contain"
+              draggable={false}
+            />
+          </div>
+        </div>
+
+>>>>>>> 1c28b0d62a132e2521b0609577c456d6cb84d908
         <h1 className="text-xl font-semibold text-slate-900 mb-6 text-center">
           Flight Roster Management System
         </h1>

@@ -5,8 +5,18 @@ import axios from "axios";
 
 const API_BASE = "http://localhost:3000";
 
+// --- helper: Fisher–Yates shuffle (true random order) ---
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default function CrewAssignmentPage() {
-  const { flightNumber } = useParams();              // ✅ comes from route /flights/:flightNumber/crew
+  const { flightNumber } = useParams(); // /flights/:flightNumber/crew
   const navigate = useNavigate();
 
   const [flightInfo, setFlightInfo] = useState(null);
@@ -32,7 +42,7 @@ export default function CrewAssignmentPage() {
           `${API_BASE}/api/flights/${flightNumber}`
         );
 
-        const f = flightRes.data.data; // from flightsController getFlightByNumber
+        const f = flightRes.data.data;
 
         setFlightInfo({
           flightNumber: f.flight_number,
@@ -63,13 +73,12 @@ export default function CrewAssignmentPage() {
             assignedCabinIds = assignmentRes.data.data.cabin_crew_ids || [];
           }
         } catch (err) {
-          // If 404: no assignment yet -> ignore
           if (err.response?.status !== 404) {
             console.warn("Error loading existing assignment:", err);
           }
         }
 
-        // 4) Map pilots & cabin crew into UI state
+        // 4) Map into UI state
         setFlightCrew(
           pilotsData.map((p) => ({
             id: p.id,
@@ -99,9 +108,7 @@ export default function CrewAssignmentPage() {
       }
     };
 
-    if (flightNumber) {
-      loadData();
-    }
+    if (flightNumber) loadData();
   }, [flightNumber]);
 
   // =========================
@@ -109,34 +116,50 @@ export default function CrewAssignmentPage() {
   // =========================
   const toggleFlightCrew = (id) => {
     setFlightCrew((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, assigned: !c.assigned } : c
-      )
+      prev.map((c) => (c.id === id ? { ...c, assigned: !c.assigned } : c))
     );
   };
 
   const toggleCabinCrew = (id) => {
     setCabinCrew((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, assigned: !c.assigned } : c
-      )
+      prev.map((c) => (c.id === id ? { ...c, assigned: !c.assigned } : c))
     );
   };
 
-  // super simple demo logic
+  // =========================
+  // AUTO ASSIGN (RANDOM)
+  // =========================
   const handleAutoAssign = () => {
-    setFlightCrew((prev) =>
-      prev.map((c, idx) => ({
+    setError("");
+    setSuccessMessage("");
+
+    // how many you want for demo
+    const PILOT_COUNT = 2;
+    const CABIN_COUNT = 3;
+
+    // --- Pilots ---
+    setFlightCrew((prev) => {
+      const shuffled = shuffleArray(prev);
+      const pickCount = Math.min(PILOT_COUNT, shuffled.length);
+      const selectedIds = new Set(shuffled.slice(0, pickCount).map((p) => p.id));
+
+      return prev.map((p) => ({
+        ...p,
+        assigned: selectedIds.has(p.id),
+      }));
+    });
+
+    // --- Cabin crew ---
+    setCabinCrew((prev) => {
+      const shuffled = shuffleArray(prev);
+      const pickCount = Math.min(CABIN_COUNT, shuffled.length);
+      const selectedIds = new Set(shuffled.slice(0, pickCount).map((c) => c.id));
+
+      return prev.map((c) => ({
         ...c,
-        assigned: idx < 2, // first 2 pilots
-      }))
-    );
-    setCabinCrew((prev) =>
-      prev.map((c, idx) => ({
-        ...c,
-        assigned: idx < 3, // first 3 cabin crew
-      }))
-    );
+        assigned: selectedIds.has(c.id),
+      }));
+    });
   };
 
   // =========================
@@ -147,12 +170,8 @@ export default function CrewAssignmentPage() {
     setError("");
     setSuccessMessage("");
 
-    const pilot_ids = flightCrew
-      .filter((c) => c.assigned)
-      .map((c) => c.id);
-    const cabin_crew_ids = cabinCrew
-      .filter((c) => c.assigned)
-      .map((c) => c.id);
+    const pilot_ids = flightCrew.filter((c) => c.assigned).map((c) => c.id);
+    const cabin_crew_ids = cabinCrew.filter((c) => c.assigned).map((c) => c.id);
 
     if (pilot_ids.length === 0 || cabin_crew_ids.length === 0) {
       setError("Please assign at least one pilot and one cabin crew member.");
@@ -160,7 +179,7 @@ export default function CrewAssignmentPage() {
       return;
     }
 
-    const payload = { pilot_ids, cabin_crew_ids }; // ✅ this is the payload
+    const payload = { pilot_ids, cabin_crew_ids };
 
     try {
       const res = await axios.post(
@@ -184,11 +203,7 @@ export default function CrewAssignmentPage() {
   // Loading / error states
   // =========================
   if (loading) {
-    return (
-      <p className="text-sm text-slate-500">
-        Loading crew data...
-      </p>
-    );
+    return <p className="text-sm text-slate-500">Loading crew data...</p>;
   }
 
   if (error && !flightInfo) {
@@ -211,7 +226,6 @@ export default function CrewAssignmentPage() {
   // =========================
   return (
     <div className="space-y-6">
-      {/* Simple top navigation – adjust paths to your routing if needed */}
       <div className="flex flex-wrap gap-2 mb-2">
         <button
           onClick={() => navigate("/")}
@@ -243,13 +257,10 @@ export default function CrewAssignmentPage() {
         Flight Details and Crew Assignment
       </h2>
 
-      {/* Flight info summary */}
       {flightInfo && (
         <section className="bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1 text-sm">
-            <p className="font-semibold text-slate-800">
-              Flight Information Summary
-            </p>
+            <p className="font-semibold text-slate-800">Flight Information Summary</p>
             <p>
               <span className="font-medium">Flight Number:</span>{" "}
               {flightInfo.flightNumber}
@@ -261,37 +272,26 @@ export default function CrewAssignmentPage() {
           </div>
           <div className="space-y-1 text-sm">
             <p>
-              <span className="font-medium">Route:</span>{" "}
-              {flightInfo.route}
+              <span className="font-medium">Route:</span> {flightInfo.route}
             </p>
             <p>
-              <span className="font-medium">Duration:</span>{" "}
-              {flightInfo.duration}
+              <span className="font-medium">Duration:</span> {flightInfo.duration}
             </p>
           </div>
         </section>
       )}
 
-      {/* Info messages */}
       {(error || successMessage) && (
         <div className="space-y-1">
-          {error && (
-            <p className="text-sm text-red-600">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           {successMessage && (
-            <p className="text-sm text-emerald-600">
-              {successMessage}
-            </p>
+            <p className="text-sm text-emerald-600">{successMessage}</p>
           )}
         </div>
       )}
 
-      {/* Crew panels */}
       <section className="bg-slate-50 border border-slate-200 rounded-xl p-5">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Flight crew */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900">
               Flight Crew (Pilots)
@@ -301,18 +301,12 @@ export default function CrewAssignmentPage() {
                 <div
                   key={crew.id}
                   className={`flex items-center justify-between rounded-lg border px-4 py-3 bg-white ${
-                    crew.assigned
-                      ? "border-blue-400 shadow-sm"
-                      : "border-slate-200"
+                    crew.assigned ? "border-blue-400 shadow-sm" : "border-slate-200"
                   }`}
                 >
                   <div className="space-y-0.5 text-sm">
-                    <p className="font-semibold text-slate-900">
-                      {crew.name}
-                    </p>
-                    <p className="text-slate-600">
-                      Rank: {crew.rank}
-                    </p>
+                    <p className="font-semibold text-slate-900">{crew.name}</p>
+                    <p className="text-slate-600">Rank: {crew.rank}</p>
                   </div>
                   <button
                     type="button"
@@ -328,35 +322,24 @@ export default function CrewAssignmentPage() {
                 </div>
               ))}
               {flightCrew.length === 0 && (
-                <p className="text-sm text-slate-500">
-                  No pilots found in the system.
-                </p>
+                <p className="text-sm text-slate-500">No pilots found in the system.</p>
               )}
             </div>
           </div>
 
-          {/* Cabin crew */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-slate-900">
-              Cabin Crew
-            </h3>
+            <h3 className="text-lg font-semibold text-slate-900">Cabin Crew</h3>
             <div className="space-y-3">
               {cabinCrew.map((crew) => (
                 <div
                   key={crew.id}
                   className={`flex items-center justify-between rounded-lg border px-4 py-3 bg-white ${
-                    crew.assigned
-                      ? "border-blue-400 shadow-sm"
-                      : "border-slate-200"
+                    crew.assigned ? "border-blue-400 shadow-sm" : "border-slate-200"
                   }`}
                 >
                   <div className="space-y-0.5 text-sm">
-                    <p className="font-semibold text-slate-900">
-                      {crew.name}
-                    </p>
-                    <p className="text-slate-600">
-                      Role: {crew.role}
-                    </p>
+                    <p className="font-semibold text-slate-900">{crew.name}</p>
+                    <p className="text-slate-600">Role: {crew.role}</p>
                   </div>
                   <button
                     type="button"
@@ -380,7 +363,6 @@ export default function CrewAssignmentPage() {
           </div>
         </div>
 
-        {/* Bottom buttons */}
         <div className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"

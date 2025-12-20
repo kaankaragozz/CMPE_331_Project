@@ -1,5 +1,6 @@
 // src/components/Navbar.jsx
 import { NavLink, useNavigate } from "react-router-dom";
+import logo from "../../src/assets/logo.jpeg";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -10,10 +11,10 @@ export default function Navbar() {
     role === "Pilot"
       ? "/pilot"
       : role === "CabinCrew"
-        ? "/cabincrew"
-        : role === "Passenger"
-          ? "/passenger"
-          : "/";
+      ? "/cabincrew"
+      : role === "Passenger"
+      ? "/passenger"
+      : "/";
 
   return (
     <header className="h-16 flex items-center justify-between px-6 bg-white border-b border-slate-200">
@@ -25,10 +26,16 @@ export default function Navbar() {
           onClick={() => navigate(homePath)}
           className="flex items-center gap-3 focus:outline-none"
         >
-          {/* Circular logo */}
-          <div className="h-9 w-9 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-            FR
+          {/* ✅ Smaller logo (fixed size + contained) */}
+          <div className="h-9 w-9 rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden flex items-center justify-center">
+            <img
+              src={logo}
+              alt="Company Logo"
+              className="h-7 w-7 object-contain"
+              draggable={false}
+            />
           </div>
+
           <div className="hidden sm:block text-left">
             <h1 className="text-base sm:text-lg font-semibold text-slate-900">
               Flight Roster Management
@@ -37,10 +44,10 @@ export default function Navbar() {
               {role === "Pilot"
                 ? "Pilot dashboard"
                 : role === "CabinCrew"
-                  ? "Cabin crew console"
-                  : role === "Passenger"
-                    ? "Passenger portal"
-                    : "Operations dashboard"}
+                ? "Cabin crew console"
+                : role === "Passenger"
+                ? "Passenger portal"
+                : "Operations dashboard"}
             </p>
           </div>
         </button>
@@ -50,9 +57,10 @@ export default function Navbar() {
           <NavLink
             to={homePath}
             className={({ isActive }) =>
-              `px-3 py-1.5 rounded-lg font-medium ${isActive
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-100"
+              `px-3 py-1.5 rounded-lg font-medium ${
+                isActive
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
               }`
             }
           >
@@ -62,9 +70,10 @@ export default function Navbar() {
           <NavLink
             to="/flights"
             className={({ isActive }) =>
-              `px-3 py-1.5 rounded-lg font-medium ${isActive
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-100"
+              `px-3 py-1.5 rounded-lg font-medium ${
+                isActive
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
               }`
             }
           >
@@ -74,9 +83,10 @@ export default function Navbar() {
           <NavLink
             to="/user/profile"
             className={({ isActive }) =>
-              `px-3 py-1.5 rounded-lg font-medium ${isActive
-                ? "bg-slate-900 text-white"
-                : "text-slate-600 hover:bg-slate-100"
+              `px-3 py-1.5 rounded-lg font-medium ${
+                isActive
+                  ? "bg-slate-900 text-white"
+                  : "text-slate-600 hover:bg-slate-100"
               }`
             }
           >
@@ -89,13 +99,8 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <div className="text-right hidden sm:block">
-            <p className="text-xs font-medium text-slate-900">
-              {name}
-            </p>
+            <p className="text-xs font-medium text-slate-900">{name}</p>
             <p className="text-[11px] text-slate-500">{role}</p>
-          </div>
-          <div className="h-9 w-9 rounded-full bg-slate-800 text-white flex items-center justify-center text-sm font-semibold shadow-sm">
-            {name.charAt(0).toUpperCase()}
           </div>
         </div>
 
