@@ -6,17 +6,17 @@ import axios from "axios";
 const ROW_COUNT = 15;
 const SEAT_LETTERS = ["A", "B", "C", "D"];
 
+// Crew seats reserved (passengers must NOT sit here)
+const CREW_SEATS = ["1A", "1B", "1C", "1D"];
+const CREW_SEAT_SET = new Set(CREW_SEATS);
+
 const PASSENGER_API_BASE = "http://localhost:3004";
 
 // basic layout: rows 1–3 business, 4–15 economy
 // some seats are crew (static demo), passengers/infants come from DB
 function buildBaseSeatMap() {
-  const specialSeats = {
-    "1A": { occupantType: "crew" },
-    "1B": { occupantType: "crew" },
-    "1C": { occupantType: "crew" },
-    "1D": { occupantType: "crew" },
-  };
+  const specialSeats = {};
+  CREW_SEATS.forEach((s) => (specialSeats[s] = { occupantType: "crew" }));
 
   const rows = [];
   for (let r = 1; r <= ROW_COUNT; r++) {
@@ -94,8 +94,12 @@ export default function PlaneSeatMapPage() {
     passengers.forEach((p) => {
       if (!p.seat_number) return; // unassigned passenger
       const seatKey = p.seat_number; // e.g. "5A"
+
       const seat = seatIndex.get(seatKey);
       if (!seat) return; // seat not in our simple layout
+
+      // IMPORTANT: Never allow DB overlay to overwrite crew seats
+      if (CREW_SEAT_SET.has(seatKey)) return;
 
       seat.occupantType = p.is_infant ? "infant" : "passenger";
 
@@ -133,8 +137,7 @@ export default function PlaneSeatMapPage() {
   // ---------- Navigation handlers ----------
   const goDashboard = () => navigate("/");
   const goFlights = () => navigate("/flights");
-  const goFlightDetails = () =>
-    navigate(`/flights/${flightNumber}`);
+  const goFlightDetails = () => navigate(`/flights/${flightNumber}`);
   const goSeatAssignment = () =>
     navigate(`/flights/${flightNumber}/passengers`);
 
@@ -174,7 +177,7 @@ export default function PlaneSeatMapPage() {
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Visual map of occupied and empty seats based on passenger assignments
-            in the database.
+            in the database. Crew seats are reserved and cannot be taken by passengers.
           </p>
         </div>
 
@@ -257,7 +260,7 @@ export default function PlaneSeatMapPage() {
               Legend
             </h3>
             <div className="space-y-2 text-sm text-slate-700">
-              <LegendItem colorClass="bg-blue-500" label="Crew" />
+              <LegendItem colorClass="bg-blue-500" label="Crew (Reserved)" />
               <LegendItem colorClass="bg-cyan-500" label="Business Passenger" />
               <LegendItem colorClass="bg-green-500" label="Economy Passenger" />
               <LegendItem colorClass="bg-red-400" label="Infant" />
@@ -266,6 +269,11 @@ export default function PlaneSeatMapPage() {
                 label="Empty Seat"
               />
             </div>
+
+            <p className="mt-3 text-xs text-slate-500">
+              Reserved crew seats:{" "}
+              <span className="font-mono">{CREW_SEATS.join(", ")}</span>
+            </p>
           </div>
         </div>
 
@@ -304,9 +312,7 @@ export default function PlaneSeatMapPage() {
 function LegendItem({ colorClass, label }) {
   return (
     <div className="flex items-center gap-2">
-      <div
-        className={`h-4 w-4 rounded-sm shadow-sm ${colorClass}`}
-      ></div>
+      <div className={`h-4 w-4 rounded-sm shadow-sm ${colorClass}`}></div>
       <span>{label}</span>
     </div>
   );
@@ -319,16 +325,11 @@ function SeatColumnBlock({ side, seatMap }) {
   return (
     <div className="flex flex-col gap-1">
       {seatMap.map((row) => {
-        const rowSeats = row.seats.filter((s) =>
-          letters.includes(s.column)
-        );
+        const rowSeats = row.seats.filter((s) => letters.includes(s.column));
         if (rowSeats.length === 0) return null;
 
         return (
-          <div
-            key={row.rowNumber + side}
-            className="flex items-center gap-2"
-          >
+          <div key={row.rowNumber + side} className="flex items-center gap-2">
             {side === "left" && (
               <span className="w-4 text-xs text-slate-500">
                 {row.rowNumber}
@@ -336,14 +337,10 @@ function SeatColumnBlock({ side, seatMap }) {
             )}
             <div className="flex gap-2">
               {letters.map((letter) => {
-                const seat = rowSeats.find(
-                  (s) => s.column === letter
-                );
+                const seat = rowSeats.find((s) => s.column === letter);
                 if (!seat) {
                   // if filtering hid it, render placeholder with transparent seat
-                  return (
-                    <div key={letter} className="w-8 h-10" />
-                  );
+                  return <div key={letter} className="w-8 h-10" />;
                 }
                 return <Seat key={seat.id} seat={seat} />;
               })}
@@ -361,6 +358,7 @@ function Seat({ seat }) {
   return (
     <div
       className={`w-8 h-10 rounded-sm shadow-sm flex items-center justify-center text-xs font-semibold text-white ${colorClass}`}
+      title={seat.id}
     >
       {seat.column}
     </div>
@@ -368,20 +366,10 @@ function Seat({ seat }) {
 }
 
 function getSeatColor(seat) {
-  if (!seat.occupantType) {
-    return "bg-slate-300 text-slate-700";
-  }
-  if (seat.occupantType === "crew") {
-    return "bg-blue-500";
-  }
-  if (seat.occupantType === "infant") {
-    return "bg-red-400";
-  }
-  if (seat.cabinClass === "business") {
-    return "bg-cyan-500";
-  }
-  if (seat.cabinClass === "economy") {
-    return "bg-green-500";
-  }
+  if (!seat.occupantType) return "bg-slate-300 text-slate-700";
+  if (seat.occupantType === "crew") return "bg-blue-500";
+  if (seat.occupantType === "infant") return "bg-red-400";
+  if (seat.cabinClass === "business") return "bg-cyan-500";
+  if (seat.cabinClass === "economy") return "bg-green-500";
   return "bg-slate-300 text-slate-700";
 }

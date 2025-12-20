@@ -3,12 +3,14 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_BASE =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const API_BASE = "http://localhost:3000";
 
 // Simple seat map configuration
-const ROWS = 30; // adjust for your aircraft if needed
-const SEAT_LETTERS = ["A", "B", "C", "D", "E", "F"];
+const ROWS = 15;
+const SEAT_LETTERS = ["A", "B", "C", "D"];
+
+// Crew seats reserved (passengers must NOT sit here)
+const CREW_SEATS = ["1A", "1B", "1C", "1D"];
 
 export default function PassengerSeatAssignmentPage() {
   const { flightNumber } = useParams(); // /flights/:flightNumber/passengers
@@ -22,16 +24,20 @@ export default function PassengerSeatAssignmentPage() {
   const [passengers, setPassengers] = useState([]);
   const [originalPassengers, setOriginalPassengers] = useState([]);
 
-  // All possible seat numbers (1A..1F, 2A..2F, ..., 30A..30F)
+  const CREW_SEAT_SET = useMemo(() => new Set(CREW_SEATS), []);
+
+  // All possible seats EXCLUDING crew seats
   const ALL_SEATS = useMemo(() => {
     const seats = [];
     for (let row = 1; row <= ROWS; row++) {
       for (const letter of SEAT_LETTERS) {
-        seats.push(`${row}${letter}`);
+        const seat = `${row}${letter}`;
+        if (CREW_SEAT_SET.has(seat)) continue; // remove crew seats
+        seats.push(seat);
       }
     }
     return seats;
-  }, []);
+  }, [CREW_SEAT_SET]);
 
   // ---- LOAD PASSENGERS FOR THIS FLIGHT ----
   const loadPassengers = useCallback(async () => {
@@ -78,10 +84,11 @@ export default function PassengerSeatAssignmentPage() {
   );
 
   const handleSeatChange = (id, seat) => {
+    // If somehow selecting a crew seat, block it
+    if (seat && CREW_SEAT_SET.has(seat)) return;
+
     setPassengers((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, seatNumber: seat || "" } : p
-      )
+      prev.map((p) => (p.id === id ? { ...p, seatNumber: seat || "" } : p))
     );
   };
 
@@ -127,6 +134,18 @@ export default function PassengerSeatAssignmentPage() {
     setInfo(null);
 
     try {
+      // hard-block if any passenger currently has a crew seat
+      const invalid = passengers.find(
+        (p) => p.seatNumber && CREW_SEAT_SET.has(p.seatNumber)
+      );
+      if (invalid) {
+        setError(
+          `Seat ${invalid.seatNumber} is reserved for crew. Choose another seat for ${invalid.name}.`
+        );
+        setSaving(false);
+        return;
+      }
+
       const originalById = {};
       originalPassengers.forEach((p) => {
         originalById[p.id] = p.seatNumber || "";
@@ -190,7 +209,12 @@ export default function PassengerSeatAssignmentPage() {
           <p className="text-sm text-slate-500 mt-1">
             Flight <span className="font-semibold">{flightNumber}</span>
           </p>
+          <p className="text-xs text-slate-500 mt-1">
+            Reserved crew seats:{" "}
+            <span className="font-mono">{CREW_SEATS.join(", ")}</span>
+          </p>
         </div>
+
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -246,12 +270,8 @@ export default function PassengerSeatAssignmentPage() {
             <table className="min-w-full text-sm border-collapse">
               <thead>
                 <tr className="bg-slate-100 text-slate-800">
-                  <th className="px-4 py-2 text-left font-semibold">
-                    Name
-                  </th>
-                  <th className="px-4 py-2 text-left font-semibold">
-                    Age
-                  </th>
+                  <th className="px-4 py-2 text-left font-semibold">Name</th>
+                  <th className="px-4 py-2 text-left font-semibold">Age</th>
                   <th className="px-4 py-2 text-left font-semibold">
                     Nationality
                   </th>
@@ -267,6 +287,7 @@ export default function PassengerSeatAssignmentPage() {
                 {passengers.map((p) => {
                   const missingSeat = !p.seatNumber;
                   const options = getSeatOptionsForPassenger(p.seatNumber);
+
                   return (
                     <tr
                       key={p.id}
@@ -295,9 +316,7 @@ export default function PassengerSeatAssignmentPage() {
                             handleSeatChange(p.id, e.target.value)
                           }
                         >
-                          <option value="">
-                            -- No seat --
-                          </option>
+                          <option value="">-- No seat --</option>
                           {options.map((seat) => (
                             <option key={seat} value={seat}>
                               {seat}
@@ -310,9 +329,9 @@ export default function PassengerSeatAssignmentPage() {
                 })}
               </tbody>
             </table>
+
             <p className="mt-2 text-xs text-slate-500">
-              * Backend will still prevent assigning the same seat to two
-              different passengers.
+              * Crew seats are excluded from passenger assignment.
             </p>
           </div>
         )}
