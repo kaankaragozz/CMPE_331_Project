@@ -240,15 +240,8 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {/* Navigate to flights list to start a new roster */}
           <button
             className="inline-flex items-center rounded-lg bg-slate-900 text-white text-xs sm:text-sm px-3 sm:px-4 py-2 hover:bg-slate-800"
-            onClick={() => navigate("/flights")}
-          >
-            Generate new roster
-          </button>
-          <button
-            className="inline-flex items-center rounded-lg border border-slate-300 text-xs sm:text-sm px-3 sm:px-4 py-2 text-slate-700 hover:bg-slate-50"
             onClick={() => navigate("/flights")}
           >
             Go to flights
