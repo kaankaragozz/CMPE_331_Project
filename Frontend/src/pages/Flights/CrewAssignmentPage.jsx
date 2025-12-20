@@ -5,30 +5,7 @@ import axios from "axios";
 
 const API_BASE = "http://localhost:3000";
 
-// =========================
-// Adjustable “reasonable demo” targets
-// (Spec is larger; these are scaled for small seed)
-// =========================
-const TARGETS = {
-  pilots: {
-    total: 2, // usually 2 pilots
-    // keep rule: at least 1 senior + 1 junior if possible
-    maxTrainee: 2,
-  },
-  cabin: {
-    // For small seeds, keep it reasonable:
-    chiefMin: 1,
-    chiefMax: 1,
-    seniorMin: 1,
-    seniorMax: 2,
-    juniorMin: 2, // <- was 4 in strict spec; reduced for demo
-    juniorMax: 6,
-    chefMin: 0,
-    chefMax: 1,
-  },
-};
-
-// --- helper: Fisher–Yates shuffle ---
+// --- helper: Fisher–Yates shuffle (true random order) ---
 function shuffleArray(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -38,42 +15,31 @@ function shuffleArray(arr) {
   return a;
 }
 
-// Pick up to n random elements from arr
-function pickRandomMany(arr, n) {
-  const s = shuffleArray(arr);
-  return s.slice(0, Math.max(0, Math.min(n, s.length)));
+function normalizeStr(s) {
+  return String(s || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[-_]/g, " ")
+    .trim();
 }
 
-// Normalize strings for matching
-function norm(s) {
-  return String(s || "").trim().toLowerCase();
+function vehicleMatches(pilotVehicle, flightVehicle) {
+  const p = normalizeStr(pilotVehicle);
+  const f = normalizeStr(flightVehicle);
+  if (!p || !f) return false;
+
+  // tolerant match: either includes the other
+  return p.includes(f) || f.includes(p);
 }
 
-// Vehicle match: tolerant (includes)
-function vehicleMatches(memberVehicles, flightVehicle) {
-  const fv = norm(flightVehicle);
-  const list = Array.isArray(memberVehicles) ? memberVehicles : [];
-
-  // If API returned null/undefined vehicles, treat as "unknown" -> allow for demo
-  if (list.length === 0) return true;
-
-  // Any vehicle restriction matches flight vehicle?
-  return list.some((v) => {
-    const vv = norm(v);
-    if (!vv) return false;
-    return fv.includes(vv) || vv.includes(fv);
-  });
-}
-
-// Display cabin role short
-function displayCabinRole(type) {
-  const t = norm(type);
-  if (t.includes("chief")) return "Chief";
+function formatCabinRole(type) {
+  if (!type) return "";
+  const t = String(type).toLowerCase();
+  if (t === "chief") return "Chief";
+  if (t === "chef") return "Chef";
   if (t.includes("senior")) return "Senior";
   if (t.includes("junior")) return "Junior";
-  if (t.includes("chef")) return "Chef";
-  // fallback
-  return type ? String(type) : "Crew";
+  return type;
 }
 
 export default function CrewAssignmentPage() {
@@ -81,7 +47,7 @@ export default function CrewAssignmentPage() {
   const navigate = useNavigate();
 
   const [flightInfo, setFlightInfo] = useState(null);
-  const [flightCrew, setFlightCrew] = useState([]); // pilots
+  const [flightCrew, setFlightCrew] = useState([]);
   const [cabinCrew, setCabinCrew] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -101,13 +67,16 @@ export default function CrewAssignmentPage() {
         const flightRes = await axios.get(`${API_BASE}/api/flights/${flightNumber}`);
         const f = flightRes.data.data;
 
+        // distance field names can differ; try common ones
+        const distanceKm =
+          Number(f.flight_distance_km ?? f.distance_km ?? f.flight_distance ?? f.distance) || null;
+
         setFlightInfo({
           flightNumber: f.flight_number,
-          route: `${f.source?.airport_code || "???"} - ${f.destination?.airport_code || "???"}`,
+          route: `${f.source.airport_code} - ${f.destination.airport_code}`,
           duration: `${f.duration_minutes} min`,
           aircraftType: f.vehicle_type?.type_name || "N/A",
-          // distance might be distance_km or distance depending on your backend
-          distance: f.distance_km ?? f.distance ?? null,
+          distanceKm,
         });
 
         const [pilotsRes, cabinRes] = await Promise.all([
@@ -118,7 +87,7 @@ export default function CrewAssignmentPage() {
         const pilotsData = pilotsRes.data.data || [];
         const cabinData = cabinRes.data.data || [];
 
-        // Load existing assignment (if any)
+        // existing assignment (if any)
         let assignedPilotIds = [];
         let assignedCabinIds = [];
 
@@ -131,39 +100,34 @@ export default function CrewAssignmentPage() {
             assignedCabinIds = assignmentRes.data.data.cabin_crew_ids || [];
           }
         } catch (err) {
-          if (err.response?.status !== 404) {
-            console.warn("Error loading existing assignment:", err);
-          }
+          if (err.response?.status !== 404) console.warn("Error loading existing assignment:", err);
         }
 
-        // Map pilots
         setFlightCrew(
           pilotsData.map((p) => ({
             id: p.id,
             name: p.name,
-            rank: p.seniority_level, // Senior / Junior / Trainee
-            vehicleRestriction: p.vehicle_restriction || p.vehicleRestriction || null,
-            allowedRange: p.allowed_range ?? p.allowedRange ?? null,
+            rank: p.seniority_level, // Senior | Junior | Trainee
+            vehicle:
+              p.vehicle_restriction ||
+              p.vehicleRestriction ||
+              p.vehicle_type?.type_name ||
+              "",
+            allowedRange: Number(p.allowed_range ?? p.allowedRange ?? 0) || 0,
             assigned: assignedPilotIds.includes(p.id),
           }))
         );
 
-        // Map cabin crew
         setCabinCrew(
-          cabinData.map((c) => {
-            const vehiclesRaw = c.vehicle_restrictions;
-            const vehicles =
-              Array.isArray(vehiclesRaw) ? vehiclesRaw.filter(Boolean) : [];
-
-            return {
-              id: c.id,
-              name: `${c.first_name} ${c.last_name}`,
-              roleRaw: c.attendant_type, // e.g. junior_flight_attendant
-              role: displayCabinRole(c.attendant_type), // Junior/Senior/Chief/Chef
-              vehicles, // array of type_name strings
-              assigned: assignedCabinIds.includes(c.id),
-            };
-          })
+          cabinData.map((c) => ({
+            id: c.id,
+            name: `${c.first_name} ${c.last_name}`,
+            role: formatCabinRole(c.attendant_type),
+            vehicleRestrictions: Array.isArray(c.vehicle_restrictions)
+              ? c.vehicle_restrictions.filter(Boolean)
+              : [],
+            assigned: assignedCabinIds.includes(c.id),
+          }))
         );
       } catch (err) {
         console.error("Error loading data:", err);
@@ -184,146 +148,153 @@ export default function CrewAssignmentPage() {
   // Toggle helpers
   // =========================
   const toggleFlightCrew = (id) => {
-    setFlightCrew((prev) => prev.map((c) => (c.id === id ? { ...c, assigned: !c.assigned } : c)));
+    setFlightCrew((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, assigned: !c.assigned } : c))
+    );
   };
 
   const toggleCabinCrew = (id) => {
-    setCabinCrew((prev) => prev.map((c) => (c.id === id ? { ...c, assigned: !c.assigned } : c)));
+    setCabinCrew((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, assigned: !c.assigned } : c))
+    );
   };
 
   // =========================
-  // AUTO ASSIGN (constraint-aware but flexible)
+  // Eligibility checks
+  // =========================
+  const isPilotEligible = (p) => {
+    const aircraft = flightInfo?.aircraftType;
+    if (!aircraft || aircraft === "N/A") return true; // if we can't know, don't block
+
+    // vehicle restriction must match (auto-assign should never pick mismatch)
+    if (!p.vehicle) return false;
+    if (!vehicleMatches(p.vehicle, aircraft)) return false;
+
+    // distance check only if we have distance
+    const dist = Number(flightInfo?.distanceKm);
+    if (Number.isFinite(dist) && dist > 0) {
+      const range = Number(p.allowedRange);
+      if (!Number.isFinite(range) || range <= 0) return false;
+      if (range < dist) return false;
+    }
+
+    return true;
+  };
+
+  const isCabinEligible = (c) => {
+    const aircraft = flightInfo?.aircraftType;
+    if (!aircraft || aircraft === "N/A") return true;
+
+    // If no restriction list -> treat as eligible (seed küçük diye bloklamayalım)
+    const list = c.vehicleRestrictions || [];
+    if (!list.length) return true;
+
+    // If has list -> must contain aircraft type (tolerant match)
+    return list.some((v) => vehicleMatches(v, aircraft));
+  };
+
+  // =========================
+  // AUTO ASSIGN (RANDOM + VEHICLE SAFE)
   // =========================
   const handleAutoAssign = () => {
     setError("");
     setSuccessMessage("");
 
-    const flightVehicle = flightInfo?.aircraftType || "";
-    const flightDistance = flightInfo?.distance; // might be null
+    const PILOT_COUNT = 2;
+    const CABIN_COUNT = 3;
 
-    // ---------- Pilots ----------
+    // ---- Pilots: eligible + prefer 1 Senior + 1 Junior
     setFlightCrew((prev) => {
-      // eligibility: vehicle + range (if distance exists)
-      const eligible = prev.filter((p) => {
-        const vehicleOk = !p.vehicleRestriction ? true : norm(flightVehicle).includes(norm(p.vehicleRestriction));
-        const rangeOk =
-          flightDistance == null || p.allowedRange == null
-            ? true
-            : Number(p.allowedRange) >= Number(flightDistance);
-        return vehicleOk && rangeOk;
-      });
+      const eligible = prev.filter(isPilotEligible);
 
-      const seniors = eligible.filter((p) => norm(p.rank) === "senior");
-      const juniors = eligible.filter((p) => norm(p.rank) === "junior");
-
-      const chosen = [];
-
-      // Keep “at least 1 senior + 1 junior” if possible
-      const pickSenior = pickRandomMany(seniors, 1);
-      const pickJunior = pickRandomMany(juniors, 1);
-      chosen.push(...pickSenior, ...pickJunior);
-
-      // fill remaining (up to total) from remaining eligible (include trainees up to maxTrainee)
-      const chosenIds = new Set(chosen.map((x) => x.id));
-      const remainingEligible = eligible.filter((p) => !chosenIds.has(p.id));
-
-      const traineeLimit = TARGETS.pilots.maxTrainee;
-      const alreadyTrainee = chosen.filter((p) => norm(p.rank) === "trainee").length;
-
-      const remainingShuffled = shuffleArray(remainingEligible).filter((p) => {
-        if (norm(p.rank) !== "trainee") return true;
-        return alreadyTrainee < traineeLimit;
-      });
-
-      const need = Math.max(0, TARGETS.pilots.total - chosen.length);
-      chosen.push(...remainingShuffled.slice(0, need));
-
-      // If we couldn't satisfy senior/junior due to seed, we still assign what we can.
-      if (pickSenior.length === 0 || pickJunior.length === 0) {
-        setError((prevErr) => {
-          const msg =
-            "Auto-assign note: Not enough eligible Senior/Junior pilots to satisfy the ideal rule. Assigned best available pilots.";
-          return prevErr ? `${prevErr}\n${msg}` : msg;
-        });
+      if (eligible.length === 0) {
+        setError("Auto-assign failed: No eligible pilots for this aircraft (and/or distance).");
+        return prev.map((p) => ({ ...p, assigned: false }));
       }
 
-      const finalIds = new Set(chosen.map((p) => p.id));
-      return prev.map((p) => ({ ...p, assigned: finalIds.has(p.id) }));
+      const seniors = shuffleArray(eligible.filter((p) => p.rank === "Senior"));
+      const juniors = shuffleArray(eligible.filter((p) => p.rank === "Junior"));
+      const rest = shuffleArray(
+        eligible.filter((p) => p.rank !== "Senior" && p.rank !== "Junior")
+      );
+
+      const picked = [];
+      if (seniors[0]) picked.push(seniors[0]);
+      if (juniors[0]) picked.push(juniors[0]);
+
+      // fill remaining slots (if any)
+      const already = new Set(picked.map((p) => p.id));
+      const pool = [...seniors, ...juniors, ...rest].filter((p) => !already.has(p.id));
+      while (picked.length < Math.min(PILOT_COUNT, eligible.length) && pool.length) {
+        picked.push(pool.shift());
+      }
+
+      // if we couldn't satisfy senior+junior, warn but still pick eligible
+      if (!seniors.length || !juniors.length) {
+        const msgParts = [];
+        if (!seniors.length) msgParts.push("Senior");
+        if (!juniors.length) msgParts.push("Junior");
+        setError(
+          `Auto-assign note: Not enough eligible ${msgParts.join(" & ")} pilots. Picked from eligible pool.`
+        );
+      }
+
+      const selectedIds = new Set(picked.map((p) => p.id));
+      return prev.map((p) => ({ ...p, assigned: selectedIds.has(p.id) }));
     });
 
-    // ---------- Cabin Crew ----------
+    // ---- Cabin crew: eligible by aircraft type (if restrictions exist)
     setCabinCrew((prev) => {
-      // eligibility by vehicle restriction (tolerant)
-      const eligible = prev.filter((c) => vehicleMatches(c.vehicles, flightVehicle));
-
-      const chiefs = eligible.filter((c) => norm(c.roleRaw).includes("chief"));
-      const seniors = eligible.filter((c) => norm(c.roleRaw).includes("senior"));
-      const juniors = eligible.filter((c) => norm(c.roleRaw).includes("junior"));
-      const chefs = eligible.filter((c) => norm(c.roleRaw).includes("chef"));
-
-      const pickedChief = pickRandomMany(chiefs, Math.min(TARGETS.cabin.chiefMax, TARGETS.cabin.chiefMin));
-      const pickedSenior = pickRandomMany(
-        seniors.filter((x) => !pickedChief.some((p) => p.id === x.id)),
-        Math.min(TARGETS.cabin.seniorMax, Math.max(TARGETS.cabin.seniorMin, 1))
-      );
-
-      // juniors: flexible — use up to juniorMax, but if not enough, take what exists.
-      const pickedJunior = pickRandomMany(
-        juniors.filter((x) => ![...pickedChief, ...pickedSenior].some((p) => p.id === x.id)),
-        Math.min(TARGETS.cabin.juniorMax, Math.max(TARGETS.cabin.juniorMin, 0))
-      );
-
-      // chef optional
-      const pickedChef = pickRandomMany(
-        chefs.filter((x) => ![...pickedChief, ...pickedSenior, ...pickedJunior].some((p) => p.id === x.id)),
-        TARGETS.cabin.chefMax
-      );
-
-      const chosen = [...pickedChief, ...pickedSenior, ...pickedJunior, ...pickedChef];
-
-      // If we’re missing juniors because seed small / vehicle filtering, warn but do not fail
-      if (pickedJunior.length < TARGETS.cabin.juniorMin) {
-        setError((prevErr) => {
-          const msg =
-            `Auto-assign note: Only ${pickedJunior.length} eligible Junior cabin crew found (target min ${TARGETS.cabin.juniorMin}). Assigned best available cabin crew.`;
-          return prevErr ? `${prevErr}\n${msg}` : msg;
-        });
+      const eligible = prev.filter(isCabinEligible);
+      if (eligible.length === 0) {
+        // cabin tarafında tamamen fail etmek yerine boş bırak
+        return prev.map((c) => ({ ...c, assigned: false }));
       }
-
-      if (chosen.length === 0) {
-        setError((prevErr) => {
-          const msg =
-            "Auto-assign note: No eligible cabin crew found for this aircraft type. (Vehicle restrictions may be too strict.)";
-          return prevErr ? `${prevErr}\n${msg}` : msg;
-        });
-      }
-
-      const finalIds = new Set(chosen.map((c) => c.id));
-      return prev.map((c) => ({ ...c, assigned: finalIds.has(c.id) }));
+      const shuffled = shuffleArray(eligible);
+      const pickCount = Math.min(CABIN_COUNT, shuffled.length);
+      const selectedIds = new Set(shuffled.slice(0, pickCount).map((c) => c.id));
+      return prev.map((c) => ({ ...c, assigned: selectedIds.has(c.id) }));
     });
   };
 
   // =========================
-  // SAVE -> DB
+  // SAVE -> DB (frontend validation)
   // =========================
   const handleSave = async () => {
     setSaving(true);
     setError("");
     setSuccessMessage("");
 
-    const pilot_ids = flightCrew.filter((c) => c.assigned).map((c) => c.id);
-    const cabin_crew_ids = cabinCrew.filter((c) => c.assigned).map((c) => c.id);
+    const selectedPilots = flightCrew.filter((c) => c.assigned);
+    const selectedCabin = cabinCrew.filter((c) => c.assigned);
 
-    if (pilot_ids.length === 0 || cabin_crew_ids.length === 0) {
+    if (selectedPilots.length === 0 || selectedCabin.length === 0) {
       setError("Please assign at least one pilot and one cabin crew member.");
       setSaving(false);
       return;
     }
 
+    // prevent saving mismatch pilots
+    const badPilots = selectedPilots.filter((p) => !isPilotEligible(p));
+    if (badPilots.length) {
+      setError(
+        `Cannot save: Some selected pilots are not eligible for this aircraft/distance: ${badPilots
+          .map((p) => p.name)
+          .join(", ")}`
+      );
+      setSaving(false);
+      return;
+    }
+
+    const pilot_ids = selectedPilots.map((c) => c.id);
+    const cabin_crew_ids = selectedCabin.map((c) => c.id);
     const payload = { pilot_ids, cabin_crew_ids };
 
     try {
-      const res = await axios.post(`${API_BASE}/api/flights/${flightNumber}/crew-assignments`, payload);
+      const res = await axios.post(
+        `${API_BASE}/api/flights/${flightNumber}/crew-assignments`,
+        payload
+      );
       console.log("Saved crew assignment:", res.data);
       setSuccessMessage("Crew assignment saved successfully.");
     } catch (err) {
@@ -345,7 +316,7 @@ export default function CrewAssignmentPage() {
   if (error && !flightInfo) {
     return (
       <div className="space-y-3">
-        <p className="text-sm text-red-600 whitespace-pre-line">{error}</p>
+        <p className="text-sm text-red-600">{error}</p>
         <button
           type="button"
           onClick={() => navigate("/flights")}
@@ -395,14 +366,18 @@ export default function CrewAssignmentPage() {
           <div className="space-y-1 text-sm">
             <p className="font-semibold text-slate-800">Flight Information Summary</p>
             <p>
-              <span className="font-medium">Flight Number:</span>{" "}
-              {flightInfo.flightNumber}
+              <span className="font-medium">Flight Number:</span> {flightInfo.flightNumber}
             </p>
             <p>
-              <span className="font-medium">Aircraft Type:</span>{" "}
-              {flightInfo.aircraftType}
+              <span className="font-medium">Aircraft Type:</span> {flightInfo.aircraftType}
             </p>
+            {flightInfo.distanceKm ? (
+              <p>
+                <span className="font-medium">Distance:</span> {flightInfo.distanceKm} km
+              </p>
+            ) : null}
           </div>
+
           <div className="space-y-1 text-sm">
             <p>
               <span className="font-medium">Route:</span> {flightInfo.route}
@@ -416,7 +391,7 @@ export default function CrewAssignmentPage() {
 
       {(error || successMessage) && (
         <div className="space-y-1">
-          {error && <p className="text-sm text-amber-700 whitespace-pre-line">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           {successMessage && <p className="text-sm text-emerald-600">{successMessage}</p>}
         </div>
       )}
@@ -437,12 +412,21 @@ export default function CrewAssignmentPage() {
                   <div className="space-y-0.5 text-sm">
                     <p className="font-semibold text-slate-900">{crew.name}</p>
                     <p className="text-slate-600">Rank: {crew.rank}</p>
+                    {crew.vehicle ? (
+                      <p className="text-slate-600">Vehicle: {crew.vehicle}</p>
+                    ) : null}
+                    {crew.allowedRange ? (
+                      <p className="text-slate-600">Range: {crew.allowedRange} km</p>
+                    ) : null}
                   </div>
+
                   <button
                     type="button"
                     onClick={() => toggleFlightCrew(crew.id)}
                     className={`rounded-md px-4 py-2 text-sm font-medium text-white ${
-                      crew.assigned ? "bg-slate-500 hover:bg-slate-600" : "bg-blue-500 hover:bg-blue-600"
+                      crew.assigned
+                        ? "bg-slate-500 hover:bg-slate-600"
+                        : "bg-blue-500 hover:bg-blue-600"
                     }`}
                   >
                     {crew.assigned ? "Unassign" : "Assign"}
@@ -455,7 +439,7 @@ export default function CrewAssignmentPage() {
             </div>
           </div>
 
-          {/* Cabin */}
+          {/* Cabin crew */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900">Cabin Crew</h3>
             <div className="space-y-3">
@@ -469,20 +453,21 @@ export default function CrewAssignmentPage() {
                   <div className="space-y-0.5 text-sm">
                     <p className="font-semibold text-slate-900">{crew.name}</p>
                     <p className="text-slate-600">Role: {crew.role}</p>
-
-                    {/* ✅ Only show Vehicles line if we actually have vehicles */}
-                    {Array.isArray(crew.vehicles) && crew.vehicles.length > 0 && (
-                      <p className="text-slate-500 text-xs">
-                        Vehicles: {crew.vehicles.join(", ")}
+                    {/* boşsa hiç yazmasın */}
+                    {crew.vehicleRestrictions?.length ? (
+                      <p className="text-slate-600">
+                        Vehicles: {crew.vehicleRestrictions.join(", ")}
                       </p>
-                    )}
+                    ) : null}
                   </div>
 
                   <button
                     type="button"
                     onClick={() => toggleCabinCrew(crew.id)}
                     className={`rounded-md px-4 py-2 text-sm font-medium text-white ${
-                      crew.assigned ? "bg-slate-500 hover:bg-slate-600" : "bg-blue-500 hover:bg-blue-600"
+                      crew.assigned
+                        ? "bg-slate-500 hover:bg-slate-600"
+                        : "bg-blue-500 hover:bg-blue-600"
                     }`}
                   >
                     {crew.assigned ? "Unassign" : "Assign"}
