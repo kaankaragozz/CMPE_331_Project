@@ -1,11 +1,18 @@
 import { sql } from "../config/db.js";
 
 const SAMPLE_DISH_RECIPES = [
-  { chef_index: 5, recipe_name: 'Mediterranean Salmon', description: 'Grilled salmon with olive oil, lemon, and fresh herbs' },
-  { chef_index: 5, recipe_name: 'Beef Wellington', description: 'Classic beef tenderloin wrapped in puff pastry with mushroom duxelles' },
-  { chef_index: 5, recipe_name: 'Vegetarian Lasagna', description: 'Layered pasta with ricotta, spinach, and marinara sauce' },
-  { chef_index: 5, recipe_name: 'Thai Green Curry', description: 'Aromatic curry with coconut milk, vegetables, and jasmine rice' },
-  { chef_index: 5, recipe_name: 'Chocolate Lava Cake', description: 'Rich chocolate cake with molten center, served with vanilla ice cream' }
+  //Hakan
+  // Recipes for chef_index 13, crew :  Isabella Garcia 
+  { chef_index: 13, recipe_name: 'Mediterranean Salmon', description: 'Grilled salmon with olive oil, lemon, and fresh herbs' },
+  { chef_index: 13, recipe_name: 'Beef Wellington', description: 'Classic beef tenderloin wrapped in puff pastry with mushroom duxelles' },
+  { chef_index: 13, recipe_name: 'Vegetarian Lasagna', description: 'Layered pasta with ricotta, spinach, and marinara sauce' },
+  { chef_index: 13, recipe_name: 'Thai Green Curry', description: 'Aromatic curry with coconut milk, vegetables, and jasmine rice' },
+
+  // Recipes for chef_index 14, crew :  Alexander Lee 
+  { chef_index: 14, recipe_name: 'Chocolate Lava Cake', description: 'Rich chocolate cake with molten center, served with vanilla ice cream' },
+  { chef_index: 14, recipe_name: 'Chicken Tikka Masala', description: 'Tender chicken pieces in spiced tomato cream sauce, served with basmati rice' },
+  { chef_index: 14, recipe_name: 'Sushi Platter', description: 'Assortment of nigiri and rolls with fresh fish and vegetables' },
+  { chef_index: 14, recipe_name: 'Ratatouille', description: 'French vegetable stew with zucchini, eggplant, peppers, and tomatoes' }
 ];
 
 export async function seedDishRecipes() {
@@ -24,7 +31,7 @@ export async function seedDishRecipes() {
     // Insert all dish recipes using actual database IDs
     for (const recipe of SAMPLE_DISH_RECIPES) {
       const actualChefId = cabinCrewIds[recipe.chef_index - 1]; // Convert 1-based index to 0-based array index
-      
+
       if (!actualChefId) {
         console.error(`❌ Chef ID ${recipe.chef_index} not found (only ${cabinCrewIds.length} crew members exist)`);
         continue;

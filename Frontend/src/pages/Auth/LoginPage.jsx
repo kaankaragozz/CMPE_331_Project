@@ -31,48 +31,33 @@ export default function LoginPage() {
 
       const data = await res.json();
       console.log("Login response:", data);
-      console.log("Cabin Crew ID:", data.user.cabincrewId);
 
       if (!res.ok) {
         setError(data.message || "Login failed");
         return;
       }
 
-      const user = data.user; // { id, name, role, pilot_id?, cabincrewId passengerId? }
+      const user = data.user;
 
       localStorage.setItem("token", String(user.id));
       localStorage.setItem("userId", String(user.id));
       localStorage.setItem("userRole", user.role);
       localStorage.setItem("userName", user.name);
 
-      if (user.pilot_id) {
-        localStorage.setItem("pilotId", String(user.pilot_id));
-      } else {
-        localStorage.removeItem("pilotId");
-      }
+      if (user.pilot_id) localStorage.setItem("pilotId", String(user.pilot_id));
+      else localStorage.removeItem("pilotId");
 
-      if (user.cabin_crew_id) {
-        localStorage.setItem("cabincrewId", String(user.cabin_crew_id));
-      } else {
-        localStorage.removeItem("cabincrewId");
-      }
+      if (user.cabin_crew_id) localStorage.setItem("cabincrewId", String(user.cabin_crew_id));
+      else localStorage.removeItem("cabincrewId");
 
-      if (user.passenger_id) {
-        localStorage.setItem("passengerId", String(user.passenger_id));
-      } else {
-        localStorage.removeItem("passengerId");
-      }
+      if (user.passenger_id) localStorage.setItem("passengerId", String(user.passenger_id));
+      else localStorage.removeItem("passengerId");
 
       // Role-based redirect
-      if (user.role === "Admin") {
-        window.location.href = "/";
-      } else if (user.role === "Pilot") {
-        window.location.href = "/pilot";
-      } else if (user.role === "CabinCrew") {
-        window.location.href = "/cabincrew";
-      } else if (user.role === "Passenger") {
-        window.location.href = "/passenger";
-      }
+      if (user.role === "Admin") window.location.href = "/";
+      else if (user.role === "Pilot") window.location.href = "/pilot";
+      else if (user.role === "CabinCrew") window.location.href = "/cabincrew";
+      else if (user.role === "Passenger") window.location.href = "/passenger";
     } catch (err) {
       console.error(err);
       setError("Server error");
@@ -80,8 +65,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <div className="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+    //Background Image 
+    <div className="min-h-screen flex items-center justify-center relative">
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-center bg-no-repeat bg-cover"
+        style={{
+          backgroundImage: "url('/favicon.png')",
+          backgroundSize: "contain", // scales it nicely without covering whole screen
+        }}
+      ></div>
+
+      {/* Optional overlay */}
+      <div className="absolute inset-0 bg-black/20"></div>
+
+      {/* Login form */}
+      <div className="relative z-10 w-full max-w-sm bg-white/70 backdrop-blur-md border border-white/50 rounded-xl p-6 shadow-lg">
         <h1 className="text-xl font-semibold text-slate-900 mb-6 text-center">
           Flight Roster Management System
         </h1>
@@ -127,7 +126,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="mt-3 w-full rounded-md bg-blue-500 py-2.5 text-sm font-medium text-white hover:bg-blue-600"
+            className="mt-3 w-full rounded-md bg-blue-500/80 py-2.5 text-sm font-medium text-white hover:bg-blue-600/90"
           >
             Sign In
           </button>

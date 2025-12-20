@@ -32,6 +32,35 @@ export default function FlightDetailsPage() {
   const [crewAssignment, setCrewAssignment] = useState(null);
   const [passengers, setPassengers] = useState([]);
 
+  //Hakan
+  //add dish_Recipes in to flight details 
+  const [crewWithRecipes, setCrewWithRecipes] = useState([]);
+
+  useEffect(() => {
+    const fetchCrewRecipes = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/api/cabin-crew`);
+        const crewData = res.data?.data || [];
+
+        // Only keep chefs
+        const chefs = crewData.filter(c => c.attendant_type === "chef" && c.recipes?.length);
+        setCrewWithRecipes(chefs);
+      } catch (err) {
+        console.error("Failed to load cabin crew recipes", err);
+      }
+    };
+
+    fetchCrewRecipes();
+  }, []);
+
+  // Filter assigned chefs with recipes (runs every render)
+  const assignedChefsWithRecipes = crewWithRecipes.filter(
+    (chef) =>
+      chef.attendant_type === "chef" &&
+      chef.recipes?.length > 0 &&
+      crewAssignment?.cabin_crew_ids?.includes(chef.id)
+  );
+
   const loadData = useCallback(async () => {
     if (!flightNumberParam) {
       console.error("FlightDetailsPage: no flight number in URL", params);
@@ -91,6 +120,7 @@ export default function FlightDetailsPage() {
           console.error("Error loading passengers:", err);
         }
       }
+
     } catch (err) {
       console.error("Error loading flight details:", err);
       const msg =
@@ -352,11 +382,10 @@ export default function FlightDetailsPage() {
           <p>
             <span className="font-medium text-slate-800">Status:</span>{" "}
             <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                status.toLowerCase().includes("ready")
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                  : "bg-amber-50 text-amber-700 border-amber-100"
-              }`}
+              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${status.toLowerCase().includes("ready")
+                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                : "bg-amber-50 text-amber-700 border-amber-100"
+                }`}
             >
               {status}
             </span>
@@ -374,12 +403,10 @@ export default function FlightDetailsPage() {
           {crewAssignment ? (
             <>
               <p className="text-sm text-slate-800">
-                Pilots assigned:{" "}
-                <span className="font-semibold">{pilotCount}</span>
+                Pilots assigned: <span className="font-semibold">{pilotCount}</span>
               </p>
               <p className="text-sm text-slate-800">
-                Cabin crew assigned:{" "}
-                <span className="font-semibold">{cabinCount}</span>
+                Cabin crew assigned: <span className="font-semibold">{cabinCount}</span>
               </p>
               <button
                 type="button"
@@ -431,6 +458,26 @@ export default function FlightDetailsPage() {
           </button>
         </div>
       </section>
+
+      {/* Hakan */}
+      {/* Chef Recipes */}
+      {assignedChefsWithRecipes.length > 0 && (
+        <section className="bg-white rounded-xl shadow-sm border border-slate-100 p-4 mt-4">
+          <h3 className="text-sm font-semibold text-slate-900 mb-3">Chef Recipes</h3>
+          {assignedChefsWithRecipes.map((chef) => (
+            <div key={chef.id} className="mb-4">
+              <p className="font-medium text-slate-800">{chef.first_name} {chef.last_name}</p>
+              <ul className="list-disc list-inside text-sm text-slate-700">
+                {chef.recipes.map((recipe, idx) => (
+                  <li key={idx}>
+                    <span className="font-semibold">{recipe.recipe_name}:</span> {recipe.description}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+      )}
 
       {/* Sample passenger list */}
       {passengers.length > 0 && (

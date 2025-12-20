@@ -1,10 +1,11 @@
 import { sql } from "../config/db.js";
 
 const SAMPLE_ATTENDANT_TYPES = [
-  { type_name: 'flight_attendant', min_count: 4, max_count: 8 },
-  { type_name: 'senior_flight_attendant', min_count: 1, max_count: 2 },
-  { type_name: 'chef', min_count: 1, max_count: 2 },
-  { type_name: 'purser', min_count: 1, max_count: 1 }
+  //Hakan
+  { type_name: 'chief', min_count: 1, max_count: 1 }, // 1 chief 
+  { type_name: 'senior_flight_attendant', min_count: 1, max_count: 4 },  //In each flight there should be 1-4 senior attendants
+  { type_name: 'junior_flight_attendant', min_count: 4, max_count: 16 },  // In each flight there should be 4-16 junior attendants 
+  { type_name: 'chef', min_count: 0, max_count: 2 },  // In each flight there should be 0-2 chefs
 ];
 
 export async function seedAttendantTypes() {
